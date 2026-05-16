@@ -1,35 +1,61 @@
-# Apex Alpha Portfolio Simulator 📈
+# Apex Alpha Portfolio Simulator
 
-Chào mừng đến với mã nguồn mở của **Apex Alpha Portfolio Simulator** - một trò chơi mô phỏng quản lý danh mục đầu tư (Portfolio Manager Simulation Game).
+Apex Alpha Portfolio Simulator is a classroom portfolio-management simulation game.
 
-## 🎯 Mục đích dự án
+Students act as fund managers, start with virtual `$50M` AUM, and compete across deterministic monthly turns. Instructors create class instances, control simulation pacing, and debrief results using portfolio and leaderboard data.
 
-Trong đào tạo đầu tư tài chính truyền thống, sinh viên thường chỉ học lý thuyết và ghi nhớ công thức mà không nắm bắt được tác động thực tế của sự thay đổi kinh tế vĩ mô, độ lệch danh mục (portfolio drift), và rào cản thuế trong một thị trường cạnh tranh thực sự. 
+## Project Status
 
-**Apex Alpha Portfolio Simulator** là một nền tảng mô phỏng nhiều người chơi, theo lượt và có khả năng mở rộng cao. Sinh viên sẽ đóng vai trò là các Giám đốc Quỹ (Fund Managers), cạnh tranh trong một "Lớp học" để:
-- Xây dựng danh mục đầu tư vững chắc theo cấu trúc **Tháp Tài Sản** (Asset Pyramid: Base = Safety, Core = Yield, Apex = Alpha).
-- Đọc hiểu và dự báo các dữ liệu kinh tế vĩ mô có độ trễ (Time-lagged macroeconomic data).
-- Tái cơ cấu danh mục một cách linh hoạt theo phương pháp **TARA** (Transfer, Avoid, Reduce, Accept).
+The repository currently contains documentation and harness files only. No application code, package manifest, tests, CI, database migrations, or deployment automation exist yet.
 
-Hệ thống không sử dụng các con số ngẫu nhiên mà được vận hành bởi một **Pedagogical Deterministic Engine** (Động cơ quyết định sư phạm), được thiết kế chặt chẽ để đảm bảo kết quả học tập và chống gian lận.
+The accepted seed spec is `SPEC.md`, derived from `docs/prd/PRD-01.md`.
 
-## 💻 Công nghệ sử dụng (Tech Stack)
+Living product contracts are under `docs/product/`.
 
-Dự án được xây dựng với cấu trúc hiện đại, đảm bảo tính bảo mật và tối ưu cho môi trường serverless:
-- **Frontend Framework:** Next.js (App Router) với React Server Components (RSC) và Server Actions.
-- **Database & Auth:** Supabase (PostgreSQL) tích hợp Row Level Security (RLS) và Supabase Realtime (WebSockets) cho trải nghiệm cập nhật tức thì.
-- **Database ORM:** Drizzle ORM giúp truy vấn an toàn và hiệu suất cao.
-- **Math Worker / Queue:** Inngest được sử dụng để tính toán các tác vụ nặng (như tính thuế, độ trượt giá PvP) trong nền (background) nhằm tránh giới hạn timeout của serverless.
-- **UI & Styling:** Tailwind CSS + shadcn/ui cho giao diện tài chính chuyên nghiệp, chế độ tối (dark-mode).
-- **Data Visualization:** Apache ECharts & Tremor để vẽ các biểu đồ phân tích và bảng xếp hạng (Leaderboards).
-- **Hosting & Cron:** Vercel hỗ trợ Edge network và Cron Jobs tự động chuyển tháng mô phỏng.
+## Product Goals
 
-## 🚀 Triển khai (Deployment)
+The simulator teaches three course areas:
 
-Dự án được cấu hình để triển khai tại tên miền: **[pmsim.gscfin.com](https://pmsim.gscfin.com)**.
+1. Asset Pyramid structure: Base = Safety, Core = Yield, Apex = Alpha.
+2. Macro driver interpretation through time-lagged indicators.
+3. Rules-based TARA rebalancing under tax drag and liquidity friction.
 
-*(Lưu ý: Quản lý DNS thông qua `flarectrl`. Việc triển khai tự động lên Vercel tạm thời chưa được kích hoạt ở thời điểm hiện tại).*
+The product uses a Pedagogical Deterministic Engine instead of random market simulation.
 
-## 📄 Giấy phép (License)
+## Intended Stack
 
-Dự án được phát triển dưới dạng mã nguồn mở.
+Future implementation is expected to use:
+
+- Next.js App Router.
+- Vercel hosting and cron.
+- Supabase PostgreSQL/Auth/RLS and Supabase Realtime.
+- Drizzle ORM.
+- Inngest or Upstash QStash for background turn processing.
+- Tailwind CSS and shadcn/ui.
+- Apache ECharts and Tremor.
+
+## Documentation Map
+
+- `AGENTS.md` — agent operating guide.
+- `SPEC.md` — accepted seed specification snapshot.
+- `docs/prd/PRD-01.md` — original PRD source.
+- `docs/product/` — living product contract.
+- `docs/stories/backlog.md` — candidate epics and first story candidates.
+- `docs/TEST_MATRIX.md` — behavior-to-proof matrix.
+- `docs/decisions/` — architecture and harness decisions.
+
+## MVP Boundaries
+
+In scope:
+
+- Student dashboard.
+- Instructor class management.
+- Dual-trigger simulation execution.
+- Realtime refresh after turn completion.
+
+Out of scope for MVP:
+
+- Live market APIs.
+- Individual stock picking.
+- Short selling and leverage.
+- Instructor scenario builder.

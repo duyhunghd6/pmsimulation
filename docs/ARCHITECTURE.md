@@ -1,24 +1,35 @@
 # Architecture
 
-No application stack is selected yet.
+The accepted Apex Alpha PRD selects a web application direction, but no application code exists yet. This document captures architecture rules future implementation should follow when selected stories begin.
 
-No application code exists yet. This document defines generic architecture
-questions and boundary rules that future implementation should adapt after a
-user-provided spec and stack decision exist.
+Source decision: `docs/decisions/0004-accept-apex-alpha-prd.md`.
+
+## Selected Stack Direction
+
+| Layer | Technology |
+| --- | --- |
+| Frontend framework | Next.js App Router |
+| Hosting and cron | Vercel |
+| Database and auth | Supabase PostgreSQL/Auth/RLS |
+| Realtime | Supabase Realtime |
+| ORM | Drizzle ORM |
+| Background worker | Inngest or Upstash QStash |
+| UI | Tailwind CSS and shadcn/ui |
+| Visualization | Apache ECharts and Tremor |
+
+The final worker choice remains open until the execution-engine implementation story selects Inngest or Upstash QStash.
 
 ## Discovery Before Shape
 
-Before proposing implementation shape, identify:
+Before proposing implementation shape for a selected story, identify:
 
-- Product surfaces: browser, mobile, desktop, CLI, API, worker, or service.
-- Runtime stack: language, framework, database, queues, providers, and hosting.
-- Core domains: the product concepts that deserve stable names and contracts.
-- Boundary inputs: user input, API requests, webhooks, jobs, files, credentials,
-  provider payloads, and environment configuration.
-- Validation ladder: the smallest checks that can prove the selected stack.
+- Product surface: student browser, instructor browser, server action/query, cron trigger, background worker, realtime channel, or deployment platform.
+- Runtime stack details needed by that story.
+- Core domains: class, fund, macro narrative, asset DNA, holding, TARA order, ledger, attribution.
+- Boundary inputs: user input, server actions, auth/session claims, database rows, cron payloads, worker events, realtime payloads, environment configuration.
+- Validation ladder: the smallest checks that can prove the selected slice.
 
-Record stack choices in `docs/decisions/` when they meaningfully constrain
-future work.
+Record stack choices in `docs/decisions/` when they meaningfully constrain future work.
 
 ## Default Layering
 
@@ -59,13 +70,9 @@ app/
 
 surfaces/
   browser/
-  mobile/
-  desktop/
-  cli/
 ```
 
-This is a thinking template, not a scaffold. Create real folders only when a
-story enters implementation and the selected stack needs them.
+This is a thinking template, not a scaffold. Create real folders only when a story enters implementation and the selected stack needs them.
 
 ## Dependency Rule
 
@@ -86,12 +93,13 @@ Unknown data must be parsed at boundaries before it enters inner code.
 Boundaries include:
 
 - HTTP request bodies, params, and query strings.
+- Server Action inputs.
 - Session payloads and identity claims.
 - Environment variables.
 - Database rows returned from external clients.
-- Platform shell payloads.
-- Deep links, tokens, and signed URLs.
-- Provider webhooks, events, and async payloads.
+- Cron requests.
+- Worker events.
+- Realtime payloads.
 
 Target flow:
 
@@ -103,18 +111,23 @@ unknown input
   -> domain object/value object
 ```
 
-Inner layers should work with meaningful product types such as `UserId`,
-`AccountId`, `WorkspaceId`, `Role`, `DateRange`, or domain-specific IDs,
-rather than repeatedly validating raw strings.
+Inner layers should work with meaningful product types such as `ClassId`, `FundId`, `StudentId`, `InstructorId`, `MonthIndex`, `AssetTier`, and `AllocationWeight` rather than repeatedly validating raw strings.
 
 ## Command/Query Boundary
 
-If the product has both reads and writes, keep command/query separation clear at
-the code level even when the storage layer is simple:
+Keep command/query separation clear at the code level even when the storage layer is simple:
 
 - Commands mutate state and own audit side effects.
 - Queries read state and format for consumers.
 - Shared domain rules live in domain/application, not controllers.
+
+## Security Boundaries
+
+- Future macro narrative rows must never be sent to the student browser.
+- Student query paths must not return exact holdings for other students.
+- Instructor God Mode must be separated from student data paths.
+- RLS policies are part of the product contract, not optional infrastructure.
+- End-of-month processing must be idempotent across cron and instructor-triggered paths.
 
 ## Observability Contract
 
@@ -129,5 +142,4 @@ The future server should emit one canonical JSON log line per request with:
 - status_code
 - message
 
-Audit logs are product records. Application logs are operational records. Do not
-use one as a substitute for the other.
+Audit logs are product records. Application logs are operational records. Do not use one as a substitute for the other.

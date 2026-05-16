@@ -2,8 +2,7 @@
 
 This file maps product behavior to proof.
 
-No product behavior has been defined or implemented yet. Do not mark a row
-implemented until tests or validation evidence exist.
+Product behavior is now defined from the accepted Apex Alpha PRD, but no implementation or executable validation exists yet. Do not mark a row implemented until tests or validation evidence exist.
 
 ## Status Values
 
@@ -19,15 +18,17 @@ implemented until tests or validation evidence exist.
 
 | Story | Contract | Unit | Integration | E2E | Platform | Status | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| TBD | Add rows when story packets are created | no | no | no | no | planned | none |
+| Spec intake | `SPEC.md`, `docs/product/*` | no | no | no | no | planned | `docs/stories/spec-intake-2026-05-16.md` |
+| E00 Data, auth, and tenancy foundation | `docs/product/roles-and-permissions.md`, `docs/product/data-model.md` | planned | planned | no | no | planned | Candidate epic only; no story packet yet |
+| E01 Student Bloomberg dashboard | `docs/product/user-surfaces.md`, `docs/product/simulation-engine.md` | planned | planned | planned | no | planned | Candidate epic only; no story packet yet |
+| E02 Instructor management | `docs/product/roles-and-permissions.md`, `docs/product/user-surfaces.md` | planned | planned | planned | no | planned | Candidate epic only; no story packet yet |
+| E03 Dual-trigger execution engine | `docs/product/simulation-engine.md`, `docs/product/runtime-architecture.md` | planned | planned | planned | planned | planned | Candidate epic only; no story packet yet |
+| E04 Realtime and release proof | `docs/product/user-surfaces.md`, `docs/product/runtime-architecture.md` | no | planned | planned | planned | planned | Candidate epic only; no story packet yet |
 
 ## Evidence Rules
 
 - Unit proof covers pure domain and application rules.
-- Integration proof covers backend enforcement, data integrity, provider
-  behavior, jobs, or service contracts.
+- Integration proof covers backend enforcement, data integrity, provider behavior, jobs, or service contracts.
 - E2E proof covers user-visible browser flows.
-- Platform proof covers only shell, deployment, mobile, desktop, or runtime
-  behavior that cannot be proven in lower layers.
-- A story can be implemented without every proof column if the story packet
-  explains why.
+- Platform proof covers only shell, deployment, mobile, desktop, or runtime behavior that cannot be proven in lower layers.
+- A story can be implemented without every proof column if the story packet explains why.

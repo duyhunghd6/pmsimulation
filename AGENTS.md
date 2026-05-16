@@ -14,18 +14,18 @@ Read in this order:
 1. `README.md` for project status.
 2. `docs/HARNESS.md` for the human-agent operating model.
 3. `docs/FEATURE_INTAKE.md` before turning any prompt into work.
-4. The user-provided spec or prompt, when one exists.
+4. `SPEC.md` and `docs/prd/PRD-01.md` for the accepted seed specification snapshot.
 5. `docs/product/` for current product contracts.
 6. `docs/ARCHITECTURE.md` before proposing implementation shape.
 7. `docs/stories/` for story packets and backlog.
 8. `docs/TEST_MATRIX.md` for proof status.
 9. `docs/decisions/` for why important choices were made.
 
-This harness does not ship with a project-specific `SPEC.md`. When the human
-provides a spec for a new project, treat that spec as input material for the
-first buildout. Derive product docs, story packets, architecture decisions, and
-validation expectations from it. Product docs, stories, tests, and decisions
-then become the living contract that agents should update as the system evolves.
+This harness did not ship with a project-specific `SPEC.md`; this project now
+has one because the human supplied a spec and explicitly requested that artifact.
+Treat `SPEC.md` as a stable intake snapshot, not the living product plan. Product
+docs, stories, tests, and decisions are the living contract that agents should
+update as the system evolves.
 
 ## Task Loop
 

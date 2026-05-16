@@ -6,9 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This repository currently contains product documentation only. The implementation has not been scaffolded yet: there is no `package.json`, framework config, test runner, or build system in the repo.
 
-Primary source document:
+Accepted specification sources:
 
-- `docs/prd/PRD-01.md` — Product Requirements Document for the Apex Alpha Portfolio Simulator.
+- `SPEC.md` — ingested seed specification snapshot for the Apex Alpha Portfolio Simulator.
+- `docs/prd/PRD-01.md` — original Product Requirements Document source material.
+- `docs/product/` — living product contract derived from the accepted spec.
 
 ## Commands
 
