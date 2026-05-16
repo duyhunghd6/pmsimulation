@@ -7,7 +7,7 @@ The student dashboard is a responsive desktop-first terminal-style interface.
 Required surfaces:
 
 - Macro news terminal.
-- Current macro metrics.
+- Current macro, market-string, and scenario-driver metrics.
 - Pyramid/funnel portfolio visualizer.
 - TARA order entry.
 - Estimated tax drag preview.
@@ -16,7 +16,7 @@ Required surfaces:
 
 ### Macro News Terminal
 
-Shows the current month's headline and six macro metrics. It may show past data already revealed to the student, but it must not expose future scenario rows.
+Shows the current month's headline, macro regime, market-string dashboard, and scenario-driver metrics relevant to the current turn. It may show past data already revealed to the student, but it must not expose future scenario or metric rows.
 
 ### Pyramid Visualizer
 
@@ -32,7 +32,7 @@ The UI should preview estimated tax drag before submission.
 
 After turn processing, students receive a breakdown explaining why AUM changed.
 
-Required attribution categories include market beta impact, tax penalties, PvP slippage, and ending AUM.
+Required attribution categories include market beta impact, fee drag, tax penalties, tax drag, PvP slippage, liquidity penalty, classroom sell concentration, and ending AUM.
 
 ## Instructor Dashboard
 

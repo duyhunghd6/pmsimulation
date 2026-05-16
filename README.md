@@ -6,7 +6,7 @@ Students act as fund managers, start with virtual `$50M` AUM, and compete across
 
 ## Project Status
 
-The repository currently contains documentation and harness files only. No application code, package manifest, tests, CI, database migrations, or deployment automation exist yet.
+The repository has started its first minimal application-code slice: a pure TypeScript domain validator for TARA allocation weights. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
 
 The accepted seed spec is `SPEC.md`, derived from `docs/prd/PRD-01.md`.
 

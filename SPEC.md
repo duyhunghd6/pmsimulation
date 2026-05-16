@@ -3,6 +3,7 @@
 Source: `docs/prd/PRD-01.md`
 Source version: 1.0.0
 Ingested: 2026-05-16
+Updated: 2026-05-17 for tracked simulation metrics / driver-string catalog
 Status: accepted seed specification
 
 This file records the project specification ingested into the harness from the accepted PRD. It is a stable intake snapshot, not the living product plan.
@@ -119,11 +120,12 @@ The simulation does not use random market numbers. It reads from a pre-scripted 
 
 The backend reads monthly macro values from a scripted scenario source.
 
-Macro indicators:
+Macro indicators and regime strings:
 
-- Leading: `PMI` and `M2 Growth`.
-- Coincident: `GDP` and `VIX`.
-- Lagging: `CPI / Inflation` and `CB Rate`.
+- Leading: `PMI`, `IIP`, and `M2 Growth`.
+- Coincident: `GDP`, `VIX`, equity-market liquidity, and market-flow strings.
+- Lagging: `CPI / Inflation`, `CB Rate`, bond yield, interbank rate, and delayed risk/performance effects.
+- Regime context: `investment_clock_phase`, `scenario_persistence`, `business_cycle_phase`, driver direction, impact weight, and time lag.
 
 Required lag rules:
 
@@ -136,13 +138,15 @@ Required lag rules:
 
 Asset yields are calculated deterministically from macro deltas and hardcoded beta sensitivities.
 
-The asset factor matrix uses beta coefficients for macro inputs such as:
+The asset factor matrix uses beta coefficients for macro and market-string inputs such as:
 
 - M2 liquidity.
 - CPI / inflation.
 - GDP.
 - VIX / volatility.
 - Interest rate effects where represented in the asset DNA.
+- USD/VND movement.
+- Market liquidity and flow pressure where represented in the asset DNA.
 
 The Apex tier, including technology or crypto-like exposure in the PRD example, has strong positive sensitivity to M2 liquidity and severe negative sensitivity to interest rates and VIX.
 
@@ -162,15 +166,33 @@ Crowded trade / market-depth penalty:
 - The PRD example penalty is `-5%` extra slippage.
 - This simulates market panic and teaches contrarianism.
 
+### 4.4 Tracked Simulation Metrics Catalog
+
+The simulator tracks the broader Asset Pyramid, Driver/String Map, and TARA curriculum metric set rather than only CPI and interest rates. A tracked metric may be seeded, computed, student-entered, or rubric-scored.
+
+Tracked metric families:
+
+- Investor, suitability, and pyramid policy: `savings_rate_for_investment`, `asset_allocation_weight`, `risk_appetite_level`, `risk_profile_class`, `investment_time_horizon`, `expected_annual_return`, `investment_capacity`, `risk_limit`, `risk_budget`, `liquidity_buffer`.
+- Macro regime and leading/coincident/lagging drivers: `investment_clock_phase`, `pmi`, `iip`, `m2_growth`, `gdp_growth_yoy`, `inflation_cpi`, `policy_rate`, `bond_yield`, `interbank_rate`, `usd_vnd_movement`, `vix`, `scenario_persistence`, `driver_time_lag`.
+- Vietnam equity-market strings: `vn_index_level`, `equity_market_trading_value`, `foreign_investor_net_trading_value`, `retail_investor_net_trading_value`, `market_earnings_growth_expectation`, `valuation_sentiment`, `business_cycle_phase`.
+- Asset class and fund inputs: `fund_nav_per_unit`, `annualized_return`, `adjusted_world_gold_price`, `bank_deposit_rate`, `bond_fund_duration`, `asset_class_fee_pct`, `base_fee_pct`.
+- Portfolio construction and order state: `current_AUM`, `own_capital`, `position_weight`, `holding_count`, `portfolio_turnover`, `pending_order_count`, `target_weight_base`, `target_weight_core`, `target_weight_apex`, `cash_buffer_weight`, `rebalance_trigger`, `limit_price`, `trigger_price`, `trailing_step`.
+- Performance and risk dashboard: `roi`, `fund_nav_per_unit`, `alpha`, `beta`, `volatility`, `correlation_coefficient`, `sharpe_ratio`, `treynor_ratio`, `drawdown`, `benchmark_return`, `risk_free_proxy`, `return_frequency`, `lookback_window`, `annualization_convention`.
+- TARA and risk register: `risk_probability_score`, `risk_impact_score`, `tara_risk_treatment_class`, `tara_risk_matrix`, `risk_type`, `risk_direction`, `impact_weight`, `risk_time_lag`, `risk_treatment_action`.
+- Friction, attribution, and PvP mechanics: `tax_paid`, `tax_drag_pct`, `pvp_slippage_paid`, `liquidity_penalty_pct`, `classroom_sell_concentration_pct`, `market_beta_impact`, `fee_drag`, `ending_AUM`.
+- Industry and company evidence metrics: `revenue`, `revenue_growth`, `net_income`, `earnings_growth`, `operating_cash_flow`, `total_assets`, `roe`, `roa`, `gross_margin`, `net_profit_margin`, `business_profit_margin`, `dividend_yield`, `cash_dividend`, `market_share`, `market_capitalization`, `average_trading_volume`, `mp_stock_group_class`, `ev_to_ebitda`, `price_to_book`, `store_count`, `hot_rolled_coil_price`, `free_cash_flow`, and `leverage_ratio_family`.
+
+Every tracked metric record should carry its month, scope, display label, unit, source or convention note, and source type. Metrics for alpha, beta, volatility, correlation, Sharpe, Treynor, and drawdown must also retain benchmark, return frequency, lookback window, annualization convention, risk-free proxy, and raw-vs-adjusted price convention.
+
 ## 5. Functional Requirements
 
 ### Epic 1: Student Bloomberg Dashboard
 
 #### FR-1.1 Macro News Terminal
 
-The student dashboard securely displays the current month's news headline and six macroeconomic metrics.
+The student dashboard securely displays the current month's news headline, macro regime, market-string dashboard, and all tracked scenario metrics relevant to the current turn.
 
-The browser must not receive future macro rows.
+The browser must not receive future macro or metric rows.
 
 #### FR-1.2 Pyramid Visualizer
 
@@ -310,12 +332,55 @@ Expected fields:
 - `id` primary key.
 - `month_index`.
 - `news_headline`.
+- `investment_clock_phase`.
 - `pmi`.
-- `m2`.
-- `gdp`.
-- `cpi`.
-- `cb_rate`.
+- `iip`.
+- `m2_growth`.
+- `gdp_growth_yoy`.
+- `inflation_cpi`.
+- `policy_rate`.
+- `bond_yield`.
+- `interbank_rate`.
+- `usd_vnd_movement`.
 - `vix`.
+- `scenario_persistence`.
+
+### `Market_Metrics`
+
+Current-turn market strings scoped to a class and month.
+
+Expected fields:
+
+- `id` primary key.
+- `class_id` foreign key.
+- `month_index`.
+- `vn_index_level`.
+- `equity_market_trading_value`.
+- `foreign_investor_net_trading_value`.
+- `retail_investor_net_trading_value`.
+- `market_earnings_growth_expectation`.
+- `valuation_sentiment`.
+- `business_cycle_phase`.
+
+### `Tracked_Metrics`
+
+Generic registry for seeded, computed, student-entered, or rubric-scored metric values.
+
+Expected fields:
+
+- `id` primary key.
+- `scope_type`, covering scenario, class, fund, or case scopes.
+- `scope_id`.
+- `month_index`.
+- `metric_id`.
+- `display_label`.
+- `metric_family`.
+- `value_numeric`.
+- `value_text`.
+- `unit`.
+- `source_type`.
+- `source_note`.
+- `convention_note`.
 
 ### `Asset_DNA`
 
@@ -328,6 +393,9 @@ Expected fields:
 - `beta_cpi`.
 - `beta_gdp`.
 - `beta_vix`.
+- `beta_policy_rate`.
+- `beta_usd_vnd`.
+- `beta_market_liquidity`.
 - `base_fee_pct`.
 
 ### `Funds`
@@ -340,7 +408,19 @@ Expected fields:
 - `class_id` foreign key.
 - `student_id` foreign key.
 - `current_AUM`.
+- `risk_appetite_level`.
+- `risk_profile_class`.
+- `investment_time_horizon`.
+- `expected_annual_return`.
+- `risk_budget`.
+- `liquidity_buffer`.
+- `roi`.
+- `alpha`.
+- `beta`.
+- `volatility`.
 - `sharpe_ratio`.
+- `treynor_ratio`.
+- `drawdown`.
 
 ### `Asset_Holdings`
 
@@ -352,6 +432,8 @@ Expected fields:
 - `fund_id` foreign key.
 - `tier`.
 - `allocation_weight_pct`.
+- `position_weight`.
+- `cash_buffer_weight`.
 
 ### `TARA_Orders`
 
@@ -363,7 +445,27 @@ Expected fields:
 - `fund_id` foreign key.
 - `month_index`.
 - `target_weights_json`.
+- `estimated_tax_drag`.
+- `rebalance_trigger`.
 - `status`, including pending and processed states.
+
+### `Risk_Register`
+
+TARA risk evidence and treatment decisions by fund and month.
+
+Expected fields:
+
+- `id` primary key.
+- `fund_id` foreign key.
+- `month_index`.
+- `risk_type`.
+- `risk_direction`.
+- `impact_weight`.
+- `risk_time_lag`.
+- `risk_probability_score`.
+- `risk_impact_score`.
+- `tara_risk_treatment_class`.
+- `risk_treatment_action`.
 
 ### `Simulation_Ledger`
 
@@ -374,8 +476,13 @@ Expected fields:
 - `id` primary key.
 - `fund_id` foreign key.
 - `month_index`.
+- `market_beta_impact`.
+- `fee_drag`.
 - `tax_paid`.
+- `tax_drag_pct`.
 - `pvp_slippage_paid`.
+- `liquidity_penalty_pct`.
+- `classroom_sell_concentration_pct`.
 - `ending_AUM`.
 
 ## 8. Out of Scope for MVP Phase 1

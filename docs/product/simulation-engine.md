@@ -12,9 +12,10 @@ Macro data comes from a pre-scripted scenario array.
 
 Indicator timing:
 
-- Leading indicators: `PMI`, `M2 Growth`.
-- Coincident indicators: `GDP`, `VIX`.
-- Lagging indicators: `CPI / Inflation`, `CB Rate`.
+- Leading indicators: `PMI`, `IIP`, `M2 Growth`.
+- Coincident indicators: `GDP`, `VIX`, equity-market liquidity, and market-flow strings.
+- Lagging indicators: `CPI / Inflation`, `CB Rate`, bond yield, interbank rate, and delayed risk/performance effects.
+- Regime context includes `investment_clock_phase`, `scenario_persistence`, `business_cycle_phase`, driver direction, impact weight, and time lag.
 
 Lag rules:
 
@@ -31,7 +32,20 @@ Assets are modeled as tiers rather than individual tickers:
 - Core: yield-oriented assets.
 - Apex: alpha-oriented assets.
 
-Asset returns are calculated from hardcoded beta sensitivities to macro deltas. Apex assets have high positive sensitivity to liquidity and severe negative sensitivity to interest-rate and volatility shocks.
+Asset returns are calculated from hardcoded beta sensitivities to macro and market-string deltas. Apex assets have high positive sensitivity to liquidity and severe negative sensitivity to interest-rate and volatility shocks.
+
+## Tracked Simulation Metrics
+
+The engine must track the curriculum metric set needed for Asset Pyramid, Driver/String Map, and TARA evidence. Tracked metrics include:
+
+- Investor policy and suitability values such as `risk_profile_class`, `investment_time_horizon`, `expected_annual_return`, `risk_budget`, and `liquidity_buffer`.
+- Macro and market strings such as `investment_clock_phase`, `m2_growth`, `gdp_growth_yoy`, `inflation_cpi`, `policy_rate`, `usd_vnd_movement`, `vn_index_level`, market liquidity, foreign flows, retail flows, and earnings expectations.
+- Portfolio state and order metrics such as `current_AUM`, `asset_allocation_weight`, `position_weight`, `portfolio_turnover`, target tier weights, and pending-order state.
+- Performance and risk metrics such as `roi`, `alpha`, `beta`, `volatility`, `correlation_coefficient`, `sharpe_ratio`, `treynor_ratio`, and `drawdown`.
+- TARA evidence values such as `risk_probability_score`, `risk_impact_score`, `tara_risk_treatment_class`, impact weight, time lag, and treatment action.
+- Friction and attribution values such as `market_beta_impact`, `fee_drag`, `tax_paid`, `tax_drag_pct`, `pvp_slippage_paid`, `liquidity_penalty_pct`, classroom sell concentration, and ending AUM.
+
+Advanced risk/performance metrics must retain benchmark, return frequency, lookback window, annualization convention, risk-free proxy, and raw-vs-adjusted price convention.
 
 ## Rebalancing Friction
 

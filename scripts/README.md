@@ -25,6 +25,23 @@ application source folders, package scripts, CI, tests, platform shells, or fake
 validation commands. The installer script is not part of the installed project
 payload.
 
+## Claude Sprint Runner
+
+`scripts/run-claude-sprints.sh` runs Claude Code for at least 10 bounded implementation rounds. Each round passes an AGENTS.md-first prompt, asks Claude to choose the next smallest unblocked sprint from the harness, and tells it to stop after one bounded slice.
+
+```bash
+./scripts/run-claude-sprints.sh
+./scripts/run-claude-sprints.sh 12
+```
+
+Optional environment variables:
+
+- `CLAUDE_BIN` — Claude Code executable name or path. Defaults to `claude`.
+- `CLAUDE_EXTRA_ARGS` — additional Claude Code flags, such as a permission mode.
+- `LOG_DIR` — output directory for per-round logs. Defaults to `.claude/sprint-runs`.
+
+The runner does not set model, base URL, auth token, commit, push, create PRs, or bypass permissions.
+
 ## Future Command Contract
 
 Expected future checks:

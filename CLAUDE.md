@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-This repository currently contains product documentation only. The implementation has not been scaffolded yet: there is no `package.json`, framework config, test runner, or build system in the repo.
+This repository has started its first minimal application-code slice: a pure TypeScript domain validator for TARA allocation weights. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
 
 Accepted specification sources:
 
@@ -14,9 +14,13 @@ Accepted specification sources:
 
 ## Commands
 
-No development commands are defined yet. Before running build, lint, test, or dev commands, inspect the current repository state for newly added manifests/configs.
+The repository now has a minimal TypeScript/Vitest setup for pure domain validation.
 
-Once the app is scaffolded, document the actual commands here rather than assuming defaults. Expected future stack from the PRD is Next.js App Router on Vercel with Supabase, Drizzle ORM, Inngest, Tailwind CSS, shadcn/ui, Apache ECharts, and Tremor.
+- `npm run typecheck` — run TypeScript without emitting files.
+- `npm run test:unit` — run unit tests.
+- `npm run validate:quick` — run typecheck and unit tests.
+
+No Next.js app, database, integration tests, E2E tests, CI, or deployment commands exist yet. Expected future stack from the PRD is Next.js App Router on Vercel with Supabase, Drizzle ORM, Inngest, Tailwind CSS, shadcn/ui, Apache ECharts, and Tremor.
 
 ## Product architecture
 

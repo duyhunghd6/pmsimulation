@@ -17,9 +17,11 @@ Do not create every possible story packet up front. Create story packets when wo
 ## First Story Candidates
 
 - Establish Supabase auth, class tenancy, and student/instructor RLS boundaries.
-- Seed deterministic macro narratives and asset DNA.
+- Seed deterministic macro narratives, market strings, tracked metrics, and asset DNA.
 - Implement the student current-month macro news terminal without exposing future rows.
-- Implement TARA target allocation validation and order submission.
+- Implement the current-turn Driver/String metrics dashboard with no future metric leakage.
+- Implement TARA target allocation validation. Sliced as `docs/stories/US-001-tara-allocation-validation.md`.
+- Implement TARA order submission. Still unsliced.
 - Implement deterministic month-processing math and ledger attribution.
 - Implement instructor class creation and join links.
 - Implement instructor live month advancement.

@@ -63,13 +63,31 @@ To enforce the TARA Matrix, the system penalizes naive rebalancing:
 * **Tax Drag (Teaches "Accept/Reduce"):** Selling profitable Apex assets incurs a 20% simulated capital gains tax automatically deducted from AUM.
 * **PvP Crowded Trade Penalty (Market Depth):** During end-of-turn processing, if $>50\%$ of the classroom volume submits identical sell orders for the exact same asset tier, the Engine applies a `Liquidity Penalty` (e.g., -5% extra slippage) to that specific trade, simulating a market panic and teaching contrarianism.
 
+### 4.4 Tracked Simulation Metrics Catalog
+
+The simulator must track the broader curriculum metric set from the Asset Pyramid / Driver String / TARA course design, not only CPI and interest rates. A tracked metric can be a seeded scenario time series, a computed fund metric, a student-entered policy field, a TARA rubric score, or an evidence metric used in debriefs. MVP may keep individual-stock picking out of scope, but the platform data model must still make these variables visible as tracked learning evidence where they affect scenarios, allocation decisions, or post-turn attribution.
+
+| Metric family | Tracked metrics / IDs | Product use |
+| --- | --- | --- |
+| **Investor, suitability, and pyramid policy** | `savings_rate_for_investment`, `asset_allocation_weight`, `risk_appetite_level`, `risk_profile_class`, `investment_time_horizon`, `expected_annual_return`, `investment_capacity`, `risk_limit`, `risk_budget`, `liquidity_buffer` | Defines each student fund mandate, allocation guardrails, target return, allowed drawdown, and whether a TARA action is appropriate for the persona. |
+| **Macro regime and leading/coincident/lagging drivers** | `investment_clock_phase`, `pmi`, `iip`, `m2_growth`, `gdp_growth_yoy`, `inflation_cpi`, `policy_rate`, `bond_yield`, `interbank_rate`, `usd_vnd_movement`, `vix`, `scenario_persistence`, `driver_time_lag` | Drives deterministic monthly scenario state and teaches lagged relationships between liquidity, growth, inflation, rates, FX, and volatility. |
+| **Vietnam equity-market strings** | `vn_index_level`, `equity_market_trading_value`, `foreign_investor_net_trading_value`, `retail_investor_net_trading_value`, `market_earnings_growth_expectation`, `valuation_sentiment`, `business_cycle_phase` | Gives students a market dashboard for Driver/String Map reasoning before reallocating between Base/Core/Apex tiers. |
+| **Asset class and fund inputs** | `fund_nav_per_unit`, `annualized_return`, `adjusted_world_gold_price`, `bank_deposit_rate`, `bond_fund_duration`, `asset_class_fee_pct`, `base_fee_pct` | Tracks non-equity asset-class behavior for deposits, gold, bond funds, equity funds/ETFs, and tier fees. |
+| **Portfolio construction and order state** | `current_AUM`, `own_capital`, `position_weight`, `holding_count`, `portfolio_turnover`, `pending_order_count`, `target_weight_base`, `target_weight_core`, `target_weight_apex`, `cash_buffer_weight`, `rebalance_trigger`, `limit_price`, `trigger_price`, `trailing_step` | Supports the pyramid visualizer, 100% TARA allocation validation, pending-order visibility, and execution discipline. |
+| **Performance and risk dashboard** | `roi`, `fund_nav_per_unit`, `alpha`, `beta`, `volatility`, `correlation_coefficient`, `sharpe_ratio`, `treynor_ratio`, `drawdown`, `benchmark_return`, `risk_free_proxy`, `return_frequency`, `lookback_window`, `annualization_convention` | Powers the Risk-Return Dashboard and forces every advanced metric to carry benchmark/window/frequency conventions. |
+| **TARA and risk register** | `risk_probability_score`, `risk_impact_score`, `tara_risk_treatment_class`, `tara_risk_matrix`, `risk_type`, `risk_direction`, `impact_weight`, `risk_time_lag`, `risk_treatment_action` | Turns TARA from a static label into a time-shifting risk register with explicit Avoid/Reduce/Accept/Transfer decisions. |
+| **Friction, attribution, and PvP mechanics** | `tax_paid`, `tax_drag_pct`, `pvp_slippage_paid`, `liquidity_penalty_pct`, `classroom_sell_concentration_pct`, `market_beta_impact`, `fee_drag`, `ending_AUM` | Explains post-turn AUM changes and connects penalties to tax drag, liquidity crowding, beta sensitivity, and fees. |
+| **Industry and company evidence metrics** | `revenue`, `revenue_growth`, `net_income`, `earnings_growth`, `operating_cash_flow`, `total_assets`, `roe`, `roa`, `gross_margin`, `net_profit_margin`, `business_profit_margin`, `dividend_yield`, `cash_dividend`, `market_share`, `market_capitalization`, `average_trading_volume`, `mp_stock_group_class`, `ev_to_ebitda`, `price_to_book`, `store_count`, `hot_rolled_coil_price`, `free_cash_flow`, `leverage_ratio_family` | Used for stock-case evidence, instructor debriefs, and future extensions; MVP may expose these as scripted case/context metrics without allowing individual-stock trading. |
+
+Every metric record must carry its `month_index`, `class_id` or scenario scope, display label, unit, source/convention note, and whether it is `seeded`, `computed`, `student_entered`, or `rubric_scored`. Metrics that use alpha, beta, volatility, correlation, Sharpe, Treynor, or drawdown must also store benchmark, return frequency, lookback window, annualization convention, risk-free proxy, and raw-vs-adjusted price convention.
+
 ---
 
 ## 5. Functional Requirements (Epics)
 
 ### Epic 1: The Student "Bloomberg" Dashboard
 
-* **FR-1.1 Macro News Terminal:** Securely displays the current month's news headline and the 6 macroeconomic metrics.
+* **FR-1.1 Macro News Terminal:** Securely displays the current month's news headline, macro regime, market-string dashboard, and all tracked scenario metrics relevant to the current turn. It must never expose future-month metric rows.
 * **FR-1.2 Pyramid Visualizer:** An interactive funnel chart displaying the current structural weight of their portfolio, highlighting dangerous "Portfolio Drift".
 * **FR-1.3 TARA Order Entry:** Interactive sliders to adjust asset allocations. *Must include strict client-side validation (Zustand)* ensuring total allocation exactly equals 100.0% before submission. Calculates an "Estimated Tax Drag" preview.
 * **FR-1.4 Attribution Report:** A post-turn report breaking down exactly *why* their AUM changed (e.g., Market Beta Impact: +$200k vs. Tax Penalties: -$40k vs. PvP Slippage: -$15k).
@@ -107,34 +125,45 @@ To meet strict anti-cheating requirements and Vercel timeout constraints, the st
 
 ## 7. Core Database Schema Blueprint (PostgreSQL / Drizzle)
 
-1. **`Classes` Table (Game Instances)**
+### `Classes` Table (Game Instances)
+
 * `id` (PK), `instructor_id` (FK), `trigger_mode` (AUTO/MANUAL), `current_month_index`
 
+### `Macro_Narratives` Table (The Script)
 
-2. **`Macro_Narratives` Table (The Script)**
-* `id` (PK), `month_index`, `news_headline`, `pmi`, `m2`, `gdp`, `cpi`, `cb_rate`, `vix`
+* `id` (PK), `month_index`, `news_headline`, `investment_clock_phase`, `pmi`, `iip`, `m2_growth`, `gdp_growth_yoy`, `inflation_cpi`, `policy_rate`, `bond_yield`, `interbank_rate`, `usd_vnd_movement`, `vix`, `scenario_persistence`
 
+### `Market_Metrics` Table (Current-Turn Market Strings)
 
-3. **`Asset_DNA` Table (The Physics)**
-* `asset_tier` (Base/Core/Apex), `beta_m2`, `beta_cpi`, `beta_gdp`, `beta_vix`, `base_fee_pct`
+* `id` (PK), `class_id` (FK), `month_index`, `vn_index_level`, `equity_market_trading_value`, `foreign_investor_net_trading_value`, `retail_investor_net_trading_value`, `market_earnings_growth_expectation`, `valuation_sentiment`, `business_cycle_phase`
 
+### `Tracked_Metrics` Table (Generic Metric Registry)
 
-4. **`Funds` Table (The Player)**
-* `id` (PK), `class_id` (FK), `student_id` (FK), `current_AUM`, `sharpe_ratio`
+* `id` (PK), `scope_type` (SCENARIO/CLASS/FUND/CASE), `scope_id`, `month_index`, `metric_id`, `display_label`, `metric_family`, `value_numeric`, `value_text`, `unit`, `source_type` (SEEDED/COMPUTED/STUDENT_ENTERED/RUBRIC_SCORED), `source_note`, `convention_note`
 
+### `Asset_DNA` Table (The Physics)
 
-5. **`Asset_Holdings` Table (The Pyramid)**
-* `id` (PK), `fund_id` (FK), `tier`, `allocation_weight_pct`
+* `asset_tier` (Base/Core/Apex), `beta_m2`, `beta_cpi`, `beta_gdp`, `beta_vix`, `beta_policy_rate`, `beta_usd_vnd`, `beta_market_liquidity`, `base_fee_pct`
 
+### `Funds` Table (The Player)
 
-6. **`TARA_Orders` Table**
-* `id` (PK), `fund_id` (FK), `month_index`, `target_weights_json`, `status` (PENDING/PROCESSED)
+* `id` (PK), `class_id` (FK), `student_id` (FK), `current_AUM`, `risk_appetite_level`, `risk_profile_class`, `investment_time_horizon`, `expected_annual_return`, `risk_budget`, `liquidity_buffer`, `roi`, `alpha`, `beta`, `volatility`, `sharpe_ratio`, `treynor_ratio`, `drawdown`
 
+### `Asset_Holdings` Table (The Pyramid)
 
-7. **`Simulation_Ledger` Table (For Attribution Reports)**
-* `id` (PK), `fund_id` (FK), `month_index`, `tax_paid`, `pvp_slippage_paid`, `ending_AUM`
+* `id` (PK), `fund_id` (FK), `tier`, `allocation_weight_pct`, `position_weight`, `cash_buffer_weight`
 
+### `TARA_Orders` Table
 
+* `id` (PK), `fund_id` (FK), `month_index`, `target_weights_json`, `estimated_tax_drag`, `rebalance_trigger`, `status` (PENDING/PROCESSED)
+
+### `Risk_Register` Table (TARA Evidence)
+
+* `id` (PK), `fund_id` (FK), `month_index`, `risk_type`, `risk_direction`, `impact_weight`, `risk_time_lag`, `risk_probability_score`, `risk_impact_score`, `tara_risk_treatment_class`, `risk_treatment_action`
+
+### `Simulation_Ledger` Table (For Attribution Reports)
+
+* `id` (PK), `fund_id` (FK), `month_index`, `market_beta_impact`, `fee_drag`, `tax_paid`, `tax_drag_pct`, `pvp_slippage_paid`, `liquidity_penalty_pct`, `classroom_sell_concentration_pct`, `ending_AUM`
 
 ---
 
