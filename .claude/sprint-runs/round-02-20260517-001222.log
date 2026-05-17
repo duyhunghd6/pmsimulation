@@ -1,0 +1,14 @@
+Selected story/work item: **US-003 TARA order draft**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added pending TARA order draft creation in `app/domain/tara/order.ts:36`.
+- Added unit coverage for valid drafts and invalid inputs in `app/domain/tara/order.test.ts:22`.
+- Added story packet `docs/stories/US-003-tara-order-draft.md:1`.
+- Updated backlog and proof tracking in `docs/stories/backlog.md:24`, `docs/stories/README.md:6`, and `docs/TEST_MATRIX.md:24`.
+
+Validation run:
+- `npm run validate:quick` — passed; 3 test files, 23 tests.
+
+Not attempted:
+- No UI, API route, server action, persistence, Supabase/Drizzle, auth/RLS, worker, realtime, CI, commit, push, or PR.

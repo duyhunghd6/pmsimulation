@@ -1,0 +1,13 @@
+Selected story/work item: **US-011 MVP asset-tier return calculation**. Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added `calculateAssetTierReturn` and `calculateMvpAssetTierReturns` in `app/domain/asset-dna/returns.ts:36` and `app/domain/asset-dna/returns.ts:57`.
+- Added unit coverage for all-tier return math, single-tier lookup, rate/volatility shock ordering, unknown tiers, and invalid deltas.
+- Added story packet `docs/stories/US-011-mvp-asset-tier-return-calculation.md:1`.
+- Updated product/test tracking in `docs/product/simulation-engine.md:37`, `docs/TEST_MATRIX.md:33`, `docs/stories/backlog.md`, `docs/product/data-model.md`, `README.md`, and `CLAUDE.md`.
+
+Validation run:
+- `npm run validate:quick` — passed: **11 test files, 61 tests**.
+
+Not attempted:
+- No UI, API routes, server actions, database/schema/RLS, auth, worker, realtime, ledger persistence, order execution, scenario-delta generation, commit, push, or PR.

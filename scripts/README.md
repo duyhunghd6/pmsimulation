@@ -40,7 +40,7 @@ Optional environment variables:
 - `CLAUDE_EXTRA_ARGS` — additional Claude Code flags, such as a permission mode.
 - `LOG_DIR` — output directory for per-round logs. Defaults to `.claude/sprint-runs`.
 
-The runner does not set model, base URL, auth token, commit, push, create PRs, or bypass permissions.
+The runner passes `--dangerously-skip-permissions` to Claude Code for unattended sprint execution. It does not set model, base URL, auth token, commit, push, or create PRs.
 
 ## Future Command Contract
 

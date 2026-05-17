@@ -1,0 +1,15 @@
+Selected work item: `US-010 MVP Asset DNA catalog`; lane: `normal`.
+
+Implemented one bounded pure-domain slice:
+- Added `app/domain/asset-dna/catalog.ts` with Base/Core/Apex Asset DNA beta coefficients and base fee seed values.
+- Added `app/domain/asset-dna/catalog.test.ts` covering tier coverage, lookup behavior, qualitative sensitivity relationships, and finite values.
+- Added `docs/stories/US-010-mvp-asset-dna-catalog.md`.
+- Updated `docs/product/simulation-engine.md`, `docs/product/data-model.md`, `docs/TEST_MATRIX.md`, `docs/stories/backlog.md`, `README.md`, and `CLAUDE.md` to reflect the new pure-domain Asset DNA seed slice.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: 10 test files passed, 56 tests passed.
+
+Not attempted:
+- No commit, push, or PR.
+- No UI, auth, database, Supabase/Drizzle, worker, realtime, API route, platform, or return-processing implementation.

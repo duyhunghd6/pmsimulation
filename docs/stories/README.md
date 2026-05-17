@@ -3,7 +3,7 @@
 Stories are work packets. They turn product intent into bounded implementation
 and validation work.
 
-No implementation story packets are active yet. The accepted PRD intake is recorded in `spec-intake-2026-05-16.md`, and candidate epics are tracked in `backlog.md`.
+Implemented story packets are tracked alongside the accepted PRD intake in this directory. Candidate epics and unsliced future work remain in `backlog.md`.
 
 ## Normal Story
 

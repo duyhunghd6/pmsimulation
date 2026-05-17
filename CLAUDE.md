@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-This repository has started its first minimal application-code slice: a pure TypeScript domain validator for TARA allocation weights. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
+This repository has started minimal pure TypeScript domain slices for TARA allocation rules, tracked metrics, current-turn scenario projections, portfolio pyramid snapshots, Asset DNA seeds, and asset-tier return calculations. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
 
 Accepted specification sources:
 

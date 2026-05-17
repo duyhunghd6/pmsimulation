@@ -1,0 +1,24 @@
+Selected story/work item: **US-005 TARA Turn Attribution Summary**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+
+- Added `app/domain/tara/attribution.ts`
+  - Calculates market beta impact, fee drag, tax paid, tax drag %, PvP slippage, liquidity penalty %, classroom sell concentration, and ending AUM.
+  - Composes existing tax-drag and liquidity-penalty functions.
+- Added `app/domain/tara/attribution.test.ts`
+  - Covers combined attribution, no-sale friction, sold-tier concentration, and invalid inputs.
+- Added story packet `docs/stories/US-005-tara-turn-attribution-summary.md`.
+- Updated:
+  - `docs/product/simulation-engine.md`
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md`
+
+Validation run:
+
+- `npm run validate:quick` — passed
+- Result: **5 test files, 35 tests passed**
+
+Not attempted:
+
+- No UI, API routes, persistence, Supabase/Drizzle, auth, worker, realtime, order execution, ledger writes, commit, push, or PR.

@@ -1,0 +1,16 @@
+Selected story/work item: `US-002 TARA tax-drag preview`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added `estimateTaraTaxDragPreview` in `app/domain/tara/tax-drag.ts:38`.
+- Added unit coverage in `app/domain/tara/tax-drag.test.ts:22`.
+- Added story packet `docs/stories/US-002-tara-tax-drag-preview.md:1`.
+- Updated backlog and proof matrix: `docs/stories/backlog.md:24`, `docs/TEST_MATRIX.md:23`.
+
+Validation run:
+- `npm run validate:quick` passed.
+- Result: 2 test files passed, 17 tests passed.
+
+Not attempted:
+- No UI, server action, API route, persistence, Supabase/Drizzle, auth, worker, realtime, CI, commit, push, or PR.
+- Existing unrelated dirty files remain untouched: `scripts/README.md`, `scripts/run-claude-sprints.sh`, and `.claude/`.

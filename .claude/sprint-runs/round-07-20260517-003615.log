@@ -1,0 +1,14 @@
+Selected story/work item: `US-008 Current-Turn Driver/String Dashboard`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added `buildCurrentTurnDriverStringDashboard` in `app/domain/scenario/driver-string-dashboard.ts:1`.
+- Added unit coverage in `app/domain/scenario/driver-string-dashboard.test.ts:1`.
+- Added story packet `docs/stories/US-008-current-turn-driver-string-dashboard.md:1`.
+- Updated backlog and test matrix evidence in `docs/stories/backlog.md` and `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run validate:quick` — passed: 8 test files, 48 tests.
+
+Not attempted:
+- No UI, API routes, server actions, Supabase/RLS, database schema, auth, workers, realtime, CI, commit, push, or PR.

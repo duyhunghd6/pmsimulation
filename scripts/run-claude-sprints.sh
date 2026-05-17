@@ -64,9 +64,9 @@ PROMPT
     # Intentional word splitting lets callers pass Claude Code flags, for example:
     # CLAUDE_EXTRA_ARGS="--permission-mode acceptEdits"
     # shellcheck disable=SC2086
-    "${CLAUDE_BIN}" ${CLAUDE_EXTRA_ARGS} -p "${prompt}" 2>&1 | tee "${log_file}"
+    "${CLAUDE_BIN}" --dangerously-skip-permissions ${CLAUDE_EXTRA_ARGS} -p "${prompt}" 2>&1 | tee "${log_file}"
   else
-    "${CLAUDE_BIN}" -p "${prompt}" 2>&1 | tee "${log_file}"
+    "${CLAUDE_BIN}" --dangerously-skip-permissions -p "${prompt}" 2>&1 | tee "${log_file}"
   fi
 
   echo "==> Completed round ${round}/${ROUNDS}"

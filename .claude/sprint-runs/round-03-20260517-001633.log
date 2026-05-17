@@ -1,0 +1,24 @@
+Selected story/work item: `US-004 TARA Liquidity Penalty`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added `app/domain/tara/liquidity-penalty.ts`
+  - Calculates crowded-sell PvP slippage.
+  - Applies `5%` liquidity penalty only when classroom sell concentration for the sold tier is `>50%`.
+  - Reports per-tier sell impacts, `pvpSlippagePaid`, and `liquidityPenaltyPct`.
+  - Rejects invalid AUM, allocation weights, and classroom concentration maps.
+- Added `app/domain/tara/liquidity-penalty.test.ts`.
+
+Updated harness/product evidence:
+- Added `docs/stories/US-004-tara-liquidity-penalty.md`.
+- Updated `docs/product/simulation-engine.md` with the MVP `5%` crowded-sell penalty rate.
+- Updated `docs/stories/backlog.md`.
+- Updated `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run validate:quick` — passed.
+- Result: `4` test files passed, `30` tests passed.
+
+Not attempted:
+- No UI, server actions, API routes, persistence, Supabase, Drizzle, auth, workers, realtime, order execution, ledger writes, commit, push, or PR.
+- Pre-existing unrelated working-tree changes remain untouched.

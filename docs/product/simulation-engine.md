@@ -34,18 +34,32 @@ Assets are modeled as tiers rather than individual tickers:
 
 Asset returns are calculated from hardcoded beta sensitivities to macro and market-string deltas. Apex assets have high positive sensitivity to liquidity and severe negative sensitivity to interest-rate and volatility shocks.
 
+The MVP pure-domain return projection calculates each tier's gross return percentage as the sum of each Asset DNA beta coefficient multiplied by the corresponding current-vs-prior factor delta. Base fee percentage remains separate so attribution can apply fee drag without double-counting it in gross market return.
+
+### MVP Asset DNA Seed Catalog
+
+The MVP pure-domain asset DNA catalog defines one seeded coefficient row for each asset tier. Coefficients are used as deterministic sensitivities for future asset-return calculations, and `base_fee_pct` is the tier-level fee input for attribution.
+
+| Tier | beta_m2 | beta_cpi | beta_gdp | beta_vix | beta_policy_rate | beta_usd_vnd | beta_market_liquidity | base_fee_pct |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Base | 0.05 | -0.05 | 0.10 | -0.05 | 0.20 | -0.05 | 0.05 | 0.10 |
+| Core | 0.25 | -0.15 | 0.35 | -0.20 | -0.25 | -0.10 | 0.30 | 0.50 |
+| Apex | 0.80 | -0.50 | 0.65 | -0.80 | -0.90 | -0.30 | 1.00 | 1.00 |
+
 ## Tracked Simulation Metrics
 
-The engine must track the curriculum metric set needed for Asset Pyramid, Driver/String Map, and TARA evidence. Tracked metrics include:
+The engine must track the curriculum metric set needed for Asset Pyramid, Driver/String Map, TARA evidence, and instructor debriefs. Tracked metrics include:
 
-- Investor policy and suitability values such as `risk_profile_class`, `investment_time_horizon`, `expected_annual_return`, `risk_budget`, and `liquidity_buffer`.
-- Macro and market strings such as `investment_clock_phase`, `m2_growth`, `gdp_growth_yoy`, `inflation_cpi`, `policy_rate`, `usd_vnd_movement`, `vn_index_level`, market liquidity, foreign flows, retail flows, and earnings expectations.
-- Portfolio state and order metrics such as `current_AUM`, `asset_allocation_weight`, `position_weight`, `portfolio_turnover`, target tier weights, and pending-order state.
-- Performance and risk metrics such as `roi`, `alpha`, `beta`, `volatility`, `correlation_coefficient`, `sharpe_ratio`, `treynor_ratio`, and `drawdown`.
-- TARA evidence values such as `risk_probability_score`, `risk_impact_score`, `tara_risk_treatment_class`, impact weight, time lag, and treatment action.
+- Investor policy and suitability values such as `savings_rate_for_investment`, `asset_allocation_weight`, `risk_profile_class`, `investment_time_horizon`, `expected_annual_return`, `risk_budget`, and `liquidity_buffer`.
+- Macro and market strings such as `investment_clock_phase`, `pmi`, `iip`, `m2_growth`, `gdp_growth_yoy`, `inflation_cpi`, `policy_rate`, `usd_vnd_movement`, `vix`, `vn_index_level`, market liquidity, foreign flows, retail flows, and earnings expectations.
+- Asset-class and fund inputs such as `fund_nav_per_unit`, `annualized_return`, `adjusted_world_gold_price`, `bank_deposit_rate`, `bond_fund_duration`, `asset_class_fee_pct`, and `base_fee_pct`.
+- Portfolio state and order metrics such as `current_AUM`, `asset_allocation_weight`, `position_weight`, `portfolio_turnover`, target tier weights, cash buffer weight, rebalance trigger, pending-order state, and order discipline values.
+- Performance and risk metrics such as `roi`, `fund_nav_per_unit`, `alpha`, `beta`, `volatility`, `correlation_coefficient`, `sharpe_ratio`, `treynor_ratio`, `drawdown`, `benchmark_return`, `risk_free_proxy`, `return_frequency`, `lookback_window`, and `annualization_convention`.
+- TARA evidence values such as `risk_probability_score`, `risk_impact_score`, `tara_risk_treatment_class`, `tara_risk_matrix`, impact weight, time lag, and treatment action.
 - Friction and attribution values such as `market_beta_impact`, `fee_drag`, `tax_paid`, `tax_drag_pct`, `pvp_slippage_paid`, `liquidity_penalty_pct`, classroom sell concentration, and ending AUM.
+- Industry and company evidence values such as `revenue`, `revenue_growth`, `net_income`, `earnings_growth`, `operating_cash_flow`, `roe`, `roa`, margins, dividends, market share, valuation ratios, trading volume, and sector-specific case metrics.
 
-Advanced risk/performance metrics must retain benchmark, return frequency, lookback window, annualization convention, risk-free proxy, and raw-vs-adjusted price convention.
+Tracked metric records must identify whether the source is seeded, computed, student-entered, or rubric-scored. Advanced risk/performance metrics must retain benchmark, return frequency, lookback window, annualization convention, risk-free proxy, and raw-vs-adjusted price convention.
 
 ## Rebalancing Friction
 
@@ -58,6 +72,8 @@ Selling profitable Apex assets incurs a simulated `20%` capital gains tax deduct
 ### Crowded-Trade Liquidity Penalty
 
 During end-of-turn processing, if more than `50%` of classroom volume submits identical sell orders for the same asset tier, the engine applies an additional liquidity penalty to that trade.
+
+The MVP domain penalty rate is `5%` of the crowded sold amount for each affected tier.
 
 ## TARA Order Rules
 
@@ -79,6 +95,12 @@ Processing must be idempotent so duplicate trigger attempts do not double-apply 
 Post-turn results must explain AUM changes by source, including at least:
 
 - Market beta impact.
+- Fee drag.
 - Tax penalties.
+- Tax drag percentage.
 - PvP slippage or liquidity penalties.
+- Liquidity penalty percentage.
+- Classroom sell concentration.
 - Ending AUM.
+
+The MVP pure-domain attribution summary calculates ending AUM as starting AUM plus market beta impact minus fee drag, tax paid, and PvP slippage paid.

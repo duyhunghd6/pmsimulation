@@ -17,12 +17,16 @@ Do not create every possible story packet up front. Create story packets when wo
 ## First Story Candidates
 
 - Establish Supabase auth, class tenancy, and student/instructor RLS boundaries.
-- Seed deterministic macro narratives, market strings, tracked metrics, and asset DNA.
-- Implement the student current-month macro news terminal without exposing future rows.
-- Implement the current-turn Driver/String metrics dashboard with no future metric leakage.
+- Seed deterministic macro narratives, market strings, tracked metrics, and asset DNA. First pure-domain Asset DNA catalog slice captured as `docs/stories/US-010-mvp-asset-dna-catalog.md`; first pure-domain asset-tier return slice captured as `docs/stories/US-011-mvp-asset-tier-return-calculation.md`.
+- Implement the tracked simulation metrics catalog. Sliced as `docs/stories/US-006-tracked-simulation-metrics-catalog.md`.
+- Implement the student current-month macro news terminal without exposing future rows. First domain snapshot slice captured as `docs/stories/US-007-student-macro-news-snapshot.md`.
+- Implement the current-turn Driver/String metrics dashboard with no future metric leakage. First pure domain slice captured as `docs/stories/US-008-current-turn-driver-string-dashboard.md`.
+- Implement the student portfolio pyramid visualizer. First pure domain snapshot slice captured as `docs/stories/US-009-student-portfolio-pyramid-snapshot.md`.
 - Implement TARA target allocation validation. Sliced as `docs/stories/US-001-tara-allocation-validation.md`.
-- Implement TARA order submission. Still unsliced.
-- Implement deterministic month-processing math and ledger attribution.
+- Implement TARA tax-drag preview. Sliced as `docs/stories/US-002-tara-tax-drag-preview.md`.
+- Implement TARA order submission. First domain slice captured as `docs/stories/US-003-tara-order-draft.md`.
+- Implement TARA crowded-sell liquidity penalty. Sliced as `docs/stories/US-004-tara-liquidity-penalty.md`.
+- Implement deterministic month-processing math and ledger attribution. First domain attribution slice captured as `docs/stories/US-005-tara-turn-attribution-summary.md`.
 - Implement instructor class creation and join links.
 - Implement instructor live month advancement.
 - Implement Supabase Realtime turn-completion refresh.

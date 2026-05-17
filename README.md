@@ -6,7 +6,7 @@ Students act as fund managers, start with virtual `$50M` AUM, and compete across
 
 ## Project Status
 
-The repository has started its first minimal application-code slice: a pure TypeScript domain validator for TARA allocation weights. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
+The repository has started minimal pure TypeScript domain slices for TARA allocation rules, tracked metrics, current-turn scenario projections, portfolio pyramid snapshots, Asset DNA seeds, and asset-tier return calculations. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
 
 The accepted seed spec is `SPEC.md`, derived from `docs/prd/PRD-01.md`.
 

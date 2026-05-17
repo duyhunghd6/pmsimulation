@@ -1,0 +1,22 @@
+Completed one sprint.
+
+Selected story/work item: `US-009 Student Portfolio Pyramid Snapshot`  
+Lane: normal
+
+Changed:
+- Added pure-domain portfolio pyramid projection:
+  - `app/domain/portfolio/pyramid.ts`
+  - `app/domain/portfolio/pyramid.test.ts`
+- Added story packet:
+  - `docs/stories/US-009-student-portfolio-pyramid-snapshot.md`
+- Updated docs/evidence:
+  - `docs/product/user-surfaces.md`
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md`
+
+Validation:
+- `npm run validate:quick` passed.
+- 9 test files passed, 52 tests passed.
+
+Not attempted:
+- No UI, server actions, API routes, persistence, Supabase/Drizzle, auth/RLS, workers, realtime, CI, commit, push, or PR.

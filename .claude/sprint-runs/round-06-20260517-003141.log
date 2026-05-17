@@ -1,0 +1,16 @@
+Selected story/work item: **US-007 Student macro news snapshot**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+
+- Added `app/domain/scenario/macro-news.ts:1` with `buildStudentMacroNewsSnapshot`, which returns only the current month’s macro narrative and market strings.
+- Added `app/domain/scenario/macro-news.test.ts:1` covering current snapshot output, future-row non-exposure, invalid month indexes, missing current rows, and duplicate current rows.
+- Added story packet `docs/stories/US-007-student-macro-news-snapshot.md:1`.
+- Updated `docs/stories/backlog.md` and `docs/TEST_MATRIX.md` with the new story/evidence.
+
+Validation run:
+
+- `npm run validate:quick` — passed.
+- Vitest result: **7 test files passed, 44 tests passed**.
+
+Not attempted: UI, API routes, server actions, persistence, Supabase/RLS, auth, tenancy enforcement, worker/realtime/platform scaffolding, commit, push, or PR.

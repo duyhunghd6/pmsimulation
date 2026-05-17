@@ -2,7 +2,7 @@
 
 ## Status
 
-This document captures the PRD blueprint for future schema work. No database migrations or Drizzle schema files exist yet.
+This document captures the PRD blueprint for future schema work. Pure TypeScript Asset DNA seed and return-calculation slices now exist for deterministic domain use, but no database migrations or Drizzle schema files exist yet.
 
 ## Core Entities
 
@@ -115,6 +115,7 @@ Expected fields:
 Rules:
 
 - Asset tiers are Base, Core, and Apex for MVP.
+- The MVP pure-domain catalog contains one seeded Asset DNA row for each tier.
 - Individual stock picking is out of scope.
 
 ### Funds

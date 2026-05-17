@@ -1,0 +1,17 @@
+Selected story/work item: **US-006 Tracked Simulation Metrics Catalog**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added a tracked simulation metrics catalog under `app/domain/metrics/`.
+- Added unit tests covering PRD metric coverage, family lookup, source types, and advanced performance convention flags.
+- Added story packet `docs/stories/US-006-tracked-simulation-metrics-catalog.md`.
+- Updated `docs/product/simulation-engine.md`, `docs/stories/backlog.md`, and `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run typecheck` — passed.
+- `npm run test:unit` — passed; 6 test files, 39 tests.
+- `npm run validate:quick` — passed; 6 test files, 39 tests.
+
+Not attempted:
+- No auth, database, Supabase, Drizzle, UI, API routes, workers, realtime, CI, commits, pushes, or PR creation.
+- The working tree already had other modified/untracked files before this sprint; I left unrelated work as-is.

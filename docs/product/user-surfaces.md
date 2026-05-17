@@ -20,7 +20,7 @@ Shows the current month's headline, macro regime, market-string dashboard, and s
 
 ### Pyramid Visualizer
 
-Shows the student's current allocation across Base, Core, and Apex tiers. It should highlight dangerous portfolio drift from intended structure.
+Shows the student's current allocation across Base, Core, and Apex tiers. It should highlight dangerous portfolio drift from intended structure by comparing current weights against intended weights using an accepted drift threshold.
 
 ### TARA Order Entry
 
