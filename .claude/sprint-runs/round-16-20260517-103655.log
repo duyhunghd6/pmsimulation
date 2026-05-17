@@ -1,0 +1,27 @@
+Selected story/work item: `US-027 MVP Scenario Catalog`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+
+- Added `app/domain/scenario/catalog.ts:19` with paired MVP macro narrative and market metric seed catalogs.
+- Added `listRevealedMvpScenarioRows` at `app/domain/scenario/catalog.ts:54` to expose only current/past scenario rows.
+- Added unit proof in `app/domain/scenario/catalog.test.ts:13`, including future-row non-exposure and a CPI/rate-hike/VIX stress turn.
+- Added story packet `docs/stories/US-027-mvp-scenario-catalog.md:1`.
+- Updated product/story evidence in:
+  - `docs/product/simulation-engine.md:13`
+  - `docs/product/data-model.md:57`
+  - `docs/product/user-surfaces.md:21`
+  - `docs/stories/backlog.md:20`
+  - `docs/TEST_MATRIX.md:31`
+  - `README.md:9`
+  - `CLAUDE.md:7`
+
+Validation run:
+
+- `npm run validate:quick` — passed.
+- Result: `20` test files passed, `155` tests passed.
+
+Not attempted:
+
+- No Next.js app shell, UI, auth, database, migrations, Supabase, worker, realtime provider, cron/platform code, commit, push, or PR.
+- Existing pre-sprint modified/untracked files remain in the working tree.

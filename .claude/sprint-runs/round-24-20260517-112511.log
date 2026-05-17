@@ -1,0 +1,15 @@
+Selected story/work item: **US-034 Student post-turn dashboard snapshot**  
+Lane: **normal** — bounded pure-domain composition, no platform/auth/database/UI scaffolding.
+
+Changed:
+- Added `buildStudentDashboardPostTurnSnapshot` to compose the viewer fund attribution report with permitted leaderboard rank data: `app/domain/student/dashboard-snapshot.ts:188`.
+- Added unit coverage for composition, leakage exclusions, and source-tagged child errors: `app/domain/student/dashboard-snapshot.test.ts:225`.
+- Added story packet: `docs/stories/US-034-student-post-turn-dashboard-snapshot.md`.
+- Updated product docs, backlog, README/CLAUDE status, and test matrix evidence, including `docs/TEST_MATRIX.md:39` and `docs/stories/backlog.md:25`.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: **23 test files passed, 187 tests passed**.
+
+Not attempted:
+- No UI, server actions, auth/RLS, database, Supabase, realtime provider, worker, CI, commit, push, or PR.

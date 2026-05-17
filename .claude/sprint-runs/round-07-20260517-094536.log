@@ -1,0 +1,5 @@
+Selected story/work item: **US-018 Month Advance Turn-Completion Event**; lane: **normal**.
+
+Implemented a bounded pure-domain slice: `createMonthAdvanceTurnCompletionEvent` derives an aggregate, provider-neutral completion payload from class-month processing without exposing per-fund ledger drafts or fund processing keys (`app/domain/classes/month-advancement.ts:230`), with unit coverage in `app/domain/classes/month-advancement.test.ts:112`. Updated the new story packet (`docs/stories/US-018-month-advance-turn-completion-event.md:1`), product docs (`docs/product/simulation-engine.md:99`, `docs/product/user-surfaces.md:53`, `docs/product/runtime-architecture.md:28`, `docs/product/data-model.md:240`), backlog, README/CLAUDE status, and test matrix (`docs/TEST_MATRIX.md:41`).
+
+Validation: `npm run validate:quick` passed — 13 test files, 102 tests. Not attempted: Supabase Realtime publication, worker/cron/platform wiring, UI, API routes, database/auth/RLS, commits, push, or PR.

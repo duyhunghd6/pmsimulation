@@ -1,0 +1,17 @@
+Selected story/work item: **US-039 Release validation and deployment proof**. Lane: **high-risk**.
+
+Changed:
+- Added high-risk story packet and index:
+  - `docs/stories/US-039-release-validation-and-deployment-proof/overview.md:1`
+  - `docs/stories/US-039-release-validation-and-deployment-proof/execplan.md`
+  - `docs/stories/US-039-release-validation-and-deployment-proof/design.md`
+  - `docs/stories/US-039-release-validation-and-deployment-proof/validation.md`
+  - `docs/stories/US-039-release-validation-and-deployment-proof.md`
+- Updated E04 backlog status and candidate evidence: `docs/stories/backlog.md:15`
+- Added US-039 to the test matrix and linked it into E04 evidence: `docs/TEST_MATRIX.md:62`
+
+Validation:
+- `npm run validate:quick` passed: **23 test files**, **191 tests**.
+
+Not attempted:
+- No CI, deployment, Vercel, Supabase, provider secrets, app shell, integration suite, E2E suite, platform smoke command, commit, push, or PR.

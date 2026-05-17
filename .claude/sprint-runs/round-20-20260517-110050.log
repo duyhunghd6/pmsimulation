@@ -1,0 +1,22 @@
+Selected story/work item: **US-030 Instructor live month-advance control snapshot**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorLiveMonthAdvanceControlSnapshot` and related types in `app/domain/classes/month-advancement.ts:42` and `app/domain/classes/month-advancement.ts:501`.
+- Added unit coverage for enabled manual controls, disabled auto/completed states, invalid inputs, and payload minimization in `app/domain/classes/month-advancement.test.ts:126`.
+- Added story packet `docs/stories/US-030-instructor-live-month-advance-control-snapshot.md:1`.
+- Updated product docs and tracking:
+  - `docs/product/user-surfaces.md:77`
+  - `docs/product/simulation-engine.md:99`
+  - `docs/product/roles-and-permissions.md:37`
+  - `docs/product/data-model.md:30`
+  - `docs/TEST_MATRIX.md:44`
+  - `docs/stories/backlog.md:33`
+  - `README.md` / `CLAUDE.md` repository status text
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/month-advancement.test.ts` — passed, 46 tests.
+- `npm run validate:quick` — passed, 21 test files and 174 tests.
+
+Not attempted:
+- No UI, server actions, API routes, auth/RLS, database/schema, worker, cron, Supabase Realtime provider code, commit, push, or PR.

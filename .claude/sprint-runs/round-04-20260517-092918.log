@@ -1,0 +1,15 @@
+Selected story/work item: `US-015 Shared Month Advance Processing Request`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added `createSharedMonthAdvanceProcessingRequest` in `app/domain/classes/month-advancement.ts:200`.
+- Added unit coverage for live/auto convergence, trigger-mode pairing, class-id trimming, month boundaries, invalid fields, and idempotency-key mismatch in `app/domain/classes/month-advancement.test.ts:134`.
+- Created story packet `docs/stories/US-015-shared-month-advance-processing-request.md:1`.
+- Updated `docs/TEST_MATRIX.md:38`, backlog, README/CLAUDE status, and relevant product docs for the shared request shape.
+
+Validation run:
+- `npm run validate:quick` — passed.
+- Result: 13 test files passed, 91 tests passed.
+
+Not attempted:
+- No cron, worker, API route, UI, auth, Supabase/Drizzle, RLS, realtime, order execution, ledger persistence, commit, push, or PR.

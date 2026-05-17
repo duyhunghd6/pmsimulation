@@ -1,0 +1,18 @@
+Selected story/work item: **US-037 Supabase Realtime client publication**, lane **high-risk**.
+
+Changed:
+- Added high-risk story packet and blocker docs:
+  - `docs/stories/US-037-supabase-realtime-client-publication/overview.md:1`
+  - `docs/stories/US-037-supabase-realtime-client-publication/execplan.md:1`
+  - `docs/stories/US-037-supabase-realtime-client-publication/design.md:1`
+  - `docs/stories/US-037-supabase-realtime-client-publication/validation.md:1`
+- Updated backlog to capture US-037 and mark actual provider publication/subscription/UI refetch as unimplemented: `docs/stories/backlog.md:38`
+- Updated test matrix with the planned/blocker row and E04 evidence: `docs/TEST_MATRIX.md:60`
+
+Validation:
+- `npm run validate:quick` passed.
+- 23 test files passed, 191 tests passed.
+
+Not attempted:
+- No Supabase SDK/client, auth, RLS, UI, database, worker, platform, or provider publication code was added.
+- No commit, push, or PR was created.

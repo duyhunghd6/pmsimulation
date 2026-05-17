@@ -1,0 +1,18 @@
+Selected story/work item: `US-028 Realtime Refresh Publication Envelope`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+
+- Added `MonthAdvanceRealtimePublicationEnvelope` and `createMonthAdvanceRealtimePublicationEnvelope()` in `app/domain/classes/month-advancement.ts:252` and `app/domain/classes/month-advancement.ts:323`.
+- Added unit coverage for envelope creation, refresh-only payload exclusions, and auto-path metadata preservation in `app/domain/classes/month-advancement.test.ts:158`.
+- Added story packet `docs/stories/US-028-realtime-refresh-publication-envelope.md:1`.
+- Updated product docs, backlog, test matrix, README, and `CLAUDE.md` to reflect the provider-neutral publication-envelope slice.
+
+Validation run:
+
+- `npm run validate:quick` — passed: 20 test files, 164 tests.
+
+Not attempted:
+
+- No Supabase Realtime provider code.
+- No UI subscriptions, auth/RLS, database, worker, cron, API routes, platform code, commit, push, or PR.

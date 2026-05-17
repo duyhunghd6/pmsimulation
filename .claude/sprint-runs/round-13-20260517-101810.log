@@ -1,0 +1,15 @@
+Selected story/work item: **US-024 Instructor God Mode Portfolio Visibility Snapshot**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorGodModePortfolioVisibilitySnapshot` in `app/domain/classes/god-mode-portfolio-visibility.ts:71`.
+- Added unit coverage for exact current tier holdings, trimming, sorting, empty classes, detail exclusion, and invalid inputs in `app/domain/classes/god-mode-portfolio-visibility.test.ts:47`.
+- Added the story packet at `docs/stories/US-024-instructor-god-mode-portfolio-visibility-snapshot.md:1`.
+- Updated product/test evidence, including `docs/product/user-surfaces.md:57` and `docs/TEST_MATRIX.md:39`.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: **17 test files passed, 136 tests passed**.
+
+Not attempted:
+- No UI, API routes, server actions, auth/RLS, database/Drizzle, Supabase, worker, realtime provider, platform, commit, push, or PR.

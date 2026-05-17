@@ -1,0 +1,17 @@
+Selected story/work item: **US-019 Month advance realtime refresh signal**  
+Lane: **normal** — bounded pure-domain E04 slice with weak-proof/public-contract considerations, but no provider, UI, database, auth, or platform work.
+
+Implemented one slice:
+- Added `MonthAdvanceRealtimeRefreshSignal` and `createMonthAdvanceRealtimeRefreshSignal` in `app/domain/classes/month-advancement.ts:226`.
+- Added unit coverage for signal creation, deterministic keying, auto-path preservation, and exclusion of fund/aggregate financial data in `app/domain/classes/month-advancement.test.ts:113`.
+- Added story packet `docs/stories/US-019-month-advance-realtime-refresh-signal.md:1`.
+- Updated backlog, product docs, README/CLAUDE status, and test matrix evidence, including `docs/TEST_MATRIX.md:42`.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: **13 test files passed, 104 tests passed**.
+
+Not attempted:
+- No Supabase Realtime provider publication.
+- No UI subscriptions or refresh behavior.
+- No server actions, API routes, auth/RLS, database, worker, cron, platform, commit, push, or PR.

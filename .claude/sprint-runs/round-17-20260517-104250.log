@@ -1,0 +1,15 @@
+Selected story/work item: `US-003 TARA order draft`; lane: normal.
+
+Implemented one bounded pure-domain slice:
+- Added `createStudentTaraOrderEntrySnapshot` for the already-scoped viewer fund in `app/domain/tara/order.ts:126`.
+- Trimmed returned TARA draft fund IDs in `app/domain/tara/order.ts:75`.
+- Added unit coverage for fund-id trimming, snapshot creation, payload exclusions, scope validation, and invalid draft inputs in `app/domain/tara/order.test.ts:102`.
+- Updated product/story/test-matrix evidence in `docs/stories/US-003-tara-order-draft.md:13` and `docs/TEST_MATRIX.md:24`.
+
+Validation run:
+- `npm run typecheck` — passed.
+- `npm run validate:quick` — passed: 20 test files, 161 tests.
+
+Not attempted:
+- No UI, server actions, API routes, auth/RLS, database, persistence, worker, realtime, CI, commit, push, or PR.
+- Existing unrelated uncommitted/untracked repository changes were left untouched.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROUNDS="${1:-10}"
+ROUNDS="${1:-30}"
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${LOG_DIR:-${ROOT_DIR}/.claude/sprint-runs}"

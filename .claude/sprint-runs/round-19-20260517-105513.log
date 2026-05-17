@@ -1,0 +1,22 @@
+Selected story/work item: **US-029 TARA risk register evidence snapshot**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+- Added `createTaraRiskRegisterEvidenceSnapshot` in `app/domain/tara/risk-register.ts:57`.
+- Added unit coverage in `app/domain/tara/risk-register.test.ts`.
+- Added story packet `docs/stories/US-029-tara-risk-register-evidence-snapshot.md:1`.
+- Updated product/docs evidence in:
+  - `docs/product/simulation-engine.md:66`
+  - `docs/product/data-model.md`
+  - `docs/product/user-surfaces.md`
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md:25`
+  - `README.md`
+  - `CLAUDE.md`
+
+Validation run:
+- `npm run validate:quick` — passed.
+- Result: **21 test files passed, 169 tests passed**.
+
+Not attempted:
+- No UI, auth, database, RLS, server actions, worker, provider, order execution, ledger persistence, CI, commit, push, or PR.

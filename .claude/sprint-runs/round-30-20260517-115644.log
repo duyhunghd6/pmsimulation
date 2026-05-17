@@ -1,0 +1,16 @@
+Selected `US-027 MVP Scenario Catalog`, lane `normal`.
+
+Changed:
+- Extended the pure-domain MVP scenario catalog to a full 12-month deterministic curriculum calendar: `app/domain/scenario/catalog.ts:19`.
+- Updated catalog tests to require paired 12-month macro/market coverage and no invented month after month 11: `app/domain/scenario/catalog.test.ts:15`.
+- Updated product/story/test evidence:
+  - `docs/product/simulation-engine.md:13`
+  - `docs/product/data-model.md:58`
+  - `docs/stories/US-027-mvp-scenario-catalog.md:13`
+  - `docs/TEST_MATRIX.md:33`
+
+Validation:
+- `npm run validate:quick` passed: 23 test files, 191 tests.
+
+Not attempted:
+- No UI, Next.js app shell, persistence, Supabase/Auth/RLS, worker, realtime provider, CI, deployment, commit, push, or PR.

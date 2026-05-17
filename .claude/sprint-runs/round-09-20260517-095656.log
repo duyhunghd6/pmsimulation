@@ -1,0 +1,22 @@
+Selected story/work item: **US-020 Month advance worker job envelope**  
+Lane: **normal** — bounded pure-domain execution-engine slice; no provider/database/UI/auth/platform implementation.
+
+Implemented:
+- Added `MonthAdvanceWorkerJob` and `createMonthAdvanceWorkerJob()` in `app/domain/classes/month-advancement.ts:115`.
+- Added unit coverage for manual/live and auto metadata preservation in `app/domain/classes/month-advancement.test.ts:114`.
+- Added story packet `docs/stories/US-020-month-advance-worker-job-envelope.md:1`.
+- Updated product contracts:
+  - `docs/product/runtime-architecture.md:28`
+  - `docs/product/simulation-engine.md:95`
+- Updated backlog and test matrix:
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md:39`
+- Updated repository status summaries in `README.md` and `CLAUDE.md`.
+
+Validation:
+- `npm run validate:quick` passed.
+- 13 test files passed; 106 tests passed.
+
+Not attempted:
+- No cron, worker provider, Supabase, QStash/Inngest, database, auth/RLS, UI, API routes, CI, deployment, or realtime provider implementation.
+- No commit, push, or PR created.

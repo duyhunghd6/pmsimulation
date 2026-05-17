@@ -1,0 +1,16 @@
+Selected story/work item: `US-013 Instructor live month advance request`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorLiveMonthAdvanceRequest` in `app/domain/classes/month-advancement.ts:41`.
+- Added unit coverage in `app/domain/classes/month-advancement.test.ts`.
+- Created story packet and evidence at `docs/stories/US-013-instructor-live-month-advance-request.md:1`.
+- Updated product/test docs, including `docs/TEST_MATRIX.md:36`.
+
+Validation run:
+- `npm run validate:quick` passed.
+- Result: 13 test files, 76 tests passed.
+
+Not attempted:
+- No UI, API routes, server actions, auth/RLS, database, worker, cron, realtime, order execution, ledger writes, commit, push, or PR.
+- Existing unrelated dirty/untracked files from before this sprint remain present, including sprint logs and `scripts/run-claude-sprints.sh`.

@@ -1,0 +1,14 @@
+Selected story/work item: **US-022 Instructor live leaderboard snapshot**. Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added instructor live leaderboard snapshot creation in `app/domain/classes/live-leaderboard.ts`.
+- Added unit coverage in `app/domain/classes/live-leaderboard.test.ts`.
+- Added story packet `docs/stories/US-022-instructor-live-leaderboard-snapshot.md`.
+- Updated relevant product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md`.
+
+Validation:
+- `npm run validate:quick` passed: **15 test files, 121 tests**.
+
+Not attempted:
+- No UI, auth/RLS, database/Drizzle, Supabase, API routes, worker, realtime provider, CI, commit, push, or PR.
+- Existing unrelated worktree modifications/untracked sprint files were left in place.

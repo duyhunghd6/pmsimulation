@@ -1,0 +1,28 @@
+Selected sprint: **US-033 Instructor Dashboard Current-Turn Snapshot**  
+Lane: **normal** — pure-domain composition slice with bounded code impact, no platform/provider/auth/database scaffolding.
+
+Implemented:
+- Added `app/domain/classes/dashboard-snapshot.ts`
+  - Composes instructor pending-order visibility, live leaderboard, God Mode portfolio visibility, aggregate analytics, and live month-advance control.
+  - Reuses derived pending/missing order status across sections.
+  - Returns source-tagged child errors.
+- Added `app/domain/classes/dashboard-snapshot.test.ts`
+  - Covers composition, trimming, anti-leakage boundaries, and error propagation.
+
+Updated docs:
+- `docs/stories/US-033-instructor-dashboard-current-turn-snapshot.md`
+- `docs/TEST_MATRIX.md`
+- `docs/stories/backlog.md`
+- `docs/product/user-surfaces.md`
+- `docs/product/roles-and-permissions.md`
+- `docs/product/data-model.md`
+- `docs/product/runtime-architecture.md`
+- `README.md`
+- `CLAUDE.md`
+
+Validation:
+- `npm run validate:quick` passed.
+- 23 test files passed, 184 tests passed.
+
+Not attempted:
+- No UI, server actions, auth/RLS, database/Drizzle, Supabase clients, realtime publication/subscription, worker, cron, CI, deployment, commit, push, or PR.

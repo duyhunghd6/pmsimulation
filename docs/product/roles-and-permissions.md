@@ -12,7 +12,9 @@ Allowed capabilities:
 - View current and past macro news available to the class.
 - View their own holdings, AUM, Sharpe ratio, allocation drift, and attribution reports.
 - Submit TARA rebalancing orders for the current month.
-- View their leaderboard rank and class leaderboard summary.
+- View a TARA order-entry snapshot for their own fund with current allocation, target allocation, pending draft status, and tax-drag preview.
+- View their leaderboard rank and permitted class leaderboard metrics without exact holdings or pending-order details for other students.
+- View a post-turn dashboard snapshot that combines their own attribution report with permitted leaderboard-rank metrics.
 
 Forbidden capabilities:
 
@@ -32,6 +34,9 @@ Allowed capabilities:
 - View all student portfolios in God Mode for their classes.
 - View pending-order status for students in their classes.
 - View class-wide aggregate analytics.
+- View live class leaderboard rows with fund AUM, Sharpe ratio, and pending-order status.
+- View live month-advance control status for instructor-scoped classes.
+- View a current-turn instructor dashboard snapshot for an already-scoped class, including pending-order visibility, live leaderboard, God Mode portfolio visibility, aggregate analytics, and live month-advance control sections.
 - Trigger live month advancement.
 - Configure whether a class uses auto or manual trigger mode.
 
@@ -47,6 +52,7 @@ Forbidden capabilities:
 - Future scenario data must remain server-side.
 - Other students' exact holdings must not be sent to the student browser.
 - Instructor God Mode is privileged and must be separated from student query paths.
+- God Mode portfolio visibility may include exact current holdings only after an instructor-scoped class boundary has already been enforced.
 - Row Level Security policies are part of the product contract when Supabase is introduced.
 
 ## Authorization Proof Expectations

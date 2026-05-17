@@ -1,0 +1,15 @@
+Selected story/work item: `US-025 Student leaderboard rank snapshot`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added `createStudentLeaderboardRankSnapshot` in `app/domain/student/leaderboard-rank.ts:53`.
+- Added unit coverage in `app/domain/student/leaderboard-rank.test.ts:1`.
+- Created story packet `docs/stories/US-025-student-leaderboard-rank-snapshot.md:1`.
+- Updated relevant product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run validate:quick` — passed, 18 test files and 143 tests.
+
+Not attempted:
+- No UI, server actions, auth/RLS, database, Supabase, realtime, worker, cron, CI, commit, push, or PR.
+- Existing unrelated modified/untracked files were left as-is.

@@ -1,0 +1,18 @@
+Selected story/work item: `US-035 Supabase Realtime subscription descriptor`  
+Lane: `normal`
+
+Implemented one bounded slice:
+- Added `SupabaseRealtimeSubscriptionDescriptor` and `createSupabaseRealtimeSubscriptionDescriptor` in `app/domain/classes/month-advancement.ts:304` and `app/domain/classes/month-advancement.ts:406`.
+- Added unit tests for descriptor creation and refresh-only payload boundaries in `app/domain/classes/month-advancement.test.ts:447`.
+- Added story packet `docs/stories/US-035-supabase-realtime-subscription-descriptor.md:1`.
+- Updated product docs, backlog, README/CLAUDE status text, and `docs/TEST_MATRIX.md:58`.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: 23 test files passed, 189 tests passed.
+
+Not attempted:
+- No Supabase SDK/client code.
+- No actual realtime subscription or publication.
+- No UI refetch implementation.
+- No auth/RLS, database, worker, cron, platform, commit, push, or PR.

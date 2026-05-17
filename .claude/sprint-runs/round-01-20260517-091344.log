@@ -1,0 +1,16 @@
+Selected story/work item: **US-012 Instructor Class Draft and Join Link**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorClassDraft` for instructor class draft validation and join path creation: `app/domain/classes/class-draft.ts:40`
+- Added unit coverage for valid manual/auto drafts, trimming, and invalid inputs: `app/domain/classes/class-draft.test.ts:22`
+- Added the story packet and evidence: `docs/stories/US-012-instructor-class-draft-and-join-link.md:1`
+- Updated class data-model fields/rules for display name, join code, and initial month: `docs/product/data-model.md:13`
+- Updated backlog and matrix evidence: `docs/stories/backlog.md:30`, `docs/TEST_MATRIX.md:35`
+
+Validation:
+- `npm run validate:quick` passed: **12 test files, 68 tests**
+
+Not attempted:
+- No auth, RLS, Supabase, Drizzle, persistence, API routes, UI, worker, realtime, cron, join-code generation, commit, push, or PR.
+- Pre-existing working tree changes remain untouched: `scripts/run-claude-sprints.sh` and `.claude/sprint-runs/round-01-20260517-091344.log`.

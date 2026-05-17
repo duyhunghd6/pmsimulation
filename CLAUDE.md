@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-This repository has started minimal pure TypeScript domain slices for TARA allocation rules, tracked metrics, current-turn scenario projections, portfolio pyramid snapshots, Asset DNA seeds, and asset-tier return calculations. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime implementation.
+This repository has started minimal pure TypeScript domain slices for TARA allocation rules, TARA risk register evidence snapshots, tracked metrics, current-turn scenario projections, an MVP scenario catalog, portfolio pyramid snapshots, Asset DNA seeds, asset-tier return calculations, student leaderboard rank snapshots, student attribution report snapshots, student TARA order-entry snapshots, student dashboard current-turn snapshots, student dashboard post-turn snapshots, instructor class drafts, instructor pending-order visibility snapshots, instructor live leaderboard snapshots, instructor class aggregate analytics snapshots, instructor God Mode portfolio visibility snapshots, instructor dashboard current-turn snapshots, instructor live month-advance control snapshots, instructor live/auto advancement requests, shared month-advance processing requests, provider-neutral month-advance worker job envelopes, per-fund month processing results, class-month processing results, aggregate turn-completion events, realtime refresh signals, provider-neutral realtime publication envelopes, Supabase Realtime publication descriptors, Supabase Realtime subscription descriptors, and realtime authorized current-turn refetch descriptors. There is still no Next.js app, UI, database, auth, CI, migrations, deployment automation, worker, or realtime provider implementation.
 
 Accepted specification sources:
 
@@ -62,7 +62,7 @@ The simulation engine is deterministic and curriculum-driven:
 When implementing, keep these epics aligned with the PRD:
 
 1. **Student dashboard**: macro news, current metrics, pyramid/funnel allocation visualizer, TARA order entry, attribution reports.
-2. **Instructor management**: class creation, join links, live leaderboard, pending-order visibility, manual turn advancement.
+2. **Instructor management**: class creation, join links, live leaderboard, pending-order visibility, God Mode portfolio visibility, aggregate analytics, manual turn advancement.
 3. **Dual-trigger execution engine**: cron-based auto mode and instructor-triggered live mode, both feeding a background worker and realtime client refresh.
 
 ## Data model blueprint

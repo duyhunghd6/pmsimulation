@@ -1,0 +1,13 @@
+Selected story/work item: **US-032 Student dashboard current-turn snapshot**. Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added `buildStudentDashboardCurrentTurnSnapshot` at `app/domain/student/dashboard-snapshot.ts:63`.
+- Added unit coverage for composition, anti-leakage boundaries, and source-tagged child errors at `app/domain/student/dashboard-snapshot.test.ts:97`.
+- Added story packet `docs/stories/US-032-student-dashboard-current-turn-snapshot.md`.
+- Updated product/status evidence in `docs/product/user-surfaces.md:17` and `docs/TEST_MATRIX.md:38`, plus backlog/status docs.
+
+Validation run:
+- `npm run validate:quick` — passed: **22 test files**, **179 tests**.
+
+Not attempted:
+- No UI, Next.js app, server actions, auth/RLS, database, Supabase client, realtime subscriptions, worker, cron, CI, commit, push, or PR.

@@ -1,0 +1,23 @@
+Selected story/work item: **US-038 Data, auth, and tenancy foundation**.  
+Lane: **high-risk** due to auth, authorization, data model, audit/security, external Supabase behavior, weak proof, and multi-domain scope.
+
+Changed:
+- Added high-risk story packet:
+  - `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:31`
+  - `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:46`
+  - `docs/stories/US-038-data-auth-tenancy-foundation/design.md`
+  - `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:33`
+- Updated E00 backlog status and blocker reference:
+  - `docs/stories/backlog.md:11`
+  - `docs/stories/backlog.md:19`
+- Updated test matrix with E00/US-038 proof status:
+  - `docs/TEST_MATRIX.md:28`
+  - `docs/TEST_MATRIX.md:29`
+
+Validation:
+- `npm run validate:quick` passed.
+- 23 test files passed, 191 tests passed.
+
+Not attempted:
+- No auth, database, Supabase, RLS, server runtime, UI, worker, realtime provider code, commits, pushes, or PRs.
+- Implementation is documented as blocked until role/session, schema/RLS, runtime, and integration proof boundaries are confirmed.

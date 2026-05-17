@@ -1,0 +1,19 @@
+Selected story/work item: **US-021 Instructor Pending-Order Visibility Snapshot**. Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorPendingOrderVisibilitySnapshot` in `app/domain/classes/pending-order-visibility.ts:51`.
+- Added unit coverage in `app/domain/classes/pending-order-visibility.test.ts:22`.
+- Added story packet `docs/stories/US-021-instructor-pending-order-visibility-snapshot.md:1`.
+- Updated product/status docs and test matrix:
+  - `docs/product/user-surfaces.md`
+  - `docs/product/data-model.md`
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md`
+  - `README.md`
+  - `CLAUDE.md`
+
+Validation run:
+- `npm run validate:quick` — passed: **14 test files, 113 tests**.
+
+Not attempted:
+- No UI, auth, database, Supabase/RLS, API routes, server actions, realtime provider, worker, cron, order persistence, or PR/commit.

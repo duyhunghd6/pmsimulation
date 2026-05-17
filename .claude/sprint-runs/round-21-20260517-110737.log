@@ -1,0 +1,19 @@
+Selected story/work item: `US-031 Supabase Realtime Publication Descriptor`  
+Lane: normal
+
+Implemented one bounded slice:
+- Added `SupabaseRealtimePublicationDescriptor` and `createSupabaseRealtimePublicationDescriptor` in `app/domain/classes/month-advancement.ts:293`.
+- Added unit coverage in `app/domain/classes/month-advancement.test.ts:377`.
+- Created story packet `docs/stories/US-031-supabase-realtime-publication-descriptor.md:1`.
+- Updated backlog and proof matrix at `docs/stories/backlog.md:38` and `docs/TEST_MATRIX.md:54`.
+- Updated relevant product docs plus `README.md` / `CLAUDE.md` status text.
+
+Validation:
+- `npm run validate:quick` passed.
+- 21 test files passed, 176 tests passed.
+
+Not attempted:
+- No Supabase SDK/client publication.
+- No subscriptions, auth/RLS, UI, server actions, database, worker, cron, deployment, commit, push, or PR.
+
+Note: the working tree still contains pre-existing modified/untracked files from earlier sprint work.

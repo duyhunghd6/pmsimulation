@@ -10,6 +10,8 @@ The engine advances by monthly turns. Each turn reads a scripted macro narrative
 
 Macro data comes from a pre-scripted scenario array.
 
+The MVP pure-domain scenario catalog defines paired macro narrative and market metric rows for the full 12-month MVP curriculum calendar, including rate-hike stress turns where CPI crosses `3.0%`, policy rate rises by `0.50%`, and VIX rises. Student-facing reveal helpers may return only current and past rows for the selected month.
+
 Indicator timing:
 
 - Leading indicators: `PMI`, `IIP`, `M2 Growth`.
@@ -61,6 +63,8 @@ The engine must track the curriculum metric set needed for Asset Pyramid, Driver
 
 Tracked metric records must identify whether the source is seeded, computed, student-entered, or rubric-scored. Advanced risk/performance metrics must retain benchmark, return frequency, lookback window, annualization convention, risk-free proxy, and raw-vs-adjusted price convention.
 
+The MVP pure-domain TARA risk register evidence snapshot records probability, impact, direction, time lag, treatment class, matrix label, and treatment action for one already-scoped fund month before future rubric scoring, persistence, UI, or order execution exists.
+
 ## Rebalancing Friction
 
 The engine penalizes naive or crowded rebalancing.
@@ -81,14 +85,38 @@ Student target allocations must total exactly `100.0%` before submission.
 
 Future implementation should validate the allocation at both the client boundary and the server boundary. Client validation improves usability; server validation is the authoritative guard.
 
+The MVP pure-domain student order-entry snapshot reuses the pending draft and tax-drag preview rules for one already-scoped viewer fund before UI, server actions, persistence, or order execution exists.
+
 ## Processing Requirements
 
 Month advancement must be safe from either trigger path:
 
 - Auto mode via scheduled cron.
-- Live mode via instructor action.
+- Live mode via instructor action on manually paced classes.
 
-Processing must be idempotent so duplicate trigger attempts do not double-apply returns, taxes, slippage, or ledger rows.
+Processing must be idempotent so duplicate trigger attempts do not double-apply returns, taxes, slippage, or ledger rows. Advancement requests should carry a deterministic class/month idempotency key before entering the shared processing path.
+
+The MVP pure-domain live month-advance control snapshot reports whether a manual class can currently fast-forward, disables auto-mode or completed classes, and exposes the deterministic request idempotency key only when advancement is available.
+
+The MVP pure-domain shared processing request validates that live and auto trigger inputs advance exactly one month, pair with the correct trigger mode, and preserve the deterministic class/month idempotency key before future worker, order-execution, or ledger persistence code exists.
+
+The MVP pure-domain worker job envelope derives from the shared processing request, preserves the same trigger and class/month idempotency metadata, and excludes fund-level inputs before future Inngest, QStash, or other worker-provider code exists.
+
+The MVP pure-domain per-fund processing result combines a shared processing request with one fund's attribution inputs, preserves trigger metadata, creates a deterministic fund-level processing key, and emits a ledger draft before future worker, order-execution, or ledger persistence code exists.
+
+The MVP pure-domain class-month processing result combines a shared processing request with multiple fund attribution inputs, preserves the same shared trigger metadata, rejects duplicate fund ids in one batch, emits per-fund ledger drafts, and summarizes class-level AUM and cost totals before future worker, order-execution, or ledger persistence code exists.
+
+The MVP pure-domain turn-completion event derives from a completed class-month processing result, preserves shared trigger metadata and aggregate class-level totals, and excludes per-fund ledger drafts before future realtime publication code exists.
+
+The MVP pure-domain realtime refresh signal derives from the turn-completion event and carries only class/month refresh metadata plus dedupe keys before future Supabase Realtime publication or client subscription code exists.
+
+The MVP pure-domain realtime publication envelope derives from the refresh signal and adds provider-neutral class-channel, event, audience, delivery, and publication-key metadata without introducing Supabase Realtime, client subscriptions, provider clients, or gameplay data in the publication payload.
+
+The MVP pure-domain Supabase Realtime publication descriptor derives from that provider-neutral envelope and records the future broadcast boundary metadata without introducing Supabase clients, subscriptions, auth, RLS, platform publication, or gameplay data in the descriptor payload.
+
+The MVP pure-domain Supabase Realtime subscription descriptor derives from that broadcast descriptor and records the future client subscription boundary metadata without introducing Supabase clients, auth, RLS, UI refetch code, platform publication, or gameplay data in the descriptor payload.
+
+The MVP pure-domain realtime authorized current-turn refetch descriptor derives from that subscription descriptor and records the future client refetch plan for authorized current-turn surfaces without introducing Supabase clients, auth, RLS, server queries, UI refetch execution, platform subscription, or gameplay data in the descriptor payload.
 
 ## Attribution Requirements
 
@@ -104,3 +132,5 @@ Post-turn results must explain AUM changes by source, including at least:
 - Ending AUM.
 
 The MVP pure-domain attribution summary calculates ending AUM as starting AUM plus market beta impact minus fee drag, tax paid, and PvP slippage paid.
+
+The MVP pure-domain student attribution report snapshot exposes those post-turn attribution categories only for an already-scoped viewer fund ledger draft. The MVP pure-domain student post-turn dashboard snapshot composes that report with the permitted leaderboard-rank view for one processed class month without exposing order details, holdings, other-fund ids, database rows, provider payloads, or future scenario rows.
