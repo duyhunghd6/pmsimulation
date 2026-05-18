@@ -3,20 +3,31 @@
 import { redirect } from 'next/navigation';
 
 import {
+  createInstructorLiveMonthAdvanceRequest,
+  createInstructorLiveMonthAdvanceServerActionCommandDescriptor,
+  createInstructorLiveMonthAdvanceServerActionResultEnvelope,
+  createInstructorLiveMonthAdvanceServerActionValidationFailureEnvelope,
+} from '../../../domain/classes/month-advancement';
+import {
   executeInstructorClassCreationAction,
   type InstructorClassCreationActionStore,
 } from '../../../infrastructure/auth-tenancy/instructor-class-creation-action';
 import { readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
 
-function dashboardStatusUrl(status: string, params: Record<string, string> = {}): string {
+function classCreationStatusUrl(status: string, params: Record<string, string> = {}): string {
   const searchParams = new URLSearchParams({ classCreationStatus: status, ...params });
+  return `/instructor/dashboard?${searchParams.toString()}`;
+}
+
+function liveMonthAdvanceStatusUrl(status: string, params: Record<string, string> = {}): string {
+  const searchParams = new URLSearchParams({ liveMonthAdvanceStatus: status, ...params });
   return `/instructor/dashboard?${searchParams.toString()}`;
 }
 
 export async function createInstructorClass(formData: FormData): Promise<void> {
   const routeSession = await readAuthTenancyRouteSession();
   if (!routeSession.ok || routeSession.session.role !== 'instructor') {
-    redirect(dashboardStatusUrl('not-authorized'));
+    redirect(classCreationStatusUrl('not-authorized'));
   }
 
   const result = await executeInstructorClassCreationAction({
@@ -32,21 +43,63 @@ export async function createInstructorClass(formData: FormData): Promise<void> {
   if (!result.ok) {
     if (result.failure.code === 'invalid_draft') {
       redirect(
-        dashboardStatusUrl('validation-error', {
+        classCreationStatusUrl('validation-error', {
           errors: result.failure.validationErrors?.map((error) => error.code).join(',') ?? 'invalid_draft',
         }),
       );
     }
 
-    redirect(dashboardStatusUrl('failed', { reason: result.failure.code }));
+    redirect(classCreationStatusUrl('failed', { reason: result.failure.code }));
   }
 
   redirect(
-    dashboardStatusUrl('created', {
+    classCreationStatusUrl('created', {
       joinCode: result.value.receipt.joinCode,
       triggerMode: result.value.receipt.triggerMode,
     }),
   );
+}
+
+export async function advanceInstructorLiveMonth(formData: FormData): Promise<void> {
+  const routeSession = await readAuthTenancyRouteSession();
+  if (!routeSession.ok || routeSession.session.role !== 'instructor') {
+    redirect(liveMonthAdvanceStatusUrl('not-authorized'));
+  }
+
+  const input = {
+    classId: String(formData.get('classId') ?? ''),
+    instructorId: routeSession.session.subjectId,
+    triggerMode: String(formData.get('triggerMode') ?? ''),
+    currentMonthIndex: parseFormInteger(formData.get('currentMonthIndex')),
+    totalMonths: parseFormInteger(formData.get('totalMonths')),
+  };
+  const requestResult = createInstructorLiveMonthAdvanceRequest(input);
+
+  if (!requestResult.ok) {
+    const failureEnvelope = createInstructorLiveMonthAdvanceServerActionValidationFailureEnvelope(input);
+    redirect(
+      liveMonthAdvanceStatusUrl('validation-error', {
+        errors: failureEnvelope.ok
+          ? failureEnvelope.value.validationErrors.map((error) => error.code).join(',')
+          : requestResult.errors.map((error) => error.code).join(','),
+      }),
+    );
+  }
+
+  const command = createInstructorLiveMonthAdvanceServerActionCommandDescriptor(requestResult.value);
+  const result = createInstructorLiveMonthAdvanceServerActionResultEnvelope(command);
+
+  redirect(
+    liveMonthAdvanceStatusUrl('accepted', {
+      advancementKey: result.receipt.advancementKey,
+      currentMonth: String(result.receipt.currentMonthIndex + 1),
+      nextMonth: String(result.receipt.nextMonthIndex + 1),
+    }),
+  );
+}
+
+function parseFormInteger(value: FormDataEntryValue | null): number {
+  return Number.parseInt(String(value ?? ''), 10);
 }
 
 function createBoundedInstructorClassCreationStore(): InstructorClassCreationActionStore {

@@ -1,0 +1,29 @@
+Selected sprint: Full-Stack MVP Sprint Sequence item 5 — Student TARA order submission.  
+Story/work item: US-085 Student TARA order form UI.  
+Lane: normal.  
+Work type: browser-visible UI.
+
+Implemented the protected `/dashboard` TARA order form UI over the existing bounded student TARA order submission executor:
+
+- Added reachable student form wiring in `app/(student)/dashboard/page.tsx:169`.
+- Added server action `submitStudentTaraOrder` in `app/(student)/dashboard/actions.ts:21`.
+- Added loading submit button in `app/(student)/dashboard/submit-tara-order-button.tsx:5`.
+- Added safe empty, loading, accepted, validation-error, authorization-error, and bounded failure states.
+- Kept live Supabase writes, worker dispatch, realtime publication, and processed order execution out of scope.
+
+Updated evidence/docs:
+
+- Added `docs/stories/US-085-student-tara-order-form-ui.md`.
+- Updated `docs/TEST_MATRIX.md` with US-085 proof.
+- Refreshed product/runtime/story/backlog status docs and stale `CLAUDE.md`/README/AGENTS wording from “no browser order form” to “no live provider-backed browser order form.”
+
+Validation run:
+
+- `npm run typecheck` — passed.
+- `npm run validate:quick` — passed with 39 test files and 468 tests.
+- `npm run build` — passed.
+- `/dashboard` dev-server HTTP smoke — passed with HTTP 200 on the existing Next dev server at port 3000.
+
+One route-smoke attempt failed because `status` is a read-only zsh variable; reran with `http_status`. A second attempt found an existing Next dev server already running for this repo, so I smoked that server instead of killing it.
+
+Not attempted for this selected slice: live Supabase order writes, durable provider persistence, worker dispatch, realtime publication, processed order execution, provider-backed browser E2E, CI, deployment, or PR/commit creation.

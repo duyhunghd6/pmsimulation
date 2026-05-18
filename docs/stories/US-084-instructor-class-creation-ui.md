@@ -57,4 +57,6 @@ No harness changes were needed beyond updating story and matrix evidence.
 
 ## Evidence
 
-- Pending validation in this sprint.
+- `npm run validate:quick` — passed with 39 test files and 468 tests.
+- `npm run build` — passed and rendered `/instructor/dashboard` as a dynamic server route.
+- Existing dev server smoke for `/instructor/dashboard` returned HTTP 200 with the safe auth-configuration fallback: public Supabase auth environment values are not configured, so authenticated browser form proof remains pending.

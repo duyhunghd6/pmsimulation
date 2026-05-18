@@ -11,3 +11,13 @@ export function CreateClassSubmitButton() {
     </button>
   );
 }
+
+export function AdvanceMonthSubmitButton({ canAdvance }: Readonly<{ canAdvance: boolean }>) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button className="button" disabled={pending || !canAdvance} type="submit">
+      {pending ? 'Accepting live advance...' : 'Accept live month advance'}
+    </button>
+  );
+}

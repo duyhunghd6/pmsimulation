@@ -1,0 +1,14 @@
+Selected Full-Stack MVP Sprint Sequence item 6, US-084 Instructor class creation UI, normal lane, browser-visible UI.
+
+Implemented the protected instructor class creation surface:
+- Added the `/instructor/dashboard` class creation panel with class name, join code, trigger mode, empty/success/error states at `app/(instructor)/instructor/dashboard/page.tsx:113`.
+- Wired the form to the bounded server action executor via `createInstructorClass` at `app/(instructor)/instructor/dashboard/actions.ts:16`.
+- Added the pending/loading submit state at `app/(instructor)/instructor/dashboard/create-class-submit-button.tsx:5`.
+- Updated US-084 evidence and `docs/TEST_MATRIX.md`.
+
+Validation:
+- `npm run validate:quick` passed: 39 files, 468 tests.
+- `npm run build` passed.
+- `/instructor/dashboard` local route smoke passed with HTTP 200 safe auth-configuration fallback.
+
+Out of scope for this slice: live Supabase class writes, durable class list refresh, roster management, realtime publication, and authenticated provider-backed browser proof. The exact browser proof blocker is missing public Supabase auth environment configuration for a trusted instructor session. No commit, push, or PR was created.

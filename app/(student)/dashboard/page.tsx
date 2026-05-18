@@ -3,6 +3,9 @@ import { readAuthTenancyRouteSession } from '../../infrastructure/auth-tenancy/s
 import type { AuthTenancySession } from '../../infrastructure/auth-tenancy/session';
 import type { StudentDashboardCurrentTurnQueryRowReader } from '../../infrastructure/auth-tenancy/student-dashboard-current-turn-query';
 
+import { submitStudentTaraOrder } from './actions';
+import { SubmitTaraOrderButton } from './submit-tara-order-button';
+
 const classId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const fundId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const currentMonthIndex = 2;
@@ -22,7 +25,13 @@ const formatPercent = new Intl.NumberFormat('en-US', {
   style: 'percent',
 });
 
-export default async function StudentDashboardShellPage() {
+type StudentDashboardShellPageProps = Readonly<{
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}>;
+
+export default async function StudentDashboardShellPage({ searchParams }: StudentDashboardShellPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const orderSubmissionNotice = createOrderSubmissionNotice(params);
   const routeSession = await readAuthTenancyRouteSession();
 
   if (!routeSession.ok || routeSession.session.role !== 'student') {
@@ -150,14 +159,53 @@ export default async function StudentDashboardShellPage() {
             <strong>{orderEntry.status}</strong>
           </div>
           <dl className="metric-grid compact">
-            {Object.entries(orderEntry.targetWeights).map(([tier, weight]) => (
-              <MetricTile key={tier} label={`${tier} target`} value={`${formatNumber.format(weight)}%`} />
+            {Object.entries(orderEntry.currentWeights).map(([tier, weight]) => (
+              <MetricTile key={tier} label={`${tier} current`} value={`${formatNumber.format(weight)}%`} />
             ))}
             <MetricTile label="Apex reduction" value={`${formatNumber.format(orderEntry.estimatedTaxDrag.apexReductionWeightPct)} pts`} />
             <MetricTile label="Estimated tax" value={formatCurrency.format(orderEntry.estimatedTaxDrag.estimatedTaxPaid)} />
             <MetricTile label="Tax drag" value={formatPercent.format(orderEntry.estimatedTaxDrag.taxDragPct / 100)} />
           </dl>
-          <p className="route-banner">Order submission remains out of scope; this slice renders the safe current-turn entry state only.</p>
+          <form action={submitStudentTaraOrder} className="form-stack">
+            <label htmlFor="baseTarget">Base target (%)</label>
+            <input
+              defaultValue={orderEntry.targetWeights.Base}
+              id="baseTarget"
+              max="100"
+              min="0"
+              name="baseTarget"
+              required
+              step="0.1"
+              type="number"
+            />
+
+            <label htmlFor="coreTarget">Core target (%)</label>
+            <input
+              defaultValue={orderEntry.targetWeights.Core}
+              id="coreTarget"
+              max="100"
+              min="0"
+              name="coreTarget"
+              required
+              step="0.1"
+              type="number"
+            />
+
+            <label htmlFor="apexTarget">Apex target (%)</label>
+            <input
+              defaultValue={orderEntry.targetWeights.Apex}
+              id="apexTarget"
+              max="100"
+              min="0"
+              name="apexTarget"
+              required
+              step="0.1"
+              type="number"
+            />
+
+            <SubmitTaraOrderButton />
+          </form>
+          <OrderSubmissionNotice notice={orderSubmissionNotice} />
         </article>
 
         <article className="terminal-panel wide">
@@ -189,6 +237,71 @@ export default async function StudentDashboardShellPage() {
       </section>
     </main>
   );
+}
+
+type OrderSubmissionNoticeState =
+  | { status: 'empty' }
+  | { status: 'accepted'; base: string; core: string; apex: string; taxDragPct: string }
+  | { status: 'validation-error'; errors: string }
+  | { status: 'not-authorized' }
+  | { status: 'failed'; reason: string };
+
+function createOrderSubmissionNotice(params: Record<string, string | string[] | undefined>): OrderSubmissionNoticeState {
+  const status = firstSearchParam(params.orderSubmissionStatus);
+
+  if (status === 'accepted') {
+    return {
+      status,
+      base: firstSearchParam(params.base) ?? '0',
+      core: firstSearchParam(params.core) ?? '0',
+      apex: firstSearchParam(params.apex) ?? '0',
+      taxDragPct: firstSearchParam(params.taxDragPct) ?? '0',
+    };
+  }
+
+  if (status === 'validation-error') {
+    return { status, errors: firstSearchParam(params.errors) ?? 'invalid_submission' };
+  }
+
+  if (status === 'not-authorized') {
+    return { status };
+  }
+
+  if (status === 'failed') {
+    return { status, reason: firstSearchParam(params.reason) ?? 'unknown_failure' };
+  }
+
+  return { status: 'empty' };
+}
+
+function OrderSubmissionNotice({ notice }: Readonly<{ notice: OrderSubmissionNoticeState }>) {
+  if (notice.status === 'accepted') {
+    return (
+      <p className="route-banner">
+        TARA order accepted as a student-safe pending receipt: Base {notice.base}%, Core {notice.core}%, Apex {notice.apex}%, tax
+        drag {notice.taxDragPct}%. The browser receipt excludes raw database rows, auth session payloads, worker jobs, and realtime
+        payloads.
+      </p>
+    );
+  }
+
+  if (notice.status === 'validation-error') {
+    return <p className="route-banner danger">TARA submission rejected before persistence: {notice.errors}.</p>;
+  }
+
+  if (notice.status === 'not-authorized') {
+    return <p className="route-banner danger">A trusted student app-role session is required before submitting an order.</p>;
+  }
+
+  if (notice.status === 'failed') {
+    return <p className="route-banner danger">TARA submission stopped at the bounded server action: {notice.reason}.</p>;
+  }
+
+  return <p className="route-banner">No order receipt yet. Target allocations must total exactly 100.0% before submission.</p>;
+}
+
+function firstSearchParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 function MetricTile({ label, value }: Readonly<{ label: string; value: string }>) {
@@ -283,18 +396,7 @@ function createBoundedCurrentTurnRowReader(session: AuthTenancySession): Student
             allocation_weight_pct: '30.00',
           },
         ],
-        orders: [
-          {
-            id: '40000000-0000-4000-8000-000000000001',
-            class_id: classId,
-            fund_id: fundId,
-            month_index: currentMonthIndex,
-            target_weights_json: { Base: 50, Core: 30, Apex: 20 },
-            estimated_tax_drag: '0.20',
-            rebalance_trigger: 'student_tara_submission',
-            status: 'pending',
-          },
-        ],
+        orders: [],
         trackedMetrics: [
           {
             id: '50000000-0000-4000-8000-000000000001',

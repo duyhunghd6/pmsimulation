@@ -10,6 +10,7 @@ import {
   executeInstructorClassAggregateAnalyticsQuery,
   type InstructorClassAggregateAnalyticsQueryRowReader,
 } from '../../../infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query';
+import { createInstructorLiveMonthAdvanceControlSnapshot } from '../../../domain/classes/month-advancement';
 import {
   executeInstructorGodModePortfolioVisibilityQuery,
   type InstructorGodModePortfolioVisibilityQueryRowReader,
@@ -17,11 +18,13 @@ import {
 import { readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
 import type { AuthTenancySession } from '../../../infrastructure/auth-tenancy/session';
 
-import { createInstructorClass } from './actions';
-import { CreateClassSubmitButton } from './create-class-submit-button';
+import { advanceInstructorLiveMonth, createInstructorClass } from './actions';
+import { AdvanceMonthSubmitButton, CreateClassSubmitButton } from './create-class-submit-button';
 
 const classId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const currentMonthIndex = 2;
+const totalMonths = 12;
+const triggerMode = 'manual';
 
 const formatPercent = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
@@ -35,10 +38,22 @@ type InstructorDashboardShellPageProps = Readonly<{
 export default async function InstructorDashboardShellPage({ searchParams }: InstructorDashboardShellPageProps) {
   const params = searchParams ? await searchParams : {};
   const classCreationNotice = createClassCreationNotice(params);
+  const liveMonthAdvanceNotice = createLiveMonthAdvanceNotice(params);
   const routeSession = await readAuthTenancyRouteSession();
 
   if (!routeSession.ok || routeSession.session.role !== 'instructor') {
     return <InstructorDashboardUnavailable />;
+  }
+
+  const liveMonthAdvanceControlResult = createInstructorLiveMonthAdvanceControlSnapshot({
+    classId,
+    triggerMode,
+    currentMonthIndex,
+    totalMonths,
+  });
+
+  if (!liveMonthAdvanceControlResult.ok) {
+    return <InstructorDashboardQueryFailure failureCode={liveMonthAdvanceControlResult.errors.map((error) => error.code).join(',')} />;
   }
 
   const rowReader = createBoundedInstructorDashboardRowReader(routeSession.session);
@@ -85,6 +100,7 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
   const leaderboard = liveLeaderboardResult.value.snapshot;
   const aggregateAnalytics = aggregateAnalyticsResult.value.snapshot;
   const godMode = godModeResult.value.snapshot;
+  const liveMonthAdvanceControl = liveMonthAdvanceControlResult.value;
   const completionRate = snapshot.totalFundCount === 0 ? 0 : snapshot.pendingOrderCount / snapshot.totalFundCount;
   const missingOrderRate = aggregateAnalytics.fundCount === 0 ? 0 : aggregateAnalytics.missingOrderCount / aggregateAnalytics.fundCount;
 
@@ -95,9 +111,9 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
           <span className="eyebrow">Protected instructor dashboard</span>
           <h1>Class order monitor</h1>
           <p>
-            Current-month status, leaderboard-safe rankings, aggregate analytics, and privileged God Mode holdings for the
-            instructor-scoped class. Per-fund aggregate rows, target weights, estimated tax drag, order details, and provider payloads
-            are not rendered.
+            Current-month status, leaderboard-safe rankings, aggregate analytics, privileged God Mode holdings, and a bounded live
+            month-advance control for the instructor-scoped class. Per-fund aggregate rows, target weights, estimated tax drag, order
+            details, worker jobs, realtime payloads, and provider payloads are not rendered.
           </p>
         </div>
         <dl className="metric-grid compact">
@@ -107,6 +123,10 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
           <MetricTile label="Class AUM" value={formatCurrency(aggregateAnalytics.totalCurrentAum)} />
           <MetricTile label="Ranked funds" value={leaderboard.rankedFundCount.toString()} />
           <MetricTile label="God Mode funds" value={godMode.fundCount.toString()} />
+          <MetricTile
+            label="Live advance"
+            value={liveMonthAdvanceControl.canAdvance ? `M${liveMonthAdvanceControl.nextMonthIndex! + 1}` : 'Disabled'}
+          />
         </dl>
       </section>
 
@@ -145,6 +165,43 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
             <CreateClassSubmitButton />
           </form>
           <ClassCreationNotice notice={classCreationNotice} />
+        </article>
+
+        <article className="terminal-panel wide">
+          <div className="panel-heading">
+            <span className="eyebrow">Manual month advance</span>
+            <strong>
+              {liveMonthAdvanceControl.canAdvance
+                ? `M${liveMonthAdvanceControl.currentMonthIndex + 1} → M${liveMonthAdvanceControl.nextMonthIndex! + 1}`
+                : formatDisabledReason(liveMonthAdvanceControl.disabledReason)}
+            </strong>
+          </div>
+          <p>
+            Accept a live Fast-Forward Month receipt for this instructor-scoped manual class. This stops at the existing safe server-action
+            result envelope; worker enqueueing, ledger writes, realtime publication, and processed order execution remain unwired.
+          </p>
+          <dl className="metric-grid compact">
+            <MetricTile label="Trigger mode" value={liveMonthAdvanceControl.triggerMode} />
+            <MetricTile label="Current month" value={`M${liveMonthAdvanceControl.currentMonthIndex + 1}`} />
+            <MetricTile
+              label="Next month"
+              value={liveMonthAdvanceControl.nextMonthIndex === null ? 'n/a' : `M${liveMonthAdvanceControl.nextMonthIndex + 1}`}
+            />
+            <MetricTile label="Total months" value={liveMonthAdvanceControl.totalMonths.toString()} />
+          </dl>
+          <form action={advanceInstructorLiveMonth} className="form-stack">
+            <input name="classId" type="hidden" value={liveMonthAdvanceControl.classId} />
+            <input name="triggerMode" type="hidden" value={liveMonthAdvanceControl.triggerMode} />
+            <input name="currentMonthIndex" type="hidden" value={liveMonthAdvanceControl.currentMonthIndex} />
+            <input name="totalMonths" type="hidden" value={liveMonthAdvanceControl.totalMonths} />
+            <AdvanceMonthSubmitButton canAdvance={liveMonthAdvanceControl.canAdvance} />
+          </form>
+          {!liveMonthAdvanceControl.canAdvance ? (
+            <p className="route-banner danger">
+              Live month advancement is disabled for this class: {formatDisabledReason(liveMonthAdvanceControl.disabledReason)}.
+            </p>
+          ) : null}
+          <LiveMonthAdvanceNotice notice={liveMonthAdvanceNotice} />
         </article>
 
         <article className="terminal-panel">
@@ -326,6 +383,77 @@ function ClassCreationNotice({ notice }: Readonly<{ notice: ClassCreationNoticeS
   }
 
   return <p className="route-banner">No class creation receipt yet. Submit a draft to create the first browser-visible receipt.</p>;
+}
+
+type LiveMonthAdvanceNoticeState =
+  | { status: 'empty' }
+  | { status: 'accepted'; advancementKey: string; currentMonth: string; nextMonth: string }
+  | { status: 'validation-error'; errors: string }
+  | { status: 'not-authorized' }
+  | { status: 'failed'; reason: string };
+
+function createLiveMonthAdvanceNotice(params: Record<string, string | string[] | undefined>): LiveMonthAdvanceNoticeState {
+  const status = firstSearchParam(params.liveMonthAdvanceStatus);
+
+  if (status === 'accepted') {
+    return {
+      status,
+      advancementKey: firstSearchParam(params.advancementKey) ?? 'pending',
+      currentMonth: firstSearchParam(params.currentMonth) ?? 'current',
+      nextMonth: firstSearchParam(params.nextMonth) ?? 'next',
+    };
+  }
+
+  if (status === 'validation-error') {
+    return { status, errors: firstSearchParam(params.errors) ?? 'invalid_live_month_advance' };
+  }
+
+  if (status === 'not-authorized') {
+    return { status };
+  }
+
+  if (status === 'failed') {
+    return { status, reason: firstSearchParam(params.reason) ?? 'unknown_failure' };
+  }
+
+  return { status: 'empty' };
+}
+
+function LiveMonthAdvanceNotice({ notice }: Readonly<{ notice: LiveMonthAdvanceNoticeState }>) {
+  if (notice.status === 'accepted') {
+    return (
+      <p className="route-banner">
+        Live month advance accepted from M{notice.currentMonth} to M{notice.nextMonth}. Receipt key {notice.advancementKey} is safe for
+        instructor browser delivery and excludes worker jobs, realtime payloads, ledger drafts, and processed month results.
+      </p>
+    );
+  }
+
+  if (notice.status === 'validation-error') {
+    return <p className="route-banner danger">Live month advance rejected before worker enqueueing: {notice.errors}.</p>;
+  }
+
+  if (notice.status === 'not-authorized') {
+    return <p className="route-banner danger">A trusted instructor app-role session is required before live month advancement.</p>;
+  }
+
+  if (notice.status === 'failed') {
+    return <p className="route-banner danger">Live month advance stopped at the bounded server action: {notice.reason}.</p>;
+  }
+
+  return <p className="route-banner">No live month-advance receipt yet. Accept the control to prove the browser-visible state.</p>;
+}
+
+function formatDisabledReason(reason: string | null) {
+  if (reason === 'auto_mode') {
+    return 'Auto mode';
+  }
+
+  if (reason === 'simulation_complete') {
+    return 'Simulation complete';
+  }
+
+  return 'Unavailable';
 }
 
 function firstSearchParam(value: string | string[] | undefined): string | undefined {
