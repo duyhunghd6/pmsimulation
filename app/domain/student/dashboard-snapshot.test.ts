@@ -34,7 +34,7 @@ const currentMarketMetric = {
   equityMarketTradingValue: 14_000,
   foreignInvestorNetTradingValue: -900,
   retailInvestorNetTradingValue: 500,
-  marketEarningsGrowthExpectation: 'downgraded',
+  marketEarningsGrowthExpectation: -1.5,
   valuationSentiment: 'cautious',
   businessCyclePhase: 'late_cycle',
 };

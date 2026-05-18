@@ -21,7 +21,7 @@ export type MarketMetricRow = {
   equityMarketTradingValue: number;
   foreignInvestorNetTradingValue: number;
   retailInvestorNetTradingValue: number;
-  marketEarningsGrowthExpectation: string;
+  marketEarningsGrowthExpectation: number;
   valuationSentiment: string;
   businessCyclePhase: string;
 };
@@ -54,7 +54,7 @@ export type StudentMacroNewsSnapshot = {
     equityMarketTradingValue: number;
     foreignInvestorNetTradingValue: number;
     retailInvestorNetTradingValue: number;
-    marketEarningsGrowthExpectation: string;
+    marketEarningsGrowthExpectation: number;
     valuationSentiment: string;
     businessCyclePhase: string;
   };

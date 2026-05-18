@@ -1,0 +1,52 @@
+Selected story/work item: `US-038 Data, auth, and tenancy foundation`  
+Lane: high-risk, because this slice touches auth/authorization boundaries, scoped protected data delivery, and tenant isolation proof.
+
+Implemented one bounded vertical slice:
+
+- Added `executeStudentPortfolioPyramidQuery` in `app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.ts:52`.
+  - Requires `student` role before row reads.
+  - Requires class/fund/month scope before row reads.
+  - Reads holdings through an injected row reader only.
+  - Parses every row with the existing own-holding parser before delivery.
+  - Rejects other-fund rows, duplicate tiers, incomplete/invalid snapshots, and invalid envelopes.
+  - Returns only the existing safe student portfolio pyramid query result envelope.
+- Added focused coverage in `app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts:48`.
+  - Safe own-holding envelope path.
+  - Non-student rejection before reads.
+  - Missing fund-scope rejection before reads.
+  - Other-fund holding rejection.
+  - Incomplete holdings rejected without raw row delivery.
+  - Duplicate tier rejection.
+
+Updated evidence/docs for the slice:
+
+- `docs/stories/US-038-data-auth-tenancy-foundation/validation.md`
+- `docs/TEST_MATRIX.md`
+- `README.md`
+- `CLAUDE.md`
+- `AGENTS.md`
+- `docs/product/data-model.md`
+- `docs/product/runtime-architecture.md`
+- `docs/product/user-surfaces.md`
+- `docs/product/roles-and-permissions.md`
+- `docs/stories/US-038-data-auth-tenancy-foundation/overview.md`
+- `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md`
+
+Validation run:
+
+- `npm run test:unit -- app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts`
+  - Passed: 1 file, 6 tests.
+- `npm run validate:quick`
+  - Passed: typecheck plus 31 test files, 408 tests.
+- `npm run test:integration:auth-tenancy`
+  - Passed SQL contract tests: 3 tests.
+  - Skipped local RLS execution: 1 test, because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted:
+
+- No browser UI.
+- No full current-turn student dashboard query composition.
+- No live Supabase/provider execution.
+- No hosted Supabase setup.
+- No migrations beyond the existing US-038 foundation.
+- No worker, realtime, CI, deployment, commit, push, or PR.

@@ -1,0 +1,15 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**. Lane: **high-risk** because the slice touches auth/authorization result delivery boundaries.
+
+Implemented one bounded slice:
+- Added `executeStudentDriverStringDashboardQuery` in `app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.ts`.
+- Added unit coverage in `app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts`.
+- The executor requires student role plus class/fund/month scope, parses injected RLS-backed macro narrative and market metric rows, rejects future rows, and returns only the existing safe Driver/String dashboard result envelope.
+- Updated relevant product/status docs and US-038 evidence in `README.md`, `AGENTS.md`, `CLAUDE.md`, `docs/product/*`, `docs/stories/US-038-data-auth-tenancy-foundation/*`, and `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts` — passed, 1 file / 5 tests.
+- `npm run validate:quick` — passed, 30 files / 402 tests.
+- `npm run test:integration:auth-tenancy` — passed SQL contract tests, with 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted:
+- Browser UI, live Supabase database execution, provider-backed RLS proof, full student dashboard query composition, hosted Supabase setup, CI/deployment, worker execution, and realtime provider code.

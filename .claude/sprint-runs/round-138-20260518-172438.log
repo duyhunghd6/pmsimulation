@@ -1,0 +1,31 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk story, bounded approved follow-up slice.
+
+Implemented one bounded vertical slice: an injected student TARA order-entry server query executor over parsed RLS-backed row inputs.
+
+Changed:
+- Added `executeStudentTaraOrderEntryQuery` in `app/infrastructure/auth-tenancy/student-tara-order-entry-query.ts`.
+  - Requires student session plus class/fund/month scope.
+  - Reads injected own-fund, own-holding, pending-order, and tracked-metric rows.
+  - Parses every unknown row before use.
+  - Rejects non-student sessions, missing scope, other-fund order rows, duplicate pending orders, duplicate holdings/funds, and missing Apex unrealized gain metrics.
+  - Returns only the existing safe student TARA order-entry query result envelope.
+- Added unit coverage in `app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts`.
+- Updated relevant status/evidence docs, including `README.md`, `AGENTS.md`, `CLAUDE.md`, `docs/TEST_MATRIX.md`, product docs, backlog, and US-038 story files.
+- Corrected `docs/ARCHITECTURE.md` to reflect that bounded application/infrastructure slices now exist.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts`
+  - Passed: 1 file, 7 tests.
+- `npm run validate:quick`
+  - Passed: typecheck plus unit suite.
+  - 32 test files, 415 tests.
+- `npm run test:integration:auth-tenancy`
+  - Passed SQL contract tests.
+  - Local RLS proof remains skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted:
+- No live Supabase database/provider client wiring.
+- No browser UI.
+- No TARA order submission server action.
+- No hosted Supabase, Vercel deployment, CI, worker, realtime provider code, commit, push, or PR.

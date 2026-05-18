@@ -1,0 +1,571 @@
+<analysis>
+I reviewed the preserved conversation summary and the system-provided file/tool context without calling any tools. The key continuity points are: the user originally requested one bounded autonomous sprint following AGENTS.md/source-of-truth order, no commit/push/PR, and no broad app/platform scaffolding; the selected work was US-038 Data, Auth, and Tenancy Foundation in the high-risk lane; the implemented slice was an instructor owned-class database row parser and tests; validation passed except local Supabase RLS execution remains skipped because AUTH_TENANCY_DATABASE_URL is not configured; the latest explicit user instruction before compaction was to respond with text only and no tools, using an <analysis> block followed by a <summary> block. I have preserved security-relevant constraints verbatim where applicable, especially the user’s “Do not commit, push, or create a pull request,” “Do not scaffold broad app/platform shells…” instruction, and the no-tool summary instruction.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - The user first requested one autonomous implementation sprint for the Apex Alpha Portfolio Simulator repository.
+   - Explicit requirements:
+     - “Read @AGENTS.md first and follow it exactly.”
+     - Read source-of-truth docs in AGENTS.md order relevant to choosing next work:
+       - `README.md`
+       - `docs/HARNESS.md`
+       - `docs/FEATURE_INTAKE.md`
+       - `SPEC.md` and `docs/prd/PRD-01.md` only as needed
+       - `docs/product/`
+       - `docs/ARCHITECTURE.md`
+       - `docs/stories/`
+       - `docs/TEST_MATRIX.md`
+       - `docs/decisions/`
+     - “Select the next smallest unblocked sprint from docs/stories/backlog.md and docs/TEST_MATRIX.md.”
+     - “Prefer continuing existing story packets before creating new ones.”
+     - “Work in the correct intake lane.”
+     - “Keep the blast radius small.”
+     - Security/blast-radius constraint preserved verbatim:
+       - “Do not scaffold broad app/platform shells, package scripts, CI, database migrations, auth, UI, or deployment unless an accepted story explicitly requires it.”
+     - Sprint requirements:
+       1. State selected story/work item and lane.
+       2. Implement only one bounded vertical slice or document blocker.
+       3. Update relevant docs, story status/evidence, and `docs/TEST_MATRIX.md` when they change.
+       4. Run available validation commands, especially `npm run validate:quick` after code changes.
+       5. Stop after this one sprint and summarize what changed, validation run, and what was not attempted.
+     - Git/shared-state constraint preserved verbatim:
+       - “Do not commit, push, or create a pull request.”
+   - The selected sprint was:
+     - Story/work item: `US-038 Data, Auth, and Tenancy Foundation`.
+     - Lane: high-risk.
+   - The bounded slice implemented:
+     - Parse-first server-side database row parser for instructor owned-class rows.
+     - Unit tests for accepted and rejected rows.
+     - Documentation/evidence updates.
+   - No app shell, UI, auth flow, provider runtime, CI, deployment, worker, realtime, commit, push, or PR was attempted.
+   - The latest explicit user request before compaction was a no-tool detailed summary request:
+     - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.”
+     - “Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.”
+     - “Your entire response must be plain text: an <analysis> block followed by a <summary> block.”
+
+2. Key Technical Concepts:
+   - Apex Alpha Portfolio Simulator:
+     - Classroom portfolio management simulation.
+     - Students manage funds within instructor-controlled classes.
+     - Instructors administer isolated class/game instances.
+   - Security and tenancy:
+     - Class tenancy is the primary isolation boundary.
+     - Students must only see their own exact fund/holding/order/ledger data.
+     - Students must not receive future macro/scenario rows.
+     - Instructors can access privileged owned-class and God Mode data only for administered/owned classes.
+   - US-038 auth-tenancy foundation:
+     - Supabase Auth JWT claims are trusted session source.
+     - Trusted `app_role` claim distinguishes `student` and `instructor`.
+     - Supabase PostgreSQL RLS is the primary persisted authorization layer.
+     - Server-side parse-first guards validate unknown sessions, request scopes, environment variables, and database rows before result delivery.
+   - Existing stack:
+     - TypeScript ESM.
+     - Vitest.
+     - Drizzle ORM schema.
+     - Supabase Auth/PostgreSQL/RLS.
+   - Approved future MVP stack:
+     - Next.js App Router.
+     - Vercel.
+     - Supabase Auth/PostgreSQL/RLS/Realtime.
+     - Drizzle ORM.
+     - Inngest.
+     - Tailwind CSS.
+     - shadcn/ui.
+     - Apache ECharts.
+     - Tremor.
+   - Validation commands:
+     - `npm run test:unit -- app/infrastructure/auth-tenancy`
+     - `npm run validate:quick`
+     - `npm run test:integration:auth-tenancy`
+   - Ongoing proof blocker:
+     - Local Supabase RLS execution remains skipped until `AUTH_TENANCY_DATABASE_URL` is configured.
+
+3. Files and Code Sections:
+   - `AGENTS.md`
+     - Read first per user instruction.
+     - Source-of-truth workflow and sprint rules were followed.
+     - Updated wording to include instructor owned-class row parsing:
+       - From instructor God Mode only to instructor owned-class/God Mode holding scopes.
+   - `README.md`
+     - Read for project status.
+     - Updated project status text to include “instructor owned-class/God Mode holding result delivery.”
+   - `CLAUDE.md`
+     - Project instructions were present in context.
+     - Updated similarly to mention instructor owned-class/God Mode result delivery.
+   - `docs/HARNESS.md`
+     - Read for harness workflow, source hierarchy, validation ladder, and high-risk blocked-story reselection rules.
+     - Important rule applied:
+       - If local Supabase RLS proof is blocked only by missing `AUTH_TENANCY_DATABASE_URL`, do not stop by merely restating the blocker; continue with safe bounded slices.
+   - `docs/FEATURE_INTAKE.md`
+     - Read to classify the work.
+     - Lane selected: high-risk due to auth, authorization, data model, audit/security, external provider behavior, public contracts, weak proof, and multi-domain scope.
+   - `docs/product/data-model.md`
+     - Updated status text to include instructor owned-class/God Mode holding result delivery.
+     - Added product-model rule that the US-038 server-side instructor owned-class parser preserves:
+       - Instructor role.
+       - Owner id.
+       - Class id.
+       - Trigger mode.
+       - Month bounds.
+       - Total simulation length.
+       - Join-code shape.
+   - `docs/product/roles-and-permissions.md`
+     - Updated authorization proof expectations to include instructor owned-class/God Mode holding result delivery.
+   - `docs/product/runtime-architecture.md`
+     - Updated status text to include instructor owned-class/God Mode holding result delivery.
+   - `docs/ARCHITECTURE.md`
+     - Read before implementation-shape decisions.
+     - Important constraints applied:
+       - Parse-first boundary rule.
+       - No broad scaffolding.
+       - Protect future rows, other-student holdings, and instructor privileged paths.
+   - `docs/stories/backlog.md`
+     - Read and used to select the earliest safe unimplemented layer.
+     - Full-stack sprint sequence says to finish US-038 where possible before app shell/auth flow.
+     - Updated first story candidate text to include “instructor owned-class/God Mode holding rows.”
+   - `docs/TEST_MATRIX.md`
+     - Updated E00/US-038 evidence to include instructor owned-class/God Mode row parsing.
+     - Evidence recorded:
+       - Focused auth-tenancy unit tests passed with 3 test files and 29 tests.
+       - `npm run validate:quick` passed with 27 test files and 386 tests.
+       - Integration command passed SQL contract tests with one local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+   - `docs/decisions/README.md`
+   - `docs/decisions/0004-accept-apex-alpha-prd.md`
+   - `docs/decisions/0005-approve-full-stack-mvp-track.md`
+     - Read.
+     - No new decision was added because the slice did not change architecture direction.
+   - `docs/stories/US-038-data-auth-tenancy-foundation/overview.md`
+     - Updated current behavior to include instructor owned-class/God Mode holding rows.
+   - `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md`
+     - Updated:
+       - Phase 3 now says scoped result-row parsers include instructor owned-class rows and God Mode holdings.
+       - Phase 6/evidence text includes instructor owned-class/God Mode holding rows.
+   - `docs/stories/US-038-data-auth-tenancy-foundation/validation.md`
+     - Updated with new evidence paragraph:
+       - “2026-05-18 instructor owned-class row parser slice evidence: extended the US-038 parse-first database row guards to instructor owned class rows. The guard requires instructor role, matching class and owner scope, valid trigger mode, current-month bounds, 12-to-24-month simulation length, and join-code shape before result delivery. `npm run test:unit -- app/infrastructure/auth-tenancy` passed with 3 test files and 29 tests; `npm run test:integration:auth-tenancy` passed SQL contract tests with 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured; `npm run validate:quick` passed with 27 test files and 386 tests.”
+   - `package.json`
+     - Read to confirm scripts:
+       - `typecheck`: `tsc --noEmit`
+       - `test`: `vitest run`
+       - `test:unit`: `vitest run`
+       - `test:integration:auth-tenancy`: `vitest run --config vitest.integration.config.ts tests/integration/auth-tenancy`
+       - `validate:quick`: `npm run typecheck && npm run test:unit`
+   - `app/infrastructure/auth-tenancy/session.ts`
+     - Read but not modified.
+     - Existing important signatures:
+       - `parseSupabaseAuthTenancySession(claims: unknown): AuthTenancyParseResult`
+       - `parseAuthTenancyScopeInput(input: unknown): AuthTenancyScopeParseResult`
+       - `buildSafeAuthorizationEvent(input: {...}): SafeAuthorizationEvent`
+       - `serializeSafeAuthorizationEvent(event: SafeAuthorizationEvent): string`
+     - Existing important types:
+       - `AuthTenancyRole = 'student' | 'instructor'`
+       - `AuthTenancySession = { subjectId: string; role: AuthTenancyRole }`
+       - `ParsedAuthTenancyScope = { classId: string; fundId?: string; monthIndex?: number }`
+   - `app/infrastructure/auth-tenancy/environment.ts`
+     - Read but not intentionally modified in this sprint.
+     - Existing functions:
+       - `parseAuthTenancyServerEnvironment(input: unknown): AuthTenancyEnvironmentParseResult`
+       - `parseAuthTenancyBrowserAuthEnvironment(input: unknown): AuthTenancyBrowserAuthEnvironmentParseResult`
+     - Existing security behavior:
+       - Server parser accepts PostgreSQL-only `AUTH_TENANCY_DATABASE_URL`.
+       - Browser parser accepts only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+       - Browser parser returns no database URL or service-role credential.
+   - `app/infrastructure/database/schema.ts`
+     - Read for schema context.
+     - Relevant `classes` columns:
+       - `id`
+       - `instructor_id`
+       - `display_name`
+       - `trigger_mode`
+       - `current_month_index`
+       - `total_months`
+       - `student_join_code`
+   - `tests/integration/auth-tenancy/local-supabase.test.ts`
+     - Read.
+     - Important behavior:
+       - Uses `parseAuthTenancyServerEnvironment(process.env)`.
+       - Skips local RLS proof unless valid `AUTH_TENANCY_DATABASE_URL` is configured.
+   - `tests/integration/auth-tenancy/sql-contract.test.ts`
+     - Read.
+     - Confirms required schema/policy/fixture SQL contract behavior.
+   - `app/infrastructure/auth-tenancy/rows.ts`
+     - Modified.
+     - Added/used imports:
+       ```ts
+       import { CLASS_TRIGGER_MODES, type ClassTriggerMode } from '../../domain/classes/class-draft';
+       import { MAX_SIMULATION_MONTHS, MIN_SIMULATION_MONTHS } from '../../domain/classes/month-advancement';
+       import type { AuthTenancySession, ParsedAuthTenancyScope } from './session';
+       ```
+     - Added type:
+       ```ts
+       export type InstructorOwnedClassRow = {
+         classId: string;
+         instructorId: string;
+         displayName: string;
+         triggerMode: ClassTriggerMode;
+         currentMonthIndex: number;
+         totalMonths: number;
+         studentJoinCode: string;
+       };
+       ```
+     - Extended failure code union with instructor/class fields:
+       ```ts
+       export type AuthTenancyDatabaseRowFailureCode =
+         | 'row_not_object'
+         | 'invalid_role'
+         | 'invalid_id'
+         | 'invalid_class_id'
+         | 'invalid_fund_id'
+         | 'invalid_student_id'
+         | 'invalid_instructor_id'
+         | 'invalid_month_index'
+         | 'invalid_total_months'
+         | 'invalid_display_name'
+         | 'invalid_trigger_mode'
+         | 'invalid_join_code'
+         | 'invalid_headline'
+         | 'invalid_market_metric'
+         | 'invalid_metric_scope'
+         | 'invalid_metric_value'
+         | 'invalid_metric_metadata'
+         | 'invalid_metric_source'
+         | 'invalid_tier'
+         | 'invalid_target_weights'
+         | 'invalid_status'
+         | 'invalid_rebalance_trigger'
+         | 'invalid_risk_type'
+         | 'invalid_risk_direction'
+         | 'invalid_impact_weight'
+         | 'invalid_risk_time_lag'
+         | 'invalid_risk_probability_score'
+         | 'invalid_risk_impact_score'
+         | 'invalid_tara_risk_treatment_class'
+         | 'invalid_risk_treatment_action'
+         | 'invalid_numeric_value'
+         | 'scope_mismatch'
+         | 'future_scenario_row';
+       ```
+     - Added constants/helper:
+       ```ts
+       const classTriggerModes = new Set<string>(CLASS_TRIGGER_MODES);
+       const joinCodePattern = /^[A-Z0-9]{6,12}$/;
+
+       function parseClassTriggerMode(value: unknown): ClassTriggerMode | undefined {
+         return typeof value === 'string' && classTriggerModes.has(value) ? (value as ClassTriggerMode) : undefined;
+       }
+       ```
+     - Added parser:
+       ```ts
+       export function parseInstructorOwnedClassRow(
+         input: unknown,
+         boundary: { session: AuthTenancySession; scope: ParsedAuthTenancyScope },
+       ): AuthTenancyDatabaseRowParseResult<InstructorOwnedClassRow> {
+         if (boundary.session.role !== 'instructor') {
+           return { ok: false, code: 'invalid_role' };
+         }
+         if (!isRecord(input)) {
+           return { ok: false, code: 'row_not_object' };
+         }
+
+         const classId = input.id;
+         const instructorId = input.instructor_id;
+         if (!isUuid(classId)) {
+           return { ok: false, code: 'invalid_id' };
+         }
+         if (!isUuid(instructorId)) {
+           return { ok: false, code: 'invalid_instructor_id' };
+         }
+         if (classId !== boundary.scope.classId || instructorId !== boundary.session.subjectId) {
+           return { ok: false, code: 'scope_mismatch' };
+         }
+
+         if (typeof input.display_name !== 'string' || input.display_name.trim() === '') {
+           return { ok: false, code: 'invalid_display_name' };
+         }
+         const triggerMode = parseClassTriggerMode(input.trigger_mode);
+         if (triggerMode === undefined) {
+           return { ok: false, code: 'invalid_trigger_mode' };
+         }
+         if (
+           typeof input.current_month_index !== 'number' ||
+           !Number.isInteger(input.current_month_index) ||
+           input.current_month_index < 0
+         ) {
+           return { ok: false, code: 'invalid_month_index' };
+         }
+         if (
+           typeof input.total_months !== 'number' ||
+           !Number.isInteger(input.total_months) ||
+           input.total_months < MIN_SIMULATION_MONTHS ||
+           input.total_months > MAX_SIMULATION_MONTHS
+         ) {
+           return { ok: false, code: 'invalid_total_months' };
+         }
+         if (input.current_month_index >= input.total_months) {
+           return { ok: false, code: 'invalid_month_index' };
+         }
+         if (typeof input.student_join_code !== 'string' || !joinCodePattern.test(input.student_join_code)) {
+           return { ok: false, code: 'invalid_join_code' };
+         }
+
+         return {
+           ok: true,
+           row: {
+             classId,
+             instructorId,
+             displayName: input.display_name.trim(),
+             triggerMode,
+             currentMonthIndex: input.current_month_index,
+             totalMonths: input.total_months,
+             studentJoinCode: input.student_join_code,
+           },
+         };
+       }
+       ```
+   - `app/infrastructure/auth-tenancy/rows.test.ts`
+     - Modified.
+     - Added `parseInstructorOwnedClassRow` import.
+     - Added test suite:
+       ```ts
+       describe('parseInstructorOwnedClassRow', () => {
+         const row = {
+           id: classId,
+           instructor_id: instructorSession.subjectId,
+           display_name: 'Alpha Capital Lab',
+           trigger_mode: 'manual',
+           current_month_index: 1,
+           total_months: 12,
+           student_join_code: 'ALPHA01',
+         };
+
+         it('accepts a scoped instructor-owned class row after RLS', () => {
+           expect(parseInstructorOwnedClassRow(row, { session: instructorSession, scope })).toEqual({
+             ok: true,
+             row: {
+               classId,
+               instructorId: instructorSession.subjectId,
+               displayName: 'Alpha Capital Lab',
+               triggerMode: 'manual',
+               currentMonthIndex: 1,
+               totalMonths: 12,
+               studentJoinCode: 'ALPHA01',
+             },
+           });
+         });
+
+         it('rejects unowned, malformed, or wrong-role class rows before result delivery', () => {
+           expect(parseInstructorOwnedClassRow(row, { session: studentSession, scope })).toEqual({
+             ok: false,
+             code: 'invalid_role',
+           });
+           expect(
+             parseInstructorOwnedClassRow(
+               { ...row, instructor_id: 'bbbbbbbb-1111-4111-8111-bbbbbbbbbbbb' },
+               { session: instructorSession, scope },
+             ),
+           ).toEqual({
+             ok: false,
+             code: 'scope_mismatch',
+           });
+           expect(parseInstructorOwnedClassRow({ ...row, id: otherClassId }, { session: instructorSession, scope })).toEqual({
+             ok: false,
+             code: 'scope_mismatch',
+           });
+           expect(parseInstructorOwnedClassRow({ ...row, trigger_mode: 'live' }, { session: instructorSession, scope })).toEqual({
+             ok: false,
+             code: 'invalid_trigger_mode',
+           });
+           expect(parseInstructorOwnedClassRow({ ...row, current_month_index: 12 }, { session: instructorSession, scope })).toEqual({
+             ok: false,
+             code: 'invalid_month_index',
+           });
+           expect(
+             parseInstructorOwnedClassRow(
+               { ...row, student_join_code: 'join-link-secret' },
+               { session: instructorSession, scope },
+             ),
+           ).toEqual({
+             ok: false,
+             code: 'invalid_join_code',
+           });
+         });
+       });
+       ```
+
+4. Errors and fixes:
+   - Documentation edit failed:
+     - Error: exact replacement string not found in `docs/stories/US-038-data-auth-tenancy-foundation/validation.md`.
+     - Cause: replacement text did not exactly match existing file wording.
+     - Fix: inspected the relevant section and inserted the new instructor owned-class evidence paragraph by replacing a larger surrounding block.
+   - Parser failure-code issue:
+     - Initial implementation returned `invalid_student_id` for malformed instructor IDs.
+     - Fix:
+       - Added `invalid_instructor_id` to `AuthTenancyDatabaseRowFailureCode`.
+       - Changed malformed instructor ID branch to return `{ ok: false, code: 'invalid_instructor_id' }`.
+   - Local RLS proof blocker:
+     - `npm run test:integration:auth-tenancy` could not run live local Supabase RLS proof because `AUTH_TENANCY_DATABASE_URL` is not configured.
+     - This was not treated as code failure.
+     - Result:
+       - SQL contract tests passed.
+       - Local RLS execution test skipped.
+       - Evidence and docs preserve the blocker.
+   - User feedback / overriding instruction:
+     - Latest explicit user instruction before compaction:
+       - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.”
+       - “Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.”
+     - No tools are being called in this response.
+
+5. Problem Solving:
+   - Problem: Continue earliest sprint work without being blocked by missing local Supabase DB credentials.
+     - Solution:
+       - Selected US-038 because it is earliest in the full-stack MVP sprint sequence.
+       - Avoided merely restating the `AUTH_TENANCY_DATABASE_URL` blocker.
+       - Chose a bounded parse-first row parser that does not require a live DB or UI/auth scaffolding.
+   - Problem: Strengthen instructor authorization result delivery without broad platform work.
+     - Solution:
+       - Added `parseInstructorOwnedClassRow` to validate persisted class rows after database/RLS access and before returning them to instructor paths.
+       - Enforced:
+         - Instructor role.
+         - Valid class UUID.
+         - Valid instructor UUID.
+         - Requested class scope match.
+         - Instructor subject ownership match.
+         - Non-empty display name.
+         - Trigger mode allowlist.
+         - Current month integer, non-negative, and less than total months.
+         - Total months within 12–24 bounds.
+         - Student join code shape.
+   - Problem: Prove the new parser behavior.
+     - Solution:
+       - Added unit tests for valid scoped row and rejected wrong-role, unowned, cross-class, invalid trigger mode, invalid month bounds, and invalid join-code cases.
+       - Ran focused unit tests, quick validation, and integration command.
+   - Problem: Keep docs/test matrix aligned with changed behavior.
+     - Solution:
+       - Updated US-038 story evidence, product docs, backlog, README/AGENTS/CLAUDE wording, and `docs/TEST_MATRIX.md`.
+
+6. All user messages:
+   - First user message:
+     - “Read @AGENTS.md first and follow it exactly. This is one autonomous implementation sprint for the Apex Alpha Portfolio Simulator repository.
+
+       Start by reading, in AGENTS.md order, the source-of-truth docs that are relevant to choosing the next work:
+       - README.md
+       - docs/HARNESS.md
+       - docs/FEATURE_INTAKE.md
+       - SPEC.md and docs/prd/PRD-01.md only as needed
+       - docs/product/
+       - docs/ARCHITECTURE.md before implementation-shape decisions
+       - docs/stories/
+       - docs/TEST_MATRIX.md
+       - docs/decisions/
+
+       Select the next smallest unblocked sprint from docs/stories/backlog.md and docs/TEST_MATRIX.md. Prefer continuing existing story packets before creating new ones. Work in the correct intake lane. Keep the blast radius small. Do not scaffold broad app/platform shells, package scripts, CI, database migrations, auth, UI, or deployment unless an accepted story explicitly requires it.
+
+       For this single round:
+       1. State the selected story/work item and lane.
+       2. Implement only one bounded vertical slice or document the blocker.
+       3. Update relevant docs, story status/evidence, and docs/TEST_MATRIX.md when they change.
+       4. Run available validation commands when they exist, especially npm run validate:quick after code changes.
+       5. Stop after this one sprint and summarize what changed, validation run, and what was not attempted.
+
+       Do not commit, push, or create a pull request.”
+   - Second/latest user message before compaction:
+     - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.
+
+       - Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.
+       - You already have all the context you need in the conversation above.
+       - Tool calls will be REJECTED and will waste your only turn — you will fail the task.
+       - Your entire response must be plain text: an <analysis> block followed by a <summary> block.
+
+       Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions.
+       This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
+
+       Before providing your final summary, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points.
+
+       Your summary should include:
+       1. Primary Request and Intent
+       2. Key Technical Concepts
+       3. Files and Code Sections
+       4. Errors and fixes
+       5. Problem Solving
+       6. All user messages
+       7. Pending Tasks
+       8. Current Work
+       9. Optional Next Step
+
+       REMINDER: Do NOT call any tools. Respond with plain text only — an <analysis> block followed by a <summary> block. Tool calls will be rejected and you will fail the task.”
+
+7. Pending Tasks:
+   - From the original sprint:
+     - Provide final sprint summary:
+       - Selected story/lane.
+       - What changed.
+       - Validation run.
+       - What was not attempted.
+   - The implementation, docs/evidence updates, and validation were already completed before the summary request.
+   - Ongoing product blocker:
+     - Local Supabase RLS execution proof remains pending until `AUTH_TENANCY_DATABASE_URL` is configured.
+   - No pending instruction to commit, push, or open a PR.
+   - User explicitly said:
+     - “Do not commit, push, or create a pull request.”
+
+8. Current Work:
+   - Immediately before the summary request, the sprint implementation had finished and the assistant was preparing to report the sprint result.
+   - Most recent assistant status before compaction:
+     - “Documentation evidence has been refreshed; I’ll check the working tree summary so I can report only this sprint’s relevant changes.”
+   - Known working tree state at that point:
+     - Modified:
+       - `.claude/sprint-runs/round-128-20260518-153007.log`
+       - `AGENTS.md`
+       - `CLAUDE.md`
+       - `README.md`
+       - `app/infrastructure/auth-tenancy/environment.test.ts`
+       - `app/infrastructure/auth-tenancy/environment.ts`
+       - `app/infrastructure/auth-tenancy/rows.test.ts`
+       - `app/infrastructure/auth-tenancy/rows.ts`
+       - `docs/TEST_MATRIX.md`
+       - `docs/product/data-model.md`
+       - `docs/product/roles-and-permissions.md`
+       - `docs/product/runtime-architecture.md`
+       - `docs/stories/US-038-data-auth-tenancy-foundation/design.md`
+       - `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md`
+       - `docs/stories/US-038-data-auth-tenancy-foundation/overview.md`
+       - `docs/stories/US-038-data-auth-tenancy-foundation/validation.md`
+       - `docs/stories/backlog.md`
+     - Untracked:
+       - `.claude/sprint-runs/round-129-20260518-153807.log`
+       - `.claude/sprint-runs/round-130-20260518-154408.log`
+       - `.claude/sprint-runs/round-131-20260518-155158.log`
+   - Important caveat:
+     - Some modified files, including `environment.ts`, `environment.test.ts`, story docs, and sprint logs, may have been dirty before this bounded slice or modified by automation; the intentional code edits were centered on `rows.ts`, `rows.test.ts`, and documentation/evidence wording.
+   - Validation already run:
+     - `npm run test:unit -- app/infrastructure/auth-tenancy`
+       - Passed: 3 test files, 29 tests.
+     - `npm run validate:quick`
+       - Passed: typecheck and unit tests.
+       - Passed: 27 test files, 386 tests.
+     - `npm run test:integration:auth-tenancy`
+       - SQL contract tests passed.
+       - Local RLS proof skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+   - Not attempted:
+     - No Next.js app shell.
+     - No UI.
+     - No browser auth flow.
+     - No hosted Supabase project.
+     - No live database runtime.
+     - No production migration path.
+     - No CI.
+     - No Vercel deployment.
+     - No worker/Inngest processing.
+     - No Supabase Realtime publication/subscription execution.
+     - No commit, push, or PR.
+
+9. Optional Next Step:
+   - No tool-based or implementation next step should be taken in response to the latest explicit instruction, because the user required text only and no tools.
+   - If the user returns to the implementation sprint, the direct next step is to provide the final sprint summary using the already-known results:
+     - Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`.
+     - Lane: high-risk.
+     - Changed: added instructor owned-class row parser, tests, and evidence/docs updates.
+     - Validation: focused unit tests passed, `validate:quick` passed, integration SQL contract passed with local RLS skipped due to missing `AUTH_TENANCY_DATABASE_URL`.
+     - Not attempted: app shell, UI, auth flow, hosted/live Supabase, CI/deployment, worker, realtime, commit/push/PR.
+</summary>

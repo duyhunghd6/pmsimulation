@@ -1,0 +1,20 @@
+Selected story/work item: `US-073 Student Dashboard Current-Turn UI`, lane `normal`.
+
+Implemented one bounded UI slice:
+- `app/(student)/dashboard/page.tsx:25` now renders the protected current-turn student dashboard from `executeStudentDashboardCurrentTurnQuery`, with safe fallback states for missing/wrong-role session or query failure.
+- `app/(student)/dashboard/page.tsx:216` adds a bounded injected row reader whose rows still pass through the existing auth-tenancy executor before UI rendering.
+- `app/globals.css:138` adds terminal-style dashboard, metric, pyramid, and leaderboard styling.
+- Added `docs/stories/US-073-student-dashboard-current-turn-ui.md:1`.
+- Updated `README.md`, `docs/stories/backlog.md`, and `docs/TEST_MATRIX.md` so the repo no longer says protected student dashboard UI is absent.
+
+Validation run:
+- `npm run typecheck` — passed.
+- `npm run validate:quick` — passed with 33 test files and 424 tests.
+- `npm run build` — passed.
+
+Not attempted:
+- No live Supabase/database-backed gameplay runtime.
+- No order submission/server action.
+- No post-turn attribution UI.
+- No realtime, worker, CI, deployment, or provider-backed browser E2E proof.
+- No commit, push, or PR.

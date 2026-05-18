@@ -1,0 +1,35 @@
+Selected story/work item: `US-071 Next.js App Router No-Gameplay Shell`  
+Lane: `normal`
+
+Implemented one bounded slice:
+- Added minimal Next.js/React App Router setup:
+  - `app/layout.tsx`
+  - `app/page.tsx`
+  - `app/login/page.tsx`
+  - `app/(student)/dashboard/page.tsx`
+  - `app/(instructor)/instructor/dashboard/page.tsx`
+  - `app/globals.css`
+  - `next.config.ts`
+  - `next-env.d.ts`
+- Added `npm run dev` and `npm run build`.
+- Added `.gitignore` entries for generated Next/TypeScript artifacts.
+- Added story packet: `docs/stories/US-071-nextjs-app-router-no-gameplay-shell.md`.
+- Updated relevant docs and evidence:
+  - `README.md`
+  - `AGENTS.md`
+  - `CLAUDE.md`
+  - `docs/product/runtime-architecture.md`
+  - `docs/product/user-surfaces.md`
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md`
+
+Validation run:
+- `npm run validate:quick` passed: 27 test files, 388 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests; local RLS proof still skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run build` passed and statically rendered `/`, `/login`, `/dashboard`, `/instructor/dashboard`.
+- Local dev-server HTTP smoke passed for `/`, `/login`, `/dashboard`, `/instructor/dashboard`.
+- I did not perform manual browser interaction because no browser automation tool is available in this session.
+
+Not attempted:
+- No Supabase browser auth flow, login/logout implementation, protected layouts, server queries, gameplay UI, database runtime, worker, realtime provider, CI, deployment, commit, push, or PR.
+- `npm install` reported 2 moderate audit findings; I did not address dependency audit remediation in this bounded sprint.

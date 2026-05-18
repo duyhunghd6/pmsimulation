@@ -34,18 +34,18 @@ export const MVP_MACRO_NARRATIVE_CATALOG = [
 ] as const satisfies readonly MacroNarrativeRow[];
 
 export const MVP_MARKET_METRIC_CATALOG = [
-  marketMetric(0, 1240, 8500, -120, 260, 'Cautious recovery', 'Discounted', 'Early recovery'),
-  marketMetric(1, 1295, 10200, 80, 420, 'Upgrade cycle', 'Constructive', 'Expansion'),
-  marketMetric(2, 1265, 9100, -260, 180, 'Margin pressure', 'Stretched', 'Late expansion'),
-  marketMetric(3, 1210, 7800, -520, -80, 'Downgrade risk', 'Risk-off', 'Slowdown'),
-  marketMetric(4, 1188, 7200, -430, -120, 'Defensive rotation', 'Cheap but cautious', 'Slowdown'),
-  marketMetric(5, 1165, 6800, -300, -220, 'Earnings trough', 'Capitulation', 'Contraction'),
-  marketMetric(6, 1195, 7600, -80, 90, 'Stabilization', 'Selective', 'Early recovery'),
-  marketMetric(7, 1248, 8900, 160, 310, 'Liquidity rebound', 'Constructive', 'Recovery'),
-  marketMetric(8, 1310, 11200, 340, 520, 'Earnings upgrade', 'Expansionary', 'Expansion'),
-  marketMetric(9, 1368, 13000, 220, 760, 'Momentum chase', 'Crowded', 'Late expansion'),
-  marketMetric(10, 1322, 10500, -180, 340, 'Policy stress', 'Volatile', 'Late expansion'),
-  marketMetric(11, 1340, 9800, 40, 280, 'Balanced close', 'Fair value', 'Cooldown'),
+  marketMetric(0, 1240, 8500, -120, 260, 1.2, 'Discounted', 'Early recovery'),
+  marketMetric(1, 1295, 10200, 80, 420, 2.5, 'Constructive', 'Expansion'),
+  marketMetric(2, 1265, 9100, -260, 180, -0.8, 'Stretched', 'Late expansion'),
+  marketMetric(3, 1210, 7800, -520, -80, -2.4, 'Risk-off', 'Slowdown'),
+  marketMetric(4, 1188, 7200, -430, -120, -1.5, 'Cheap but cautious', 'Slowdown'),
+  marketMetric(5, 1165, 6800, -300, -220, -3.0, 'Capitulation', 'Contraction'),
+  marketMetric(6, 1195, 7600, -80, 90, -0.4, 'Selective', 'Early recovery'),
+  marketMetric(7, 1248, 8900, 160, 310, 1.7, 'Constructive', 'Recovery'),
+  marketMetric(8, 1310, 11200, 340, 520, 3.1, 'Expansionary', 'Expansion'),
+  marketMetric(9, 1368, 13000, 220, 760, 4.0, 'Crowded', 'Late expansion'),
+  marketMetric(10, 1322, 10500, -180, 340, -1.2, 'Volatile', 'Late expansion'),
+  marketMetric(11, 1340, 9800, 40, 280, 0.8, 'Fair value', 'Cooldown'),
 ] as const satisfies readonly MarketMetricRow[];
 
 const macroNarrativesByMonth = new Map(MVP_MACRO_NARRATIVE_CATALOG.map((row) => [row.monthIndex, row]));
@@ -137,7 +137,7 @@ function marketMetric(
   equityMarketTradingValue: number,
   foreignInvestorNetTradingValue: number,
   retailInvestorNetTradingValue: number,
-  marketEarningsGrowthExpectation: string,
+  marketEarningsGrowthExpectation: number,
   valuationSentiment: string,
   businessCyclePhase: string,
 ): MarketMetricRow {

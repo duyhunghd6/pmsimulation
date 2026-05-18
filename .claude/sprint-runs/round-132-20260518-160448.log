@@ -1,0 +1,13 @@
+Selected story/work item: **US-038 Data, auth, and tenancy foundation**. Lane: **high-risk** because it touches authorization, tenant scope, and protected gameplay result delivery.
+
+Implemented one bounded slice:
+- Added `StudentOwnHoldingRow` and `parseStudentOwnHoldingRow` to preserve student role, class, fund, tier, and 0–100 allocation scope before returning persisted holding rows: `app/infrastructure/auth-tenancy/rows.ts:26`, `app/infrastructure/auth-tenancy/rows.ts:347`.
+- Added unit proof for accepted scoped own-holding rows and rejected wrong-role, cross-fund, cross-class, invalid-tier, and invalid-allocation rows: `app/infrastructure/auth-tenancy/rows.test.ts:132`.
+- Updated US-038/product/test-matrix evidence, including `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:61`, `docs/TEST_MATRIX.md:19`, and `docs/product/data-model.md:200`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` passed: 3 test files, 31 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests: 1 file passed, 1 skipped; local RLS test still skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run validate:quick` passed: typecheck plus 27 test files, 388 tests.
+
+Not attempted: local Supabase RLS execution, Next.js app shell, browser auth flow, UI, hosted Supabase, CI/deployment, worker, realtime provider execution, commit, push, or PR.

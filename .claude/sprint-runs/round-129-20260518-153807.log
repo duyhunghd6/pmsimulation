@@ -1,0 +1,13 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**. Lane: **high-risk**.
+
+Implemented one bounded slice:
+- Added a parse-first scoped student tracked-metric row parser at `app/infrastructure/auth-tenancy/rows.ts:408`.
+- Added unit coverage for accepted, future-row, cross-fund, malformed-value, and wrong-role tracked metric delivery at `app/infrastructure/auth-tenancy/rows.test.ts:207`.
+- Updated product/story/test evidence, including tracked metric scoping in `docs/product/data-model.md:119` and US-038 validation evidence in `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:55`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` passed: 3 files, 24 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests; local RLS execution still skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run validate:quick` passed: 27 files, 381 tests.
+
+Not attempted: Next.js app shell, browser auth flow, UI, hosted Supabase, production migration path, CI/deployment, worker execution, or Supabase Realtime publication.

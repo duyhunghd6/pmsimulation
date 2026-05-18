@@ -1,0 +1,44 @@
+Selected story/work item: **US-074 Student TARA order submission action**.  
+Lane: **high-risk** because it touches auth, authorization, data model, public contracts, existing behavior, and currently has injected/unit proof rather than provider-backed proof.
+
+Implemented one bounded vertical slice:
+
+- Added the bounded injected submission executor at `app/infrastructure/auth-tenancy/student-tara-order-submission-action.ts:78`.
+  - Requires `student` role.
+  - Requires class/fund/month scope.
+  - Parses authoritative current fund, holding, pending-order, and tracked-metric rows before use.
+  - Rejects duplicate pending orders.
+  - Validates target weights through the existing domain receipt/envelope path.
+  - Calls an injected pending-order writer.
+  - Parses the persisted pending-order row and verifies it matches the command before returning the existing student-safe result envelope.
+- Added unit proof in `app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts`.
+  - Covered successful scoped submission, non-student denial before writes, invalid target allocation safe failure, duplicate pending-order rejection, persisted row scope rejection, and persisted command mismatch.
+- Created story packet:
+  - `docs/stories/US-074-student-tara-order-submission-action/overview.md`
+  - `docs/stories/US-074-student-tara-order-submission-action/design.md`
+  - `docs/stories/US-074-student-tara-order-submission-action/execplan.md`
+  - `docs/stories/US-074-student-tara-order-submission-action/validation.md`
+- Updated product/docs evidence:
+  - `README.md`
+  - `docs/product/runtime-architecture.md`
+  - `docs/product/user-surfaces.md`
+  - `docs/product/data-model.md`
+  - `docs/product/roles-and-permissions.md`
+  - `docs/product/simulation-engine.md`
+  - `docs/stories/backlog.md`
+  - `docs/TEST_MATRIX.md`
+
+Validation run:
+
+- `npm run test:unit -- app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts` — passed earlier with **1 test file / 6 tests**.
+- `npm run validate:quick` — passed with **34 test files / 430 tests**.
+
+Not attempted:
+
+- No live Supabase/Drizzle insert wiring.
+- No browser order form.
+- No Next.js server action export.
+- No worker, realtime, CI, deployment, hosted Supabase setup, or provider-backed browser E2E.
+- No commit, push, or PR created.
+
+Note: the working tree already contains many pre-existing modified/untracked files from earlier rounds; this sprint only advanced the bounded US-074 slice and its docs/evidence.

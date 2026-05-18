@@ -1,6 +1,6 @@
 # Architecture
 
-The accepted Apex Alpha PRD selects a web application direction, but no application code exists yet. This document captures architecture rules future implementation should follow when selected stories begin.
+The accepted Apex Alpha PRD selects the web application direction, and bounded application/infrastructure slices now exist. This document captures architecture rules future implementation should follow when selected stories continue.
 
 Source decision: `docs/decisions/0004-accept-apex-alpha-prd.md`.
 

@@ -1,0 +1,14 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**. Lane: **high-risk** because it touches auth/environment boundaries.
+
+Implemented one bounded slice:
+- Added `parseAuthTenancyBrowserAuthEnvironment` in `app/infrastructure/auth-tenancy/environment.ts:76`.
+- It accepts only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, allows local Supabase HTTP or hosted HTTPS URLs, and does not return database URLs or service-role credentials.
+- Added unit coverage in `app/infrastructure/auth-tenancy/environment.test.ts:41`.
+- Updated US-038/product/test-matrix evidence, including `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:57`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` — passed, 3 files / 27 tests.
+- `npm run validate:quick` — passed, 27 files / 384 tests.
+- `npm run test:integration:auth-tenancy` — passed SQL contract tests with 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted: Next.js app shell, browser login/logout flow, live Supabase runtime, hosted Supabase, production migration path, UI, worker, realtime, CI, deployment, or local RLS execution beyond the existing skipped proof.

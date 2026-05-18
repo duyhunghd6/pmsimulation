@@ -2,7 +2,7 @@
 
 ## Domain Model
 
-The foundation must preserve the existing product roles and core identifiers: class, instructor, student, fund, macro narrative, market metric, holding, TARA order, and ledger. A class remains the primary tenant boundary. Students may access their own fund state and current/past class scenario data; instructors may access scoped class management and God Mode surfaces for classes they administer.
+The foundation must preserve the existing product roles and core identifiers: class, instructor, student, fund, macro narrative, market metric, holding, TARA order, risk register, and ledger. A class remains the primary tenant boundary. Students may access their own fund state and current/past class scenario data; instructors may access scoped class management and God Mode surfaces for classes they administer.
 
 ## Application Flow
 

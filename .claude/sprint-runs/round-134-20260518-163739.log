@@ -1,0 +1,21 @@
+Selected story/work item: **US-072 Supabase Auth no-gameplay route guard**.  
+Lane: **high-risk**, because it touches auth and authorization, narrowed to a no-gameplay shell guard.
+
+Changed:
+- Added Supabase auth dependencies in `package.json:22`.
+- Added protected route access classification with unit tests in `app/infrastructure/auth-tenancy/auth-flow.ts:1` and `app/infrastructure/auth-tenancy/auth-flow.test.ts:1`.
+- Added Supabase server-client/session reading in `app/infrastructure/auth-tenancy/supabase-server.ts:1`.
+- Added magic-link sign-in/sign-out server actions in `app/login/actions.ts:1`.
+- Updated `/login`, `/dashboard`, and `/instructor/dashboard` shell behavior through `app/login/page.tsx:1`, `app/auth-boundary.tsx:1`, `app/(student)/layout.tsx:1`, and `app/(instructor)/layout.tsx:1`.
+- Created the US-072 high-risk story packet under `docs/stories/US-072-supabase-auth-no-gameplay-route-guard/`.
+- Updated product docs, backlog, test matrix, README, AGENTS, and CLAUDE status to reflect the bounded auth guard.
+
+Validation:
+- `npm run validate:quick` passed: **28 test files, 393 tests**.
+- `npm run build` passed.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests with **1 local RLS test skipped** because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- Local dev-server HTTP route smoke passed for `/`, `/login`, `/dashboard`, and `/instructor/dashboard`.
+
+Not attempted:
+- No gameplay queries, protected gameplay UI, live database runtime, hosted Supabase setup, CI/deployment, worker, realtime, or provider-backed browser sign-in E2E.
+- `npm install` reported **2 moderate vulnerabilities**; I did not run `npm audit fix` because dependency remediation was outside this sprint’s scope.

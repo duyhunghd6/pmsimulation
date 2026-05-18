@@ -1,0 +1,14 @@
+Selected story/work item: **US-038 Data, auth, and tenancy foundation**.  
+Lane: **high-risk** due to auth, authorization, data model, audit/security, external system, public contract, weak proof, and multi-domain flags.
+
+Implemented one bounded slice:
+- Added `parseStudentRiskRegisterEntryRow` in `app/infrastructure/auth-tenancy/rows.ts:435`.
+- Added unit proof for scoped student risk-register row delivery and rejection of wrong-role, cross-class, and invalid treatment-class rows in `app/infrastructure/auth-tenancy/rows.test.ts:264`.
+- Updated US-038 docs, product status docs, backlog, and `docs/TEST_MATRIX.md` to include scoped student risk-register row parsing evidence.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` — passed, 3 files / 22 tests.
+- `npm run test:integration:auth-tenancy` — passed SQL contract tests, 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run validate:quick` — passed, 27 files / 379 tests.
+
+Not attempted: live Supabase RLS execution, Next.js/browser auth flow, UI, hosted Supabase, CI/deployment, worker execution, or realtime provider work. No commit, push, or PR created.

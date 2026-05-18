@@ -1,0 +1,34 @@
+Selected story/work item: **US-075 Instructor Pending-Order Visibility Query**  
+Lane: **high-risk** because it touches instructor authorization and protected gameplay data delivery.
+
+Implemented one bounded vertical slice:
+
+- Added status-only instructor pending-order infrastructure parsing in `app/infrastructure/auth-tenancy/rows.ts`.
+- Added `executeInstructorPendingOrderVisibilityQuery` in `app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.ts`.
+- Added unit coverage for:
+  - instructor happy path
+  - wrong-role denial before row access
+  - missing month denial before row access
+  - cross-class fund rejection
+  - cross-class/future-month order rejection
+  - duplicate pending order rejection
+  - non-pending order rejection
+  - no forbidden target weight/tax/provider payload delivery
+- Created the US-075 high-risk story packet under `docs/stories/US-075-instructor-pending-order-visibility-query/`.
+- Updated relevant product/story docs, backlog status, `docs/TEST_MATRIX.md`, `README.md`, `AGENTS.md`, `CLAUDE.md`, and US-038 overview to reflect the new bounded executor.
+
+Validation run:
+
+- `npm run test:unit -- app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.test.ts app/infrastructure/auth-tenancy/rows.test.ts`
+  - Passed: 2 test files, 32 tests.
+- `npm run validate:quick`
+  - Passed: typecheck plus unit suite.
+  - 35 test files, 440 tests.
+
+Not attempted:
+
+- No live Supabase read/provider integration.
+- No protected instructor browser UI.
+- No browser E2E proof.
+- No database migrations.
+- No worker, realtime, CI, deployment, commit, push, or PR.

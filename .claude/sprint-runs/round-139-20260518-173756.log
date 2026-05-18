@@ -1,0 +1,14 @@
+Selected story/work item: US-038 Data, Auth, and Tenancy Foundation. Lane: high-risk.
+
+Implemented one bounded server-query composition slice:
+- Added `parseStudentLeaderboardFundRow` for same-class leaderboard fund rows.
+- Added `executeStudentDashboardCurrentTurnQuery`, an injected row-reader executor that composes the current-turn student dashboard from parsed macro, market, fund, holding, order, tracked metric, and leaderboard rows.
+- Added unit coverage for safe envelope output and rejection of invalid role/scope, future rows, cross-class leaderboard rows, and duplicate holding tiers.
+- Updated US-038 story evidence, exec plan, overview, `docs/TEST_MATRIX.md`, `README.md`, and project `CLAUDE.md`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts app/infrastructure/auth-tenancy/rows.test.ts` passed: 2 files, 29 tests.
+- `npm run validate:quick` passed: 33 files, 424 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract checks with 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted: browser UI, live database runtime, hosted Supabase setup, production migrations, CI/deployment, worker execution, or Supabase Realtime publication.

@@ -1,12 +1,19 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  parseInstructorClassFundRow,
   parseInstructorGodModeHoldingRow,
+  parseInstructorOwnedClassRow,
+  parseInstructorPendingTaraOrderStatusRow,
   parseStudentFundStateRow,
+  parseStudentLeaderboardFundRow,
+  parseStudentOwnHoldingRow,
   parseStudentRevealedMacroNarrativeRow,
   parseStudentRevealedMarketMetricRow,
+  parseStudentRiskRegisterEntryRow,
   parseStudentSimulationLedgerRow,
   parseStudentTaraOrderRow,
+  parseStudentTrackedMetricRow,
 } from './rows';
 
 const studentSession = { subjectId: '11111111-1111-4111-8111-111111111111', role: 'student' as const };
@@ -16,6 +23,60 @@ const otherClassId = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
 const fundId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 const otherStudentId = '22222222-2222-4222-8222-222222222222';
 const scope = { classId, fundId, monthIndex: 1 };
+
+describe('parseInstructorOwnedClassRow', () => {
+  const row = {
+    id: classId,
+    instructor_id: instructorSession.subjectId,
+    display_name: 'Alpha Capital Lab',
+    trigger_mode: 'manual',
+    current_month_index: 1,
+    total_months: 12,
+    student_join_code: 'ALPHA01',
+  };
+
+  it('accepts a scoped instructor-owned class row after RLS', () => {
+    expect(parseInstructorOwnedClassRow(row, { session: instructorSession, scope })).toEqual({
+      ok: true,
+      row: {
+        classId,
+        instructorId: instructorSession.subjectId,
+        displayName: 'Alpha Capital Lab',
+        triggerMode: 'manual',
+        currentMonthIndex: 1,
+        totalMonths: 12,
+        studentJoinCode: 'ALPHA01',
+      },
+    });
+  });
+
+  it('rejects unowned, malformed, or wrong-role class rows before result delivery', () => {
+    expect(parseInstructorOwnedClassRow(row, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorOwnedClassRow({ ...row, instructor_id: 'bbbbbbbb-1111-4111-8111-bbbbbbbbbbbb' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorOwnedClassRow({ ...row, id: otherClassId }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorOwnedClassRow({ ...row, trigger_mode: 'live' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_trigger_mode',
+    });
+    expect(parseInstructorOwnedClassRow({ ...row, current_month_index: 12 }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_month_index',
+    });
+    expect(parseInstructorOwnedClassRow({ ...row, student_join_code: 'join-link-secret' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_join_code',
+    });
+  });
+});
 
 describe('parseStudentFundStateRow', () => {
   it('accepts a scoped own-fund database row after RLS', () => {
@@ -68,6 +129,126 @@ describe('parseStudentFundStateRow', () => {
         { session: studentSession, scope },
       ),
     ).toEqual({ ok: false, code: 'scope_mismatch' });
+  });
+});
+
+describe('parseStudentLeaderboardFundRow', () => {
+  const row = {
+    id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    class_id: classId,
+    student_display_name: 'Beta Fund',
+    current_aum: '52000000.00',
+    sharpe_ratio: '1.2500',
+  };
+
+  it('accepts a same-class leaderboard fund row after RLS without returning student ids or holdings', () => {
+    expect(parseStudentLeaderboardFundRow(row, { session: studentSession, scope })).toEqual({
+      ok: true,
+      row: {
+        fundId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        classId,
+        studentDisplayName: 'Beta Fund',
+        currentAum: 52000000,
+        sharpeRatio: 1.25,
+      },
+    });
+  });
+
+  it('rejects cross-class, malformed, or wrong-role leaderboard fund rows before result delivery', () => {
+    expect(parseStudentLeaderboardFundRow(row, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseStudentLeaderboardFundRow({ ...row, class_id: otherClassId }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseStudentLeaderboardFundRow({ ...row, student_display_name: ' ' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_display_name',
+    });
+    expect(parseStudentLeaderboardFundRow({ ...row, current_aum: '-1.00' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_numeric_value',
+    });
+  });
+});
+
+describe('parseInstructorClassFundRow', () => {
+  const row = {
+    id: fundId,
+    class_id: classId,
+  };
+
+  it('accepts an instructor-scoped class fund row after RLS', () => {
+    expect(parseInstructorClassFundRow(row, { session: instructorSession, scope })).toEqual({
+      ok: true,
+      row: {
+        fundId,
+        classId,
+      },
+    });
+  });
+
+  it('rejects wrong-role, cross-class, or malformed class fund rows before result delivery', () => {
+    expect(parseInstructorClassFundRow(row, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorClassFundRow({ ...row, class_id: otherClassId }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorClassFundRow({ ...row, id: 'not-a-fund-id' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_id',
+    });
+  });
+});
+
+describe('parseStudentOwnHoldingRow', () => {
+  const row = {
+    id: '10000000-0000-4000-8000-000000000002',
+    fund_id: fundId,
+    class_id: classId,
+    tier: 'Core',
+    allocation_weight_pct: '35.0000',
+  };
+
+  it('accepts a scoped student own-holding row after RLS', () => {
+    expect(parseStudentOwnHoldingRow(row, { session: studentSession, scope })).toEqual({
+      ok: true,
+      row: {
+        holdingId: '10000000-0000-4000-8000-000000000002',
+        fundId,
+        classId,
+        tier: 'Core',
+        allocationWeightPct: 35,
+      },
+    });
+  });
+
+  it('rejects unscoped, malformed, or wrong-role student holding rows before result delivery', () => {
+    expect(parseStudentOwnHoldingRow(row, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseStudentOwnHoldingRow({ ...row, fund_id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseStudentOwnHoldingRow({ ...row, class_id: otherClassId }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseStudentOwnHoldingRow({ ...row, tier: 'Cash' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_tier',
+    });
+    expect(parseStudentOwnHoldingRow({ ...row, allocation_weight_pct: '125.0000' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_numeric_value',
+    });
   });
 });
 
@@ -125,6 +306,18 @@ describe('parseStudentRevealedMacroNarrativeRow', () => {
           class_id: classId,
           month_index: 1,
           news_headline: 'Credit growth accelerates while inflation remains contained',
+          investment_clock_phase: 'expansion',
+          pmi: '52.10',
+          iip: '7.20',
+          m2_growth: '9.50',
+          gdp_growth_yoy: '6.10',
+          inflation_cpi: '2.80',
+          policy_rate: '4.50',
+          bond_yield: '5.20',
+          interbank_rate: '4.10',
+          usd_vnd_movement: '0.40',
+          vix: '18.00',
+          scenario_persistence: 'soft landing',
         },
         { session: studentSession, scope },
       ),
@@ -135,6 +328,18 @@ describe('parseStudentRevealedMacroNarrativeRow', () => {
         classId,
         monthIndex: 1,
         newsHeadline: 'Credit growth accelerates while inflation remains contained',
+        investmentClockPhase: 'expansion',
+        pmi: 52.1,
+        iip: 7.2,
+        m2Growth: 9.5,
+        gdpGrowthYoy: 6.1,
+        inflationCpi: 2.8,
+        policyRate: 4.5,
+        bondYield: 5.2,
+        interbankRate: 4.1,
+        usdVndMovement: 0.4,
+        vix: 18,
+        scenarioPersistence: 'soft landing',
       },
     });
   });
@@ -202,6 +407,68 @@ describe('parseStudentRevealedMarketMetricRow', () => {
   });
 });
 
+describe('parseStudentTrackedMetricRow', () => {
+  const row = {
+    id: '60000000-0000-4000-8000-000000000001',
+    class_id: classId,
+    fund_id: fundId,
+    scope_type: 'fund',
+    scope_id: fundId,
+    month_index: 1,
+    metric_id: 'sharpe_ratio',
+    display_label: 'Sharpe Ratio',
+    metric_family: 'performance',
+    value_numeric: '1.2500',
+    value_text: null,
+    unit: 'ratio',
+    source_type: 'computed',
+    source_note: 'month-end attribution',
+    convention_note: 'monthly return annualized with risk-free proxy',
+  };
+
+  it('accepts a scoped current-or-past student tracked metric row after RLS', () => {
+    expect(parseStudentTrackedMetricRow(row, { session: studentSession, scope })).toEqual({
+      ok: true,
+      row: {
+        trackedMetricId: '60000000-0000-4000-8000-000000000001',
+        classId,
+        fundId,
+        scopeType: 'fund',
+        scopeId: fundId,
+        monthIndex: 1,
+        metricId: 'sharpe_ratio',
+        displayLabel: 'Sharpe Ratio',
+        metricFamily: 'performance',
+        valueNumeric: 1.25,
+        valueText: undefined,
+        unit: 'ratio',
+        sourceType: 'computed',
+        sourceNote: 'month-end attribution',
+        conventionNote: 'monthly return annualized with risk-free proxy',
+      },
+    });
+  });
+
+  it('rejects future, unscoped, or malformed tracked metric rows before result delivery', () => {
+    expect(parseStudentTrackedMetricRow({ ...row, month_index: 2 }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'future_scenario_row',
+    });
+    expect(parseStudentTrackedMetricRow({ ...row, fund_id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseStudentTrackedMetricRow({ ...row, value_numeric: null, value_text: null }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_metric_value',
+    });
+    expect(parseStudentTrackedMetricRow(row, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+  });
+});
+
 describe('parseStudentTaraOrderRow', () => {
   it('accepts a scoped student TARA order row after RLS', () => {
     expect(
@@ -256,6 +523,119 @@ describe('parseStudentTaraOrderRow', () => {
     expect(parseStudentTaraOrderRow({ ...row, target_weights_json: { Base: 45, Core: 40, Apex: 20 } }, { session: studentSession, scope })).toEqual({
       ok: false,
       code: 'invalid_target_weights',
+    });
+  });
+});
+
+describe('parseInstructorPendingTaraOrderStatusRow', () => {
+  const row = {
+    id: '70000000-0000-4000-8000-000000000001',
+    fund_id: fundId,
+    class_id: classId,
+    month_index: 1,
+    status: 'pending',
+  };
+
+  it('accepts an instructor-scoped status-only TARA order row after RLS', () => {
+    expect(parseInstructorPendingTaraOrderStatusRow(row, { session: instructorSession, scope })).toEqual({
+      ok: true,
+      row: {
+        orderId: '70000000-0000-4000-8000-000000000001',
+        fundId,
+        classId,
+        monthIndex: 1,
+        status: 'pending',
+      },
+    });
+  });
+
+  it('rejects wrong-role, cross-class, future-month, or malformed order rows before result delivery', () => {
+    expect(parseInstructorPendingTaraOrderStatusRow(row, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorPendingTaraOrderStatusRow({ ...row, class_id: otherClassId }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorPendingTaraOrderStatusRow({ ...row, month_index: 2 }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorPendingTaraOrderStatusRow({ ...row, status: 'draft' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_status',
+    });
+    expect('targetWeights' in parseInstructorPendingTaraOrderStatusRow(row, { session: instructorSession, scope })).toBe(false);
+  });
+});
+
+describe('parseStudentRiskRegisterEntryRow', () => {
+  it('accepts a scoped student risk register row after RLS', () => {
+    expect(
+      parseStudentRiskRegisterEntryRow(
+        {
+          id: '80000000-0000-4000-8000-000000000001',
+          fund_id: fundId,
+          class_id: classId,
+          month_index: 1,
+          risk_type: 'inflation',
+          risk_direction: 'up',
+          impact_weight: '0.7000',
+          risk_time_lag: 2,
+          risk_probability_score: 4,
+          risk_impact_score: 4,
+          tara_risk_treatment_class: 'Reduce',
+          risk_treatment_action: 'Trim Apex and rebalance toward Base',
+        },
+        { session: studentSession, scope },
+      ),
+    ).toEqual({
+      ok: true,
+      row: {
+        riskRegisterEntryId: '80000000-0000-4000-8000-000000000001',
+        fundId,
+        classId,
+        monthIndex: 1,
+        riskType: 'inflation',
+        riskDirection: 'up',
+        impactWeight: 0.7,
+        riskTimeLag: 2,
+        riskProbabilityScore: 4,
+        riskImpactScore: 4,
+        taraRiskTreatmentClass: 'reduce',
+        riskTreatmentAction: 'Trim Apex and rebalance toward Base',
+      },
+    });
+  });
+
+  it('rejects unscoped, malformed, or wrong-role risk register rows before result delivery', () => {
+    const row = {
+      id: '80000000-0000-4000-8000-000000000001',
+      fund_id: fundId,
+      class_id: classId,
+      month_index: 1,
+      risk_type: 'inflation',
+      risk_direction: 'up',
+      impact_weight: '0.7000',
+      risk_time_lag: 2,
+      risk_probability_score: 4,
+      risk_impact_score: 4,
+      tara_risk_treatment_class: 'Reduce',
+      risk_treatment_action: 'Trim Apex and rebalance toward Base',
+    };
+
+    expect(parseStudentRiskRegisterEntryRow(row, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseStudentRiskRegisterEntryRow({ ...row, class_id: otherClassId }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseStudentRiskRegisterEntryRow({ ...row, tara_risk_treatment_class: 'hedge' }, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_tara_risk_treatment_class',
     });
   });
 });

@@ -1,0 +1,31 @@
+Selected story/work item: US-038 Data, auth, and tenancy foundation — first protected-data server query execution slice for student macro news. Lane: high-risk, because it touches auth/authorization/data delivery boundaries.
+
+Implemented one bounded slice:
+- Added `executeStudentMacroNewsQuery` in `app/infrastructure/auth-tenancy/student-macro-news-query.ts`.
+- Added unit coverage in `app/infrastructure/auth-tenancy/student-macro-news-query.test.ts`.
+- Extended student macro narrative row parsing to preserve full current/past macro-driver fields before delivery.
+- Kept the executor injected/testable only: no live Supabase client, no browser UI, no server action, no full dashboard composition.
+- Fixed `marketEarningsGrowthExpectation` typing and affected fixtures/catalog data so it remains numeric consistently.
+
+Docs/evidence updated:
+- `docs/stories/US-038-data-auth-tenancy-foundation/overview.md`
+- `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md`
+- `docs/stories/US-038-data-auth-tenancy-foundation/validation.md`
+- `docs/product/runtime-architecture.md`
+- `docs/product/user-surfaces.md`
+- `docs/product/roles-and-permissions.md`
+- `docs/product/data-model.md`
+- `docs/TEST_MATRIX.md`
+
+Validation run:
+- `npm run validate:quick` passed: 29 test files, 397 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests: 1 passed integration file, 1 skipped local RLS file; 3 passed tests, 1 skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- During validation, type/test failures surfaced from the numeric `marketEarningsGrowthExpectation` change; I fixed the catalog and test expectations, then reran validation successfully.
+
+Not attempted:
+- No commit, push, or PR.
+- No browser UI.
+- No full student dashboard server query composition.
+- No live Supabase runtime/provider execution.
+- No hosted Supabase setup, CI, deployment, worker, or realtime implementation.
+- Provider-backed local RLS execution remains pending until `AUTH_TENANCY_DATABASE_URL` is configured.
