@@ -61,14 +61,18 @@ Start by reading, in AGENTS.md order, the source-of-truth docs that are relevant
 - docs/TEST_MATRIX.md
 - docs/decisions/
 
-Select the next smallest unblocked sprint from docs/stories/backlog.md and docs/TEST_MATRIX.md. Prefer continuing existing story packets before creating new ones. Work in the correct intake lane. Keep the blast radius small. Do not scaffold broad app/platform shells, package scripts, CI, database migrations, auth, UI, or deployment unless an accepted story explicitly requires it.
+Select the next sprint from the Full-Stack MVP Sprint Sequence in docs/stories/backlog.md, not from the old pure-domain queue. Choose the earliest sequence item that is not already implemented and is not blocked by an unavailable external credential or hosted runtime. The old "smallest unblocked" rule must not keep selecting US-038 parser-only, descriptor-only, or docs-only work when the full-stack sequence has an available UI/server slice.
+
+US-038 local RLS execution is blocked when AUTH_TENANCY_DATABASE_URL is not configured. In that case, record that exact blocker once, do not select more US-038 parser-only/query-executor-only work unless a concrete security gap blocks browser exposure, and move to the next safe bounded full-stack slice. The no-gameplay Next.js shell and Supabase auth route guard already exist, so current autonomous rounds should normally advance to current-turn student dashboard server composition and then actual student dashboard UI. If the selected sequence item is UI, implement UI code; do not end the round by reporting "No browser UI" as the main outcome.
+
+The approved full-stack sequence explicitly allows bounded Next.js App Router, Supabase Auth/PostgreSQL/RLS, Drizzle, Inngest, Tailwind/shadcn, charting, realtime, E2E, deployment, and release-proof work when selected by docs/stories/backlog.md. Keep each slice narrow, but do not treat auth, database, UI, worker, realtime, CI, or deployment as categorically forbidden.
 
 For this single round:
-1. State the selected story/work item and lane.
-2. Implement only one bounded vertical slice or document the blocker.
+1. State the selected Full-Stack MVP Sprint Sequence item, story/work item, and lane.
+2. Implement one bounded vertical slice from that sequence item, or document the exact credential/runtime/decision blocker and immediately select the next safe sequence item.
 3. Update relevant docs, story status/evidence, and docs/TEST_MATRIX.md when they change.
 4. Run available validation commands when they exist, especially npm run validate:quick after code changes.
-5. Stop after this one sprint and summarize what changed, validation run, and what was not attempted.
+5. Stop after this one sprint and summarize what changed, validation run, and only the out-of-scope work that was not attempted for this selected slice.
 
 Do not commit, push, or create a pull request.
 PROMPT

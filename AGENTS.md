@@ -5,23 +5,28 @@ domain slices for accepted story packets. The human approved the full-stack MVP
 implementation track on 2026-05-18 so the accepted stack can now be introduced
 through selected stories: Next.js App Router, Vercel, Supabase Auth/PostgreSQL/RLS/Realtime,
 Drizzle ORM, Inngest, Tailwind CSS, shadcn/ui, Apache ECharts, Tremor, and
-release proof. It still has no implemented Next.js app, UI, CI, deployment automation,
-worker, or realtime provider code. US-038 has started a bounded Supabase/Drizzle
-auth-tenancy foundation, but no live database runtime, browser auth flow, hosted
-Supabase project, or production migration path is wired yet. Its RLS helpers and direct policies now require trusted student/instructor `app_role` paths for the bounded local proof, its local RLS proof harness parses `AUTH_TENANCY_DATABASE_URL` as a server-only PostgreSQL URL before execution, and its server-side database row parsers preserve student fund/order/ledger/macro-narrative/market-metric and instructor God Mode holding scopes before result delivery.
+release proof. It now has a minimal Next.js App Router shell with public home, Supabase magic-link login/logout actions, student/instructor route-group dashboard shells protected by Supabase session plus trusted `app_role` claim checks, a protected student current-turn dashboard UI, and a protected instructor pending-order visibility UI, but no live provider-backed gameplay database runtime, browser order form, CI, deployment automation,
+worker, hosted Supabase project, provider-backed browser E2E auth proof, or realtime provider code. US-038 has started a bounded Supabase/Drizzle
+auth-tenancy foundation, but no hosted
+Supabase project or production migration path is wired yet. Its RLS helpers and direct policies now require trusted student/instructor `app_role` paths for the bounded local proof, its local RLS proof harness parses `AUTH_TENANCY_DATABASE_URL` as a server-only PostgreSQL URL before execution, its future browser auth setup parses only public Supabase URL/anon-key values, its server-side database row parsers preserve student fund/holding/order/risk-register/ledger/macro-narrative/market-metric/tracked-metric and instructor owned-class/God Mode holding scopes before result delivery, its injected student macro news, current-turn Driver/String dashboard, portfolio pyramid, and TARA order-entry query executors return safe envelopes from parsed RLS-backed rows, its injected instructor pending-order visibility executor returns the existing status-only instructor envelope from parsed scoped class fund and TARA order status rows, and the protected instructor dashboard renders that status-only envelope through bounded parsed rows.
 
 The current job of agents is to preserve and grow the collaboration harness
 while adding story-selected, bounded implementation slices toward the complete
-full-stack simulation game. Do not scaffold broad unrelated shells, but do not
-keep reporting auth, UI, database, worker, realtime, CI, or deployment as
-categorically unattempted once the backlog selects a story for that layer.
+full-stack simulation game. Do not scaffold broad unrelated shells, but the
+approved full-stack sprint sequence now explicitly permits bounded auth,
+database, UI, worker, realtime, CI, deployment, and release-proof work when that
+layer is the selected backlog slice. Do not keep reporting those layers as
+categorically unattempted.
 
 When an autonomous sprint continues the full-stack MVP, select the earliest
 unimplemented slice from the full-stack sprint sequence in `docs/stories/backlog.md`.
-If local Supabase RLS execution is blocked only because `AUTH_TENANCY_DATABASE_URL`
-is not configured, record that specific blocker and move to the next bounded slice
-that can proceed safely, such as the Next.js app shell or browser auth flow that
-does not expose gameplay data.
+Do not fall back to the old pure-domain "smallest unblocked" queue. If local
+Supabase RLS execution is blocked only because `AUTH_TENANCY_DATABASE_URL` is
+not configured, record that specific blocker once, do not select more US-038
+parser-only or query-executor-only work unless a concrete security gap blocks
+browser exposure, and move to the next bounded full-stack slice. The auth-protected
+Next.js shell, student current-turn dashboard UI, and instructor pending-order UI already exist, so current autonomous
+rounds should normally advance to the next bounded instructor management server/UI slice or the next full-stack sprint-sequence item.
 
 ## Source Of Truth
 
@@ -88,4 +93,4 @@ A task is done only when:
 - Relevant docs, stories, and test matrix entries remain current.
 - Validation commands were run when they exist.
 - Missing harness capabilities were added to `docs/HARNESS_BACKLOG.md`.
-- The final response says what changed and what was not attempted.
+- The final response says what changed, validation status, and only what was intentionally out of scope for the selected slice.
