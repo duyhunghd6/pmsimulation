@@ -53,7 +53,7 @@ After pure-domain descriptor slices are exhausted, autonomous sprint rounds can 
 
 Add a blocked-story stop rule or backlog marker that tells future autonomous rounds to stop after recording the blocker once, unless the user has supplied the missing approval inputs or explicitly asks for another blocker refinement.
 
-Implemented in `docs/HARNESS.md` as the blocked high-risk reselection guard.
+Implemented in `docs/HARNESS.md` as the blocked high-risk reselection guard, and reinforced with current queue markers in `docs/stories/backlog.md` and `docs/TEST_MATRIX.md`.
 
 ### Risk
 

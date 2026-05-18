@@ -1,0 +1,16 @@
+Selected story/work item: **US-008 Current-Turn Driver/String Dashboard query boundary envelopes**.  
+Lane: **normal** — bounded pure-domain public query-boundary contract with unit proof; no UI, auth, database, provider, worker, or platform code.
+
+Implemented:
+- Added Driver/String dashboard future query descriptor, result envelope, and validation failure envelope in `app/domain/scenario/driver-string-dashboard.ts:149`.
+- Added focused unit coverage for descriptor validation, envelope scope matching, safe payload exclusions, and validation failure behavior in `app/domain/scenario/driver-string-dashboard.test.ts`.
+- Updated product/story/test evidence, including `docs/stories/US-008-current-turn-driver-string-dashboard.md:54` and `docs/TEST_MATRIX.md`.
+
+Validation:
+- `npm run test:unit -- app/domain/scenario/driver-string-dashboard.test.ts` passed: 1 file, 12 tests.
+- `npm run validate:quick` passed: 24 files, 347 tests.
+- Targeted `git diff --check` for this slice passed.
+- Repository-wide `git diff --check` is still blocked by a pre-existing trailing-whitespace issue in `.claude/sprint-runs/round-91-20260518-072110.log`.
+
+Not attempted:
+- No commit, push, PR, app scaffold, UI, auth/RLS, database, Supabase, realtime provider, worker, CI, or deployment work.

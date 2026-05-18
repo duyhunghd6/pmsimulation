@@ -348,6 +348,9 @@ export function buildStudentDashboardCurrentTurnSnapshot(
     marketMetrics: input.marketMetrics,
   });
   const portfolioPyramidResult = buildPortfolioPyramidSnapshot({
+    classId: input.classId,
+    monthIndex: input.currentMonthIndex,
+    viewerFundId: input.viewerFundId,
     currentWeights: input.currentWeights,
     intendedWeights: input.intendedWeights,
     dangerousDriftThresholdPct: input.dangerousDriftThresholdPct,

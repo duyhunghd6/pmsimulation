@@ -1,5 +1,11 @@
 # Roles and Permissions
 
+## Approved Auth and Tenancy Direction
+
+Supabase Auth JWT claims are the trusted session source for the full-stack MVP. Server boundaries must parse session claims, request inputs, and database rows before returning typed student or instructor outcomes. Supabase RLS is the primary tenant enforcement layer for persisted gameplay records, with server-side guards preserving the same class, fund, role, and month scope before database access.
+
+The first integration proof must show that students can read their own fund state and current/past class scenario data, cannot read future rows or other students' exact holdings, and cannot cross class tenants. Instructors can read God Mode data only for classes they administer and cannot access unowned classes.
+
 ## Roles
 
 ### Student / Fund Manager
@@ -10,13 +16,17 @@ Allowed capabilities:
 
 - View their own dashboard.
 - View current and past macro news available to the class.
+- Receive a future server-query descriptor, result envelope, and validation failure envelope for their own current-turn macro news scope before server query execution exists.
+- Receive a future server-query descriptor, result envelope, and validation failure envelope for their own current-turn Driver/String dashboard scope before server query execution exists.
 - View their own holdings, AUM, Sharpe ratio, allocation drift, and attribution reports.
+- Receive a future server-query descriptor, result envelope, and validation failure envelope for their own current-turn portfolio pyramid scope before server query execution exists.
 - Receive a future server-query descriptor, result envelope, and validation failure envelope for their own attribution report scope before server query execution exists.
 - Submit TARA rebalancing orders for the current month.
 - Receive a student-safe TARA submission receipt, future server-command descriptor, future server-action accepted result envelope, and future server-action validation failure envelope for their own current-month order submission boundary.
 - View a TARA order-entry snapshot for their own fund with current allocation, target allocation, pending draft status, and tax-drag preview.
 - Receive a future server-query descriptor, result envelope, and validation failure envelope for their own current-turn TARA order-entry scope before server query execution exists.
 - View their leaderboard rank and permitted class leaderboard metrics without exact holdings or pending-order details for other students.
+- Receive a future server-query descriptor, result envelope, and validation failure envelope for their own leaderboard-rank scope before server query execution exists.
 - View a post-turn dashboard snapshot that combines their own attribution report with permitted leaderboard-rank metrics.
 - Receive a future server-query descriptor, result envelope, and validation failure envelope for their own post-turn dashboard scope before server query execution or result delivery exists.
 - Receive a future server-query descriptor, result envelope, and validation failure envelope for their own current-turn dashboard scope before server query execution exists.
@@ -42,6 +52,7 @@ Allowed capabilities:
 - View pending-order status for students in their classes.
 - Receive a future server-query descriptor, result envelope, and validation failure envelope for their own pending-order visibility scope before server query execution exists.
 - View class-wide aggregate analytics.
+- Receive a future server-query descriptor, result envelope, and validation failure envelope for their own class aggregate analytics scope before server query execution exists.
 - View live class leaderboard rows with fund AUM, Sharpe ratio, and pending-order status.
 - Receive a future server-query descriptor, result envelope, and validation failure envelope for their own live leaderboard scope before server query execution exists.
 - View live month-advance control status for instructor-scoped classes.

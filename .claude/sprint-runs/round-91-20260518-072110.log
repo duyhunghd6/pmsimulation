@@ -1,0 +1,15 @@
+Selected story/work item: **US-023 Instructor Class Aggregate Analytics Snapshot continuation**  
+Lane: **normal** — bounded pure-domain query boundary slice, no provider/auth/database/UI execution.
+
+Implemented one vertical slice:
+- Added instructor aggregate analytics query descriptor/result envelope/validation failure envelope in `app/domain/classes/class-aggregate-analytics.ts:152`.
+- Added unit coverage for descriptor creation, scope mismatch, validation failure envelopes, and forbidden payload exclusions in `app/domain/classes/class-aggregate-analytics.test.ts:55`.
+- Updated product/story proof docs, backlog, README status, and test matrix, including `docs/TEST_MATRIX.md:61` and `docs/product/user-surfaces.md:89`.
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/class-aggregate-analytics.test.ts` — passed, 1 file / 14 tests.
+- `npm run validate:quick` — passed, 24 files / 322 tests.
+
+Not attempted:
+- No commit, push, or PR.
+- No UI, server query execution, auth/RLS, database, Supabase, worker, realtime, CI, deployment, or broad platform scaffolding.

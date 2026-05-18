@@ -1,0 +1,7 @@
+Selected story/work item: `US-038 Data, auth, and tenancy foundation`; lane: high-risk.
+
+This sprint stopped at the existing blocker instead of implementing because US-038 still requires explicit human decisions for session claims, schema/RLS shape, Supabase/Drizzle environment handling, fixtures, integration proof command, and denied-access observability before provider-backed auth/database work can safely start. No code or docs changed because `docs/stories/US-038-data-auth-tenancy-foundation/` already documents the blocker, decision gate, and 2026-05-18 recheck evidence.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 357 tests.
+
+Not attempted: auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, or additional descriptor scaffolding.

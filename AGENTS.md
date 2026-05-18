@@ -1,11 +1,18 @@
 # Agent Operating Guide
 
-This repository is in Harness v0. There is no product implementation yet.
+This repository started as Harness v0 and now has minimal pure TypeScript
+domain slices for accepted story packets. The human approved the full-stack MVP
+implementation track on 2026-05-18 so the accepted stack can now be introduced
+through selected stories: Next.js App Router, Vercel, Supabase Auth/PostgreSQL/RLS/Realtime,
+Drizzle ORM, Inngest, Tailwind CSS, shadcn/ui, Apache ECharts, Tremor, and
+release proof. It still has no implemented Next.js app, UI, database, auth, CI,
+migrations, deployment automation, worker, or realtime provider code.
 
 The current job of agents is to preserve and grow the collaboration harness
-before writing application code. Do not scaffold application source folders,
-platform shells, package scripts, CI, or tests unless a later story explicitly
-moves the project into implementation.
+while adding only story-selected, bounded implementation slices. Do not scaffold
+broad application shells, platform shells, package scripts, CI, database
+migrations, auth, UI, deployment, worker, or provider code outside an accepted
+story that explicitly requires that layer.
 
 ## Source Of Truth
 

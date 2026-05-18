@@ -1,0 +1,14 @@
+Selected story/work item: `US-009 Student Portfolio Pyramid Snapshot` continuation. Lane: `normal`.
+
+Implemented one bounded pure-domain slice:
+- Added student portfolio pyramid query descriptor/result/validation-failure envelopes in `app/domain/portfolio/pyramid.ts:177`, `app/domain/portfolio/pyramid.ts:281`.
+- Added class/month/viewer-fund scope to portfolio pyramid snapshots in `app/domain/portfolio/pyramid.ts:352`.
+- Updated current-turn student dashboard composition to pass portfolio scope in `app/domain/student/dashboard-snapshot.ts:350`.
+- Added 14 unit tests for descriptor safety, result scope matching, validation-failure envelopes, and snapshot scope/drift behavior in `app/domain/portfolio/pyramid.test.ts:29`.
+- Updated product/story/matrix docs, including `docs/stories/US-009-student-portfolio-pyramid-snapshot.md:34` and `docs/product/user-surfaces.md:33`.
+
+Validation run:
+- `npm run test:unit -- app/domain/portfolio/pyramid.test.ts` — passed, 1 file / 14 tests.
+- `npm run validate:quick` — passed, 24 files / 357 tests.
+
+Not attempted: no UI, auth, database, Supabase, RLS, server query execution, worker, realtime provider, CI/deployment, commit, push, or PR. The working tree already had many unrelated modified/untracked files before this sprint; I only added the bounded US-009 continuation and related docs updates.

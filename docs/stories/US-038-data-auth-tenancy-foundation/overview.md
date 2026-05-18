@@ -28,10 +28,15 @@ After this story is implemented, the product has a minimal Supabase-backed found
 - Do not migrate historical data; no durable production data exists yet.
 - Do not weaken current pure-domain contracts or mark integration proof implemented before it exists.
 
-## Sprint Blocker
+## Approved Implementation Direction
 
-Implementation remains blocked in this autonomous sprint because this slice crosses auth, authorization, data-model, audit/security, and external-provider hard gates. Proceeding would require confirming concrete Supabase schema/RLS/session boundaries, dependency/runtime configuration, integration fixtures, and proof commands. Scaffolding those pieces ad hoc would violate the harness rule against broad platform shells and the high-risk lane requirement to confirm ambiguous security and architecture boundaries before implementation.
+The human approved the full-stack MVP implementation track on 2026-05-18, including the first US-038 provider-backed proof slice. This story is no longer blocked on generic permission to introduce Supabase, Drizzle, RLS, local integration fixtures, or an auth-tenancy integration command.
 
-The 2026-05-17 sprint reselected US-038 as the next existing prerequisite packet after all remaining implementation packets proved blocked by missing app, provider, auth, or platform runtime boundaries. The blocker is the missing security foundation itself: no role/session contract, class membership/admin schema, RLS policy shape, server query/command boundary, Supabase/Drizzle dependency boundary, fixture strategy, audit/logging expectation, or integration validation command exists yet. This autonomous sprint round rechecked the backlog and test matrix after the latest pure-domain descriptor slices, confirmed there is still no smaller unblocked normal-lane implementation ahead of this foundation, and stopped at blocker evidence rather than creating another descriptor layer. No auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, or deployment code was introduced.
+Approved foundation choices:
 
-Current sprint delta: the exec plan now names the next human decision gate, and `docs/HARNESS_BACKLOG.md` records the repeated high-risk blocker reselection pattern so future autonomous rounds do not keep restating the same provider-backed blocker without new approval inputs.
+- Supabase Auth JWT claims are the trusted student/instructor session source.
+- Local Supabase is the first executable proof harness.
+- Supabase RLS is the primary persisted authorization boundary, supported by parse-first server guards.
+- Drizzle schema/migrations may cover the minimum tenancy and gameplay tables needed to prove class isolation, own-fund access, future-row denial, other-student holding denial, instructor God Mode access, and unowned-class rejection.
+- The first dedicated integration proof command should be `npm run test:integration:auth-tenancy`.
+- Browser UI, month-advance worker execution, realtime provider publication, CI, deployment, and hosted production resources remain out of scope for this story.

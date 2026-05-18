@@ -1,0 +1,15 @@
+Selected story: **US-025 Student Leaderboard Rank Snapshot and Query Boundary Envelopes**.  
+Lane: **normal**.
+
+What changed:
+- Updated US-025 validation evidence from 330 to 331 tests in `docs/stories/US-025-student-leaderboard-rank-snapshot.md:67`.
+- Updated matching test-matrix evidence in `docs/TEST_MATRIX.md:42`.
+
+Validation run:
+- `npm run test:unit -- app/domain/student/leaderboard-rank.test.ts` — passed, 15 tests.
+- `npm run validate:quick` — passed, 24 test files / 331 tests.
+
+What was not attempted:
+- No commit, push, or PR.
+- No UI, server query execution, auth/RLS, database, Supabase, worker, realtime, CI, or deployment work.
+- I did not alter the pre-existing US-023 working-tree changes.

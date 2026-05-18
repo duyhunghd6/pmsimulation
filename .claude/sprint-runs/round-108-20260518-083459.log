@@ -1,0 +1,9 @@
+Selected story/work item: `US-038 Data, auth, and tenancy foundation`.
+
+Lane: high-risk. It crosses auth, authorization, data-model, audit/security, external-provider, public-contract, weak-proof, and multi-domain gates.
+
+What changed: no code or docs were changed. The existing US-038 packet already documents the blocker, and `docs/HARNESS.md` says not to reselect blocked high-risk stories just to restate the same blocker without new human inputs.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 357 tests.
+
+Not attempted: no Supabase, auth, RLS, database, app runtime, UI, worker, realtime provider, CI, deployment, or platform scaffolding was introduced. The next step remains human approval/selection for one of the US-038 decision-gate paths in `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md`.

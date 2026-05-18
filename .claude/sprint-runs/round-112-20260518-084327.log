@@ -1,0 +1,7 @@
+Selected work item: `US-038 Data, auth, and tenancy foundation`, high-risk lane.
+
+No implementation was attempted because `docs/stories/backlog.md:19` and `docs/TEST_MATRIX.md:19` state there are no smaller unblocked normal-lane product slices, and `docs/TEST_MATRIX.md:37-38` records that US-038 remains blocked on human decisions around role/session source, schema/RLS shape, proof harness, environment handling, fixtures, audit shape, and provider-backed validation approval.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 357 tests.
+
+What changed: no code or docs changed this sprint. What was not attempted: no Supabase/auth/RLS/provider/app/platform scaffolding, and no commit/PR.

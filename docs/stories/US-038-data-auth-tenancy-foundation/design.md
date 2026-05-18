@@ -21,11 +21,11 @@ The first implementation should expose only narrow server-side query/command con
 
 ## Data Model
 
-Minimum durable entities likely include classes, class memberships or enrollment, funds, asset holdings, macro narratives or scenario rows, and instructor ownership/admin links. The exact schema, indexes, Drizzle representation, migrations, and RLS policies must be confirmed before implementation because this story owns the product's security foundation.
+Minimum durable entities include profiles or trusted auth-subject mappings, classes, class administration, class memberships or enrollment, funds, asset holdings, macro narratives, market metrics, tracked metrics, TARA orders, risk register rows, and simulation ledger rows as needed by the foundation proof. Drizzle schema/migrations and Supabase RLS policies are approved for this story, with local Supabase as the first proof target.
 
 ## UI / Platform Impact
 
-No UI or deployment shell should be introduced solely for this story. Any Supabase credentials or service-role behavior must be server-only. Browser clients should receive data only through authorized server-scoped query paths once an app runtime exists.
+No UI or deployment shell should be introduced solely for this story. Supabase and Drizzle files should stay limited to local proof, schema, RLS, fixtures, and server-only boundary code. Any Supabase credentials or service-role behavior must be server-only. Browser clients should receive data only through authorized server-scoped query paths once an app runtime exists.
 
 ## Observability
 
@@ -35,4 +35,5 @@ Future implementation should distinguish operational logs from audit records. Au
 
 1. Implement pure-domain authorization descriptors only. Rejected for this story because E00 requires actual backend enforcement proof, not another descriptor layer.
 2. Scaffold a broad Next.js/Supabase application shell. Rejected because the selected foundation should introduce only the runtime and schema pieces needed to prove tenancy and role-scoped access.
-3. Keep E00 unsliced. Rejected for this sprint because US-037 and future provider/client work need a durable blocker and prerequisite story to reference.
+3. Use a hosted Supabase project for first proof. Deferred because local Supabase gives executable isolation proof without creating shared external resources.
+4. Keep E00 unsliced. Rejected because US-037 and future provider/client work need a durable prerequisite story to reference.

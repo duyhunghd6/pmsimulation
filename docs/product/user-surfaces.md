@@ -24,11 +24,15 @@ The MVP pure-domain student post-turn dashboard snapshot composes the viewer fun
 
 Shows the current month's headline, macro regime, market-string dashboard, and scenario-driver metrics relevant to the current turn. It may show past data already revealed to the student, but it must not expose future scenario or metric rows.
 
-The MVP pure-domain scenario catalog provides deterministic current/past reveal-window rows from the 12-month MVP calendar for this surface before UI, server queries, persistence, or seed scripts exist.
+The MVP pure-domain scenario catalog provides deterministic current/past reveal-window rows from the 12-month MVP calendar for this surface before UI, server queries, persistence, or seed scripts exist. The MVP pure-domain student macro news query descriptor, result envelope, and validation failure envelope record the future server-query boundary for one already-scoped class/current-month/viewer-fund request without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, future scenario rows, or result delivery.
+
+### Driver/String Metrics Dashboard
+
+Shows current-turn macro driver indicators grouped by timing and market-string metrics for the student's already-scoped class month. The MVP pure-domain current-turn Driver/String dashboard query descriptor, result envelope, and validation failure envelope record the future server-query boundary for one already-scoped class/current-month/viewer-fund request without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, future scenario rows, other-fund payloads, or result delivery.
 
 ### Pyramid Visualizer
 
-Shows the student's current allocation across Base, Core, and Apex tiers. It should highlight dangerous portfolio drift from intended structure by comparing current weights against intended weights using an accepted drift threshold.
+Shows the student's current allocation across Base, Core, and Apex tiers. It should highlight dangerous portfolio drift from intended structure by comparing current weights against intended weights using an accepted drift threshold. The MVP pure-domain portfolio pyramid query descriptor, result envelope, and validation failure envelope record the future server-query boundary for one already-scoped class/current-month/viewer-fund request and wrap only an already-authorized viewer-fund portfolio pyramid snapshot, without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, other-fund exact holdings, instructor God Mode data, target weights, order details, estimated tax drag, ledger drafts, or result delivery.
 
 ### TARA Order Entry
 
@@ -54,7 +58,7 @@ The MVP pure-domain student attribution report snapshot emits these categories f
 
 ### Leaderboard Rank View
 
-Shows the student's current class rank and permitted class leaderboard metrics for the already-scoped class month. The MVP pure-domain snapshot ranks by current AUM descending, Sharpe ratio descending, and fund id ascending as the final deterministic tie-breaker; marks the viewing fund; and excludes exact holdings, fund ids in row payloads, pending-order status, target weights, estimated tax drag, order details, ledger drafts, and future scenario rows.
+Shows the student's current class rank and permitted class leaderboard metrics for the already-scoped class month. The MVP pure-domain snapshot ranks by current AUM descending, Sharpe ratio descending, and fund id ascending as the final deterministic tie-breaker; marks the viewing fund; and excludes exact holdings, fund ids in row payloads, pending-order status, target weights, estimated tax drag, order details, ledger drafts, and future scenario rows. The MVP pure-domain student leaderboard rank query descriptor, result envelope, and validation failure envelope record the future server-query boundary for one already-scoped class/current-month/viewer-fund request without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, or leaderboard result delivery.
 
 ## Instructor Dashboard
 
@@ -86,7 +90,7 @@ Shows exact current Base/Core/Apex allocation weights for all funds in an instru
 
 ### Class Aggregate Analytics
 
-Shows class-level fund count, total AUM, average AUM, average Sharpe ratio, pending-order count, missing-order count, pending-order AUM, and missing-order AUM for an instructor-scoped class month. The MVP pure-domain snapshot excludes per-fund rows, holdings, target weights, estimated tax drag, and other order detail payloads.
+Shows class-level fund count, total AUM, average AUM, average Sharpe ratio, pending-order count, missing-order count, pending-order AUM, and missing-order AUM for an instructor-scoped class month. The MVP pure-domain snapshot excludes per-fund rows, holdings, target weights, estimated tax drag, and other order detail payloads. The MVP pure-domain class aggregate analytics query descriptor, result envelope, and validation failure envelope record the future server-query boundary for one already-scoped instructor class/current-month request without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, or per-fund detail delivery.
 
 ### Manual Fast-Forward Control
 

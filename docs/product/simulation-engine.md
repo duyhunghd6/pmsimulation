@@ -10,7 +10,7 @@ The engine advances by monthly turns. Each turn reads a scripted macro narrative
 
 Macro data comes from a pre-scripted scenario array.
 
-The MVP pure-domain scenario catalog defines paired macro narrative and market metric rows for the full 12-month MVP curriculum calendar, including rate-hike stress turns where CPI crosses `3.0%`, policy rate rises by `0.50%`, and VIX rises. Student-facing reveal helpers may return only current and past rows for the selected month.
+The MVP pure-domain scenario catalog defines paired macro narrative and market metric rows for the full 12-month MVP curriculum calendar, including rate-hike stress turns where CPI crosses `3.0%`, policy rate rises by `0.50%`, and VIX rises. Student-facing reveal helpers may return only current and past rows for the selected month. The MVP pure-domain student macro news query descriptor, result envelope, and validation failure envelope record the future server-query boundary for one already-scoped current-turn macro news request without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, future scenario rows, or result delivery.
 
 Indicator timing:
 
@@ -18,6 +18,8 @@ Indicator timing:
 - Coincident indicators: `GDP`, `VIX`, equity-market liquidity, and market-flow strings.
 - Lagging indicators: `CPI / Inflation`, `CB Rate`, bond yield, interbank rate, and delayed risk/performance effects.
 - Regime context includes `investment_clock_phase`, `scenario_persistence`, `business_cycle_phase`, driver direction, impact weight, and time lag.
+
+The MVP pure-domain current-turn Driver/String dashboard query descriptor, result envelope, and validation failure envelope record the future server-query boundary for current macro driver and market-string metrics without executing server queries, auth/session checks, RLS, database access, UI rendering, provider clients, future scenario rows, or result delivery.
 
 Lag rules:
 

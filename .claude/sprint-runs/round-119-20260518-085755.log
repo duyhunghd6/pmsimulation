@@ -1,0 +1,11 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk, because it crosses auth, authorization, data model, audit/security, external provider, public contract, weak proof, and multi-domain gates (`docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:25`).
+
+No implementation changes were made. The blocker is already documented: US-038 cannot proceed until the role/session source, minimal membership/admin schema, RLS/enforcement boundary, Supabase/Drizzle environment handling, fixtures, audit/log shape, integration command, and approval to leave pure-domain descriptor mode are confirmed (`docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:67`).
+
+Validation run:
+
+- `npm run validate:quick`
+- Result: passed — 24 test files, 357 tests.
+
+Not attempted: auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, or platform scaffolding.

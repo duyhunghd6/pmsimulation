@@ -1,0 +1,8 @@
+Selected work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk.
+
+Outcome: no implementation or docs changes were made because `docs/stories/backlog.md`, `docs/TEST_MATRIX.md`, and `docs/stories/US-038-data-auth-tenancy-foundation/` already document that all smaller normal-lane slices are exhausted and US-038 is blocked pending human decisions on session claims, schema/RLS shape, provider proof harness, server-only environment handling, fixtures, audit/log shape, and approval to introduce provider-backed proof.
+
+Validation run: `npm run validate:quick` passed — 24 test files, 357 tests.
+
+Not attempted: auth, database, Supabase/RLS, app runtime, UI, worker, realtime provider, CI, deployment, or any broad platform scaffolding.

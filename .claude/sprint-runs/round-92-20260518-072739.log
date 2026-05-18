@@ -1,0 +1,14 @@
+Selected story/work item: `US-023 Instructor class aggregate analytics snapshot and query boundary envelopes`  
+Lane: normal
+
+Completed one bounded pure-domain slice for instructor class aggregate analytics query boundaries:
+- Added/validated server-query descriptor, result envelope, and validation failure envelope contracts in `app/domain/classes/class-aggregate-analytics.ts:48`.
+- Covered descriptor creation, scope mismatch, forbidden payload exclusion, and validation failure envelopes in `app/domain/classes/class-aggregate-analytics.test.ts:55`.
+- Story and evidence are current in `docs/stories/US-023-instructor-class-aggregate-analytics-snapshot.md:64`.
+- Test matrix evidence is current in `docs/TEST_MATRIX.md:61`.
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/class-aggregate-analytics.test.ts` — passed, 1 file / 14 tests.
+- `npm run validate:quick` — passed, 24 files / 322 tests.
+
+Not attempted: UI, auth, database, Supabase/RLS, server-query execution, providers, workers, realtime, CI, commit, push, or PR.

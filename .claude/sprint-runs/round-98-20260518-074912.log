@@ -1,0 +1,15 @@
+Selected story/work item: `US-023 Instructor Class Aggregate Analytics Snapshot and Query Boundary Envelopes`  
+Lane: `normal`
+
+Changed:
+- Continued the existing US-023 pure-domain query-boundary slice.
+- Added focused proof that the validation-failure envelope excludes snapshots, database rows, provider payloads, UI state, and executed query metadata: `app/domain/classes/class-aggregate-analytics.test.ts:276`.
+- Updated US-023 evidence to 15 focused tests and current quick-validation results: `docs/stories/US-023-instructor-class-aggregate-analytics-snapshot.md:64`.
+- Updated the test matrix evidence for US-023: `docs/TEST_MATRIX.md:61`.
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/class-aggregate-analytics.test.ts` — passed, 1 file / 15 tests.
+- `npm run validate:quick` — passed, 24 files / 331 tests.
+
+Not attempted:
+- No UI, auth, database, Supabase, RLS, server-query execution, provider client, worker, cron, commit, push, or PR work. The working tree already had broader uncommitted changes before this sprint; I only advanced the selected US-023 proof/evidence slice.

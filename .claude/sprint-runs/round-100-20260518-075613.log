@@ -1,0 +1,16 @@
+Selected work item: `US-007 Student Macro News Snapshot and Query Boundary Envelopes`  
+Lane: normal — bounded pure-domain query boundary extension with unit proof; no app/provider/auth scaffolding.
+
+Changed:
+- Added student macro-news query descriptor, query result envelope, and validation-failure envelope helpers in `app/domain/scenario/macro-news.ts:189`.
+- Added focused tests for descriptor creation, result wrapping, validation failures, and future-row non-exposure in `app/domain/scenario/macro-news.test.ts:84`.
+- Updated US-007 story packet and evidence in `docs/stories/US-007-student-macro-news-snapshot.md:1`.
+- Updated product docs, backlog, repository status text, and test matrix; matrix row is at `docs/TEST_MATRIX.md:36`.
+
+Validation run:
+- `npm run test:unit -- app/domain/scenario/macro-news.test.ts` — passed, 1 file / 13 tests.
+- `npm run validate:quick` — passed, 24 files / 339 tests.
+
+Not attempted:
+- No Next.js UI, auth, database, Supabase/RLS, worker, realtime provider, CI, deployment, commit, push, or PR.
+- Pre-existing unrelated uncommitted changes for class aggregate analytics, leaderboard rank, and sprint logs remain in the working tree.

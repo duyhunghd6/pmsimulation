@@ -50,58 +50,44 @@ Lane: high-risk.
 1. Confirm the minimal role/session model for students and instructors.
 2. Select the smallest schema/RLS surface that can prove class tenancy and protected reads.
 3. Define parse-first server command/query boundaries for session claims and database rows.
-4. Add Supabase/Drizzle or accepted persistence tooling only after the boundary is confirmed.
-5. Add deterministic fixtures for two classes, two students, one instructor, current/past/future scenario rows, and exact holdings.
+4. Add Supabase Auth/PostgreSQL/RLS and Drizzle schema/migrations for the approved proof slice.
+5. Add deterministic fixtures for two classes, two instructors, at least three students, current/past/future scenario rows, and exact holdings.
 6. Add integration proof for allowed and forbidden reads/writes.
 7. Update product docs, story evidence, test matrix, and decisions if the security architecture changes.
 
-## Minimum Unblockers
+## Approved Unblockers
 
-- Role/session claims for student and instructor identities are confirmed, including how class membership and instructor administration are represented in trusted server context.
-- Minimal class membership and instructor-admin schema/RLS shape is confirmed for own-fund reads, future-row denial, other-holding denial, instructor-owned God Mode reads, and unowned-class rejection.
-- The server-side query/command boundary that parses session claims, request inputs, and database rows is selected.
-- Supabase/Drizzle dependency and environment handling are approved for the narrow proof slice, including server-only credential handling.
-- Authorization failure logging or audit expectations are confirmed without exposing credentials, future rows, or unauthorized holdings.
-- A deterministic fixture set and integration validation command are available before any security row is marked implemented.
+- Role/session claims: Supabase Auth JWT claims are the trusted student and instructor identity source. Class membership and instructor administration are represented in persisted membership/admin rows and rechecked by RLS and server guards.
+- Minimal schema/RLS shape: classes, class administration, class membership or enrollment, funds, asset holdings, macro narratives, market metrics, tracked metrics, TARA orders, risk register rows, and simulation ledger rows are approved for the first Drizzle/Supabase foundation as needed by proof.
+- Server boundary: parse session claims, request inputs, and database rows before returning typed allowed/forbidden query or command outcomes.
+- Dependencies and environment: Supabase Auth/PostgreSQL/RLS plus Drizzle are approved for the narrow proof slice with server-only credentials and local Supabase as the initial executable harness.
+- Authorization observability: denied authorization attempts may log safe actor id, role, class id, resource kind, action, decision, reason code, and request correlation id, without credentials, future rows, unauthorized holdings, raw forbidden payloads, or service-role secrets.
+- Fixtures and command: deterministic two-class, two-instructor, three-student fixtures plus current/past/future scenario rows and exact holdings are required before marking the security row implemented; the first integration command should be `npm run test:integration:auth-tenancy`.
 
-## Decision Inputs Needed
+## Approved First Provider-Backed Slice
 
-Before implementation can start, the high-risk lane needs explicit confirmation of:
+The human approved the full-stack MVP implementation track on 2026-05-18. US-038 may now leave pure-domain descriptor mode and introduce the first provider-backed proof slice.
 
-- The trusted role/session claim source for student and instructor identities.
-- The minimal membership/admin schema needed to prove class tenancy without a full app shell.
-- Whether the first executable proof uses Supabase local development, hosted Supabase, or a different accepted backend harness.
-- The server-only environment and credential handling boundary for tests and future runtime code.
-- The integration command name and fixture ownership model for forbidden-read proof.
-- The safe audit/log shape for denied authorization attempts.
-- Whether this story should now leave pure-domain descriptor mode and introduce the first provider-backed proof slice.
+Approved choices:
 
-## Approval Checklist For First Provider-Backed Slice
-
-Before implementation can leave blocker mode, the approved slice should name:
-
-- Session source: Supabase Auth JWT claims, including the trusted role claim and subject identifier for student and instructor paths.
-- Minimal schema: classes, instructor administration, class membership or enrollment, funds, holdings, and scenario rows sufficient to prove the forbidden reads.
-- Enforcement boundary: whether proof is primarily Supabase RLS, server-side policy checks, or both, and which checks must be database-enforced.
-- Test harness: local Supabase, hosted Supabase test project, or another accepted backend target, plus the exact integration command name.
-- Environment boundary: required server-only variables and how tests prevent browser/client exposure.
-- Fixtures: deterministic two-class, multi-student, multi-instructor rows with current, past, and future scenario data.
-- Denied-access observability: safe log or audit fields that exclude credentials, future rows, unauthorized holdings, and raw forbidden payloads.
+- Session source: Supabase Auth JWT claims, including trusted role and subject identifiers for student and instructor paths.
+- Minimal schema: classes, instructor administration, class membership or enrollment, funds, holdings, macro narratives, market metrics, tracked metrics, TARA orders, risk register rows, and simulation ledger rows as needed for the foundation proof.
+- Enforcement boundary: Supabase RLS is primary for persisted tenant/role enforcement; server-side parse-first guards must preserve the same scope before database access and result delivery.
+- Test harness: local Supabase first, with `npm run test:integration:auth-tenancy` as the first dedicated integration command.
+- Environment boundary: server-only Supabase URL/key variables and database credentials; tests must not expose service-role or database credentials to browser/client code.
+- Fixtures: deterministic two-class, multi-student, multi-instructor rows with current, past, and future scenario data plus exact holdings.
+- Denied-access observability: safe actor id, role, class id, resource kind, action, decision, reason code, and request correlation id only.
 
 ## Next Human Decision Gate
 
-This story should not leave blocker mode until the human selects one of these paths:
-
-1. Approve a first provider-backed proof slice with the checklist above filled in.
-2. Defer provider-backed work and keep future autonomous rounds to docs or harness improvements only.
-3. Narrow a pure TypeScript policy-helper slice while keeping US-038 integration proof explicitly planned, not implemented.
+No additional human decision is needed before starting the narrow US-038 provider-backed proof slice above. Pause again only if implementation would expand beyond the approved stack, add hosted production resources, weaken the proof cases, introduce a broader app shell, or require a schema/security choice not covered here.
 
 ## Stop Conditions
 
 Pause for human confirmation if:
 
-- The role/session claim shape is ambiguous.
-- Implementing proof requires adding Supabase, Drizzle, app runtime, or environment configuration.
+- Implementation needs auth/session claims beyond Supabase Auth JWT role and subject identifiers.
+- Implementation requires hosted production Supabase, Vercel deployment, or third-party resources beyond local proof.
 - RLS policy shape conflicts with current product docs.
-- A broader schema or app shell becomes necessary to prove the slice.
+- A broader app shell, browser UI, worker, realtime provider, CI, or deployment setup becomes necessary to prove this slice.
 - Any validation requirement would need to be weakened or postponed after implementation.

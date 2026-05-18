@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCurrentTurnDriverStringDashboard } from './driver-string-dashboard';
+import {
+  buildCurrentTurnDriverStringDashboard,
+  createCurrentTurnDriverStringDashboardQueryDescriptor,
+  createCurrentTurnDriverStringDashboardQueryResultEnvelope,
+  createCurrentTurnDriverStringDashboardQueryResultValidationFailureEnvelope,
+} from './driver-string-dashboard';
 import { type MacroNarrativeRow, type MarketMetricRow } from './macro-news';
 
 const macroNarratives: MacroNarrativeRow[] = [
@@ -60,6 +65,291 @@ const marketMetrics: MarketMetricRow[] = [
     businessCyclePhase: 'future contraction',
   },
 ];
+
+function defaultDashboard() {
+  const result = buildCurrentTurnDriverStringDashboard({
+    currentMonthIndex: 0,
+    macroNarratives,
+    marketMetrics,
+  });
+
+  if (!result.ok) {
+    throw new Error('Expected default current-turn Driver/String dashboard to be valid.');
+  }
+
+  return result.value;
+}
+
+describe('createCurrentTurnDriverStringDashboardQueryDescriptor', () => {
+  it('creates a future server-query descriptor for a scoped current-turn Driver/String dashboard', () => {
+    const result = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: ' class-001 ',
+      currentMonthIndex: 0,
+      viewerFundId: ' fund-001 ',
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        descriptorType: 'current_turn_driver_string_dashboard_query_descriptor',
+        queryDescriptorKey: 'class:class-001:month:0:fund:fund-001:current-turn-driver-string-dashboard-query',
+        queryBoundary: 'server_query_descriptor_boundary',
+        queryName: 'get_current_turn_driver_string_dashboard',
+        requiredScope: 'viewer_fund_in_class',
+        classId: 'class-001',
+        currentMonthIndex: 0,
+        viewerFundId: 'fund-001',
+        currentTurnOnly: true,
+        includeFutureScenarioRows: false,
+        includeOtherFundIds: false,
+        includeExactHoldings: false,
+        includeTargetWeights: false,
+        includeOrderDetails: false,
+        includeLedgerDrafts: false,
+        includeProviderPayload: false,
+      },
+    });
+  });
+
+  it('rejects invalid query descriptor scope inputs', () => {
+    expect(
+      createCurrentTurnDriverStringDashboardQueryDescriptor({
+        classId: ' ',
+        currentMonthIndex: 1.5,
+        viewerFundId: ' ',
+      }),
+    ).toEqual({
+      ok: false,
+      errors: [
+        { code: 'invalid_class_id', message: 'Class id is required.' },
+        { code: 'invalid_current_month_index', message: 'Current month index must be a non-negative integer.' },
+        { code: 'invalid_viewer_fund_id', message: 'Viewer fund id is required.' },
+      ],
+    });
+  });
+
+  it('keeps descriptors free of query results, provider clients, and gameplay payloads', () => {
+    const result = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 0,
+      viewerFundId: 'fund-001',
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      return;
+    }
+
+    expect(result.value.requiredScope).toBe('viewer_fund_in_class');
+    expect(result.value.includeFutureScenarioRows).toBe(false);
+    expect(result.value.includeOtherFundIds).toBe(false);
+    expect(result.value.includeExactHoldings).toBe(false);
+    expect(result.value.includeTargetWeights).toBe(false);
+    expect(result.value.includeOrderDetails).toBe(false);
+    expect(result.value.includeLedgerDrafts).toBe(false);
+    expect(result.value.includeProviderPayload).toBe(false);
+    expect('dashboard' in result.value).toBe(false);
+    expect('databaseRows' in result.value).toBe(false);
+    expect('supabaseClient' in result.value).toBe(false);
+    expect('uiState' in result.value).toBe(false);
+  });
+});
+
+describe('createCurrentTurnDriverStringDashboardQueryResultEnvelope', () => {
+  it('wraps an already-authorized current-turn Driver/String dashboard matching descriptor month scope', () => {
+    const descriptor = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 0,
+      viewerFundId: 'fund-001',
+    });
+
+    expect(descriptor.ok).toBe(true);
+
+    if (!descriptor.ok) {
+      return;
+    }
+
+    const dashboard = defaultDashboard();
+
+    expect(createCurrentTurnDriverStringDashboardQueryResultEnvelope({ descriptor: descriptor.value, dashboard })).toEqual({
+      ok: true,
+      value: {
+        envelopeType: 'current_turn_driver_string_dashboard_query_result',
+        queryResultKey: 'class:class-001:month:0:fund:fund-001:current-turn-driver-string-dashboard-query:result-envelope',
+        queryBoundary: 'server_query_result_boundary',
+        queryDescriptorKey: descriptor.value.queryDescriptorKey,
+        queryName: 'get_current_turn_driver_string_dashboard',
+        requiredScope: 'viewer_fund_in_class',
+        classId: 'class-001',
+        currentMonthIndex: 0,
+        viewerFundId: 'fund-001',
+        resultStatus: 'ready',
+        currentTurnOnly: true,
+        includeFutureScenarioRows: false,
+        includeOtherFundIds: false,
+        includeExactHoldings: false,
+        includeTargetWeights: false,
+        includeOrderDetails: false,
+        includeLedgerDrafts: false,
+        includeProviderPayload: false,
+        dashboard,
+      },
+    });
+  });
+
+  it('rejects missing or mismatched current-turn Driver/String dashboards', () => {
+    const descriptor = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 0,
+      viewerFundId: 'fund-001',
+    });
+
+    expect(descriptor.ok).toBe(true);
+
+    if (!descriptor.ok) {
+      return;
+    }
+
+    expect(createCurrentTurnDriverStringDashboardQueryResultEnvelope({ descriptor: descriptor.value })).toEqual({
+      ok: false,
+      errors: [
+        {
+          code: 'missing_current_turn_driver_string_dashboard',
+          message: 'Current-turn Driver/String dashboard query result envelopes require the already-authorized dashboard.',
+        },
+      ],
+    });
+
+    expect(
+      createCurrentTurnDriverStringDashboardQueryResultEnvelope({
+        descriptor: descriptor.value,
+        dashboard: { ...defaultDashboard(), monthIndex: 1 },
+      }),
+    ).toEqual({
+      ok: false,
+      errors: [
+        {
+          code: 'mismatched_current_month_index',
+          message: 'Current-turn Driver/String dashboard query result month must match the descriptor current month.',
+        },
+      ],
+    });
+  });
+
+  it('keeps query result envelopes scoped to current Driver/String dashboard payloads', () => {
+    const descriptor = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 0,
+      viewerFundId: 'fund-001',
+    });
+
+    expect(descriptor.ok).toBe(true);
+
+    if (!descriptor.ok) {
+      return;
+    }
+
+    const result = createCurrentTurnDriverStringDashboardQueryResultEnvelope({
+      descriptor: descriptor.value,
+      dashboard: defaultDashboard(),
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      return;
+    }
+
+    expect(result.value.includeFutureScenarioRows).toBe(false);
+    expect(result.value.includeOtherFundIds).toBe(false);
+    expect(result.value.includeExactHoldings).toBe(false);
+    expect(result.value.includeTargetWeights).toBe(false);
+    expect(result.value.includeOrderDetails).toBe(false);
+    expect(result.value.includeLedgerDrafts).toBe(false);
+    expect(result.value.includeProviderPayload).toBe(false);
+    expect('databaseRows' in result.value).toBe(false);
+    expect('supabaseClient' in result.value).toBe(false);
+    expect('uiState' in result.value).toBe(false);
+    expect('executedQueryMetadata' in result.value).toBe(false);
+    expect(JSON.stringify(result.value)).not.toContain('Future shock not yet revealed');
+  });
+});
+
+describe('createCurrentTurnDriverStringDashboardQueryResultValidationFailureEnvelope', () => {
+  it('wraps query result validation errors without returning a dashboard', () => {
+    const descriptor = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 0,
+      viewerFundId: 'fund-001',
+    });
+
+    expect(descriptor.ok).toBe(true);
+
+    if (!descriptor.ok) {
+      return;
+    }
+
+    expect(createCurrentTurnDriverStringDashboardQueryResultValidationFailureEnvelope({ descriptor: descriptor.value })).toEqual({
+      ok: true,
+      value: {
+        envelopeType: 'current_turn_driver_string_dashboard_query_result_validation_failure',
+        queryResultKey: 'class:class-001:month:0:fund:fund-001:current-turn-driver-string-dashboard-query:validation-failure',
+        queryBoundary: 'server_query_result_boundary',
+        queryDescriptorKey: descriptor.value.queryDescriptorKey,
+        queryName: 'get_current_turn_driver_string_dashboard',
+        requiredScope: 'viewer_fund_in_class',
+        classId: 'class-001',
+        currentMonthIndex: 0,
+        viewerFundId: 'fund-001',
+        resultStatus: 'validation_failed',
+        currentTurnOnly: true,
+        includeFutureScenarioRows: false,
+        includeOtherFundIds: false,
+        includeExactHoldings: false,
+        includeTargetWeights: false,
+        includeOrderDetails: false,
+        includeLedgerDrafts: false,
+        includeProviderPayload: false,
+        validationErrors: [
+          {
+            code: 'missing_current_turn_driver_string_dashboard',
+            message: 'Current-turn Driver/String dashboard query result envelopes require the already-authorized dashboard.',
+          },
+        ],
+      },
+    });
+  });
+
+  it('rejects validation failure envelopes for valid query results', () => {
+    const descriptor = createCurrentTurnDriverStringDashboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 0,
+      viewerFundId: 'fund-001',
+    });
+
+    expect(descriptor.ok).toBe(true);
+
+    if (!descriptor.ok) {
+      return;
+    }
+
+    expect(
+      createCurrentTurnDriverStringDashboardQueryResultValidationFailureEnvelope({
+        descriptor: descriptor.value,
+        dashboard: defaultDashboard(),
+      }),
+    ).toEqual({
+      ok: false,
+      errors: [
+        {
+          code: 'query_result_is_valid',
+          message: 'Validation failure envelopes require an invalid current-turn Driver/String dashboard query result.',
+        },
+      ],
+    });
+  });
+});
 
 describe('current-turn driver/string dashboard', () => {
   it('returns current driver metrics grouped by indicator timing', () => {

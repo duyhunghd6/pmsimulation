@@ -1,0 +1,12 @@
+Selected work item: `AGENTS.md` stale repository-status guidance. Lane: tiny harness maintenance.
+
+Changed:
+- Updated `AGENTS.md:3` to reflect that the repo now has minimal pure TypeScript domain slices, while still forbidding broad app/platform scaffolding unless an accepted story requires it.
+
+Validation:
+- `npm run validate:quick` passed: 24 test files, 347 tests.
+
+Not attempted:
+- No product code changes.
+- No story/test-matrix changes, because the product contract and proof matrix did not change.
+- No auth, database, UI, CI, worker, realtime, deployment, commit, push, or PR work.

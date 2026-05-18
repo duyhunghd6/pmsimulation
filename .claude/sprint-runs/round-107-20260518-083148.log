@@ -1,0 +1,16 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk, blocked.
+
+What changed:
+- Clarified stale “current sprint” wording in `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:37`.
+- Updated US-038 blocker evidence with today’s recheck and validation result in `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:39`.
+- Updated the US-038 row in `docs/TEST_MATRIX.md:38` to reflect the current blocker status and `validate:quick` result.
+
+Validation:
+- Ran `npm run validate:quick`
+- Passed: 24 test files, 357 tests.
+
+Not attempted:
+- No product implementation.
+- No auth, Supabase, RLS, database, app runtime, UI, worker, realtime provider, CI, deployment, commit, push, or PR.
+- US-038 remains blocked until the human selects/approves a provider-backed proof path or narrows a pure TypeScript policy-helper slice.

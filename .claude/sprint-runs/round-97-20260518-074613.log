@@ -1,0 +1,11 @@
+Selected story/work item: `US-025 Student leaderboard rank snapshot and query boundary envelopes`  
+Lane: normal
+
+I found the selected US-025 slice already implemented in the current working tree, so I kept the sprint bounded and did not add more code. I verified the relevant implementation in `app/domain/student/leaderboard-rank.ts:171`, `app/domain/student/leaderboard-rank.ts:273`, and `app/domain/student/leaderboard-rank.ts:228`, and confirmed the story/matrix evidence is already current.
+
+Validation run:
+- `npm run test:unit -- app/domain/student/leaderboard-rank.test.ts` — passed, 15 tests.
+- `npm run test:unit -- app/domain/classes/class-aggregate-analytics.test.ts` — passed, 14 tests.
+- `npm run validate:quick` — passed, 24 files / 330 tests.
+
+Not attempted: no commit, push, PR, app/UI scaffold, auth/database/RLS, Supabase provider work, worker, cron, realtime execution, or deployment/release proof.

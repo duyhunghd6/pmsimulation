@@ -2,7 +2,7 @@
 
 ## Status
 
-The PRD selects an intended web application stack. No application files, package manifests, infrastructure config, or CI exist yet.
+The PRD selects the web application stack, and the human approved the full-stack MVP implementation track on 2026-05-18. No application files, package manifests, infrastructure config, or CI exist yet, but accepted stories may now introduce the selected stack layer by layer.
 
 ## Target Stack
 
@@ -13,9 +13,24 @@ The PRD selects an intended web application stack. No application files, package
 | Database and auth | Supabase PostgreSQL/Auth/RLS | Multi-tenant class isolation, authentication, and row-level authorization. |
 | Realtime | Supabase Realtime | Push turn-completion updates to connected clients. |
 | ORM | Drizzle ORM | Type-safe database access for serverless runtimes. |
-| Background worker | Inngest or Upstash QStash | End-of-month calculations should not run inside Vercel request timeouts. |
+| Background worker | Inngest | End-of-month calculations should not run inside Vercel request timeouts. |
 | UI system | Tailwind CSS and shadcn/ui | Accessible dark financial terminal aesthetic. |
 | Visualization | Apache ECharts and Tremor | Funnel/pyramid charts, KPI metrics, and leaderboards. |
+
+## Approved Full-Stack MVP Track
+
+Implementation may now proceed through bounded accepted stories for:
+
+- Supabase Auth as the trusted student/instructor session source.
+- Supabase PostgreSQL plus Drizzle schema and migrations for the gameplay data model.
+- Supabase RLS as the primary tenant and role authorization boundary, with parse-first server guards before database access.
+- Next.js App Router server components and server actions for student and instructor surfaces.
+- Inngest month-advance processing reached by both Vercel cron and instructor live triggers.
+- Supabase Realtime turn-completion publication and client refetch.
+- Tailwind CSS, shadcn/ui, Apache ECharts, and Tremor for the desktop-first terminal UI.
+- Unit, integration, E2E, platform, and release validation commands as the corresponding layers are added.
+
+Do not scaffold unrelated app shells or provider code ahead of the selected story. Each story should introduce only the minimal files needed for its vertical slice and update this architecture contract when proof expectations change.
 
 ## Architectural Constraints
 
@@ -45,11 +60,15 @@ The PRD selects an intended web application stack. No application files, package
 - A realtime authorized current-turn query descriptor can map the refetch plan to future server-scoped current-turn query instructions before server query execution, auth/session enforcement, database clients, UI refetch code, or provider subscriptions exist.
 - A realtime authorized current-turn query result envelope can wrap already-authorized current-turn dashboard snapshots after the future query boundary while still avoiding server query execution, auth/session enforcement, database clients, UI refetch code, or provider subscriptions.
 - A realtime authorized current-turn query result validation failure envelope can represent missing or mismatched dashboard query results without returning snapshots, database rows, provider clients, UI state, or provider execution details.
+- A student macro news query descriptor can record the future server-query boundary for one already-scoped class/current-month/viewer-fund macro news request before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, future scenario rows, or result delivery exists. A student macro news query result envelope can wrap an already-authorized current-month macro news snapshot after that future query boundary while still avoiding server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, future scenario rows, or result delivery. A student macro news query result validation failure envelope can represent missing or mismatched macro news query results without returning snapshots, database rows, provider clients, UI state, future scenario rows, or executed query metadata.
+- A current-turn Driver/String dashboard query descriptor can record the future server-query boundary for one already-scoped class/current-month/viewer-fund metrics dashboard request before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, future scenario rows, other-fund payloads, or result delivery exists. A current-turn Driver/String dashboard query result envelope can wrap an already-authorized current-turn dashboard projection after that future query boundary while still avoiding server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, future scenario rows, other-fund payloads, or result delivery. A current-turn Driver/String dashboard query result validation failure envelope can represent missing or mismatched dashboard query results without returning dashboards, database rows, provider clients, UI state, future scenario rows, or executed query metadata.
+- A student portfolio pyramid query descriptor can record the future server-query boundary for one already-scoped class/current-month/viewer-fund portfolio pyramid request before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, other-fund exact holdings, instructor God Mode data, target weights, order details, estimated tax drag, ledger drafts, or result delivery exists. A student portfolio pyramid query result envelope can wrap an already-authorized viewer-fund portfolio pyramid snapshot after that future query boundary while still avoiding server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, other-fund exact holdings, instructor God Mode data, target weights, order details, estimated tax drag, ledger drafts, or result delivery. A student portfolio pyramid query result validation failure envelope can represent missing or mismatched portfolio pyramid query results without returning snapshots, database rows, provider clients, UI state, other-fund exact holdings, instructor God Mode data, target weights, order details, estimated tax drag, ledger drafts, or executed query metadata.
 - A student dashboard current-turn query descriptor can record the future server-query boundary for one already-scoped class/current-month/viewer-fund dashboard request before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or query result delivery exists.
 - A student dashboard current-turn query result envelope can wrap an already-authorized current-turn dashboard snapshot for that descriptor before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or query result delivery exists.
 - A student dashboard current-turn query result validation failure envelope can represent missing or mismatched student dashboard query results without returning snapshots, database rows, provider clients, UI state, other-fund exact holdings, instructor God Mode data, future scenario rows, ledger drafts, or executed query metadata.
 - A student post-turn dashboard query descriptor can record the future server-query boundary for one already-scoped class/processed-month/viewer-fund dashboard request before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, result delivery, or attribution payload delivery exists. A student post-turn dashboard query result envelope can wrap an already-authorized post-turn dashboard snapshot after that future query boundary while still avoiding server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, result delivery, or attribution payload delivery. A student post-turn dashboard query result validation failure envelope can represent missing or mismatched post-turn dashboard query results without returning snapshots, attribution reports, database rows, provider clients, UI state, other-fund ids, exact holdings, order details, class aggregate payloads, instructor God Mode data, ledger draft collections, or executed query metadata.
 - A student attribution report query descriptor can record the future server-query boundary for one already-scoped class/processed-month/viewer-fund attribution report before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, result delivery, raw ledger delivery, or UI state exists. A student attribution report query result envelope can wrap an already-authorized attribution report snapshot after that future query boundary while still avoiding server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, raw ledger delivery, or UI state. A student attribution report query result validation failure envelope can represent missing or mismatched attribution report query results without returning snapshots, database rows, provider clients, UI state, raw ledger drafts, other-fund ledger drafts, target weights, order details, or executed query metadata.
+- A student leaderboard rank query descriptor can record the future server-query boundary for one already-scoped class/current-month/viewer-fund leaderboard view before server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, result delivery, or UI state exists. A student leaderboard rank query result envelope can wrap an already-authorized leaderboard rank snapshot after that future query boundary while still avoiding server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or UI state. A student leaderboard rank query result validation failure envelope can represent missing or mismatched leaderboard rank query results without returning snapshots, database rows, provider clients, UI state, other-fund ids, exact holdings, pending-order status, target weights, order details, ledger drafts, or executed query metadata.
 - A student TARA order server-action command descriptor can map a validated submission receipt to future command-boundary metadata before actual server actions, auth/session enforcement, database clients, worker dispatch, realtime publication, or UI execution exists.
 - A student TARA order server-action result envelope can map that command descriptor to a student-safe accepted-pending-order result before actual server actions, auth/session enforcement, database clients, worker dispatch, realtime publication, processed order execution, or UI state changes exist.
 - A student TARA order server-action validation failure envelope can map invalid submission inputs to student-safe validation errors before actual server actions, auth/session enforcement, database clients, worker dispatch, realtime publication, processed order execution, or UI state changes exist.
@@ -58,6 +77,7 @@ The PRD selects an intended web application stack. No application files, package
 - An instructor dashboard current-turn query result envelope can map an already-authorized instructor dashboard snapshot to future server-query result metadata before actual server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or result delivery exists.
 - An instructor dashboard current-turn query result validation failure envelope can map invalid instructor dashboard query result inputs to future server-query result validation metadata before actual server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or result delivery exists.
 - An instructor pending-order visibility query descriptor, result envelope, and validation failure envelope can record the future server-query boundary for one already-scoped class/current-month request before actual server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or order detail delivery exists.
+- An instructor class aggregate analytics query descriptor, result envelope, and validation failure envelope can record the future server-query boundary for one already-scoped class/current-month request before actual server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, per-fund detail delivery, or order detail delivery exists.
 - An instructor live leaderboard query descriptor, result envelope, and validation failure envelope can record the future server-query boundary for one already-scoped class/current-month request before actual server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, holdings delivery, or order detail delivery exists.
 - An instructor God Mode portfolio visibility query descriptor, result envelope, and validation failure envelope can record the future server-query boundary for one already-scoped class/current-month request before actual server query execution, auth/session enforcement, RLS, database clients, UI rendering, provider clients, or unscoped holdings delivery exists.
 - An instructor live month-advance server-action command descriptor can map a validated live advancement request to future command-boundary metadata before actual server actions, auth/session enforcement, database clients, worker dispatch, realtime publication, ledger writes, or UI state changes exist.
@@ -69,9 +89,9 @@ The PRD selects an intended web application stack. No application files, package
 
 ## Future Implementation Shape
 
-The first implementation story should introduce only the files required for its vertical slice. Do not scaffold the full stack ahead of selected work.
+The first full-stack implementation story should introduce only the files required for its vertical slice. Do not scaffold the full stack ahead of selected work.
 
-Expected future surfaces:
+Expected MVP surfaces:
 
 - Browser app for students and instructors.
 - Server-side query and command boundaries.

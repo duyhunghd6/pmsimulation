@@ -27,13 +27,13 @@ This story is not complete until integration proof exists for the security and t
 
 ```text
 npm run validate:quick
-TBD: integration proof command after Supabase/database boundary exists
+npm run test:integration:auth-tenancy
 ```
 
 ## Acceptance Evidence
 
-Blocked in the 2026-05-17 sprint. US-038 was reselected as the next existing prerequisite packet because remaining implementation packets are blocked by missing app, provider, auth, or platform runtime boundaries. This autonomous sprint round rechecked the backlog and test matrix after the latest pure-domain descriptor slices and confirmed no smaller unblocked normal-lane implementation remains ahead of the security foundation. No auth, database, Supabase, RLS, server runtime, fixtures, or integration validation command exists yet. The minimum unblockers still include role/session claims, class membership/admin schema and RLS shape, parse-first server boundaries, Supabase/Drizzle dependency and environment approval, safe authorization-failure logging, deterministic fixtures, integration proof, and explicit approval to move from pure-domain descriptors into the first provider-backed proof slice. This sprint intentionally did not add auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, or broad platform scaffolding.
+2026-05-18 approval evidence: the human approved the full-stack MVP implementation track and the first US-038 provider-backed proof slice. US-038 is no longer blocked on generic permission to introduce Supabase Auth/PostgreSQL/RLS, Drizzle schema/migrations, local fixtures, server-only environment handling, safe denied-access observability, or the first dedicated integration command.
 
-This sprint added an approval checklist to `execplan.md` so the first provider-backed security slice can be approved without broad scaffolding. The checklist requires a named session source, minimal schema, enforcement boundary, test harness and command, server-only environment boundary, deterministic fixtures, and denied-access observability shape before implementation proceeds. `npm run validate:quick` remains the only available validation command for this blocked story until the integration proof boundary exists; it passed with 24 test files and 288 tests.
+The story is complete only after executable proof exists. Expected evidence includes `npm run validate:quick` plus `npm run test:integration:auth-tenancy` passing against the local Supabase harness with deterministic fixtures for two classes, at least two instructors, at least three students, current/past/future scenario rows, and exact holdings. Proof must show allowed own-fund reads, current/past scenario reads, instructor owned-class God Mode reads, and denied future-row, other-student holding, cross-class student, and unowned-class instructor access.
 
-Current sprint evidence: the story remains blocked after rechecking the backlog and test matrix, and the exec plan still names the next human decision gate before any provider-backed work can start. `docs/HARNESS_BACKLOG.md` also records the repeated blocked high-risk story reselection pattern as a proposed harness improvement. No product implementation or product contract changed in this sprint. `npm run validate:quick` passed with 24 test files and 288 tests.
+Not in this story: browser UI, hosted production Supabase setup, Vercel deployment, CI, month-advance worker execution, or Supabase Realtime publication.

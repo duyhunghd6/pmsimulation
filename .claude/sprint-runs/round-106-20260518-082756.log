@@ -1,0 +1,14 @@
+Selected work item: document the exhausted normal-lane queue and required human decision gate.  
+Lane: normal docs/harness improvement.
+
+Changed:
+- `docs/stories/backlog.md`: added an autonomous sprint queue status note saying no smaller unblocked normal-lane product slice remains before US-038 auth/tenancy/provider-backed proof decisions.
+- `docs/TEST_MATRIX.md`: added the same current selection note tying remaining planned work to blocked high-risk rows `US-038`, `US-037`, and `US-039`.
+- `docs/HARNESS_BACKLOG.md`: updated the implemented blocked-story guard item to point at the new queue markers.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: 24 test files passed, 357 tests passed.
+
+Not attempted:
+- No product behavior, code, app shell, package scripts, CI, database, auth, Supabase, realtime provider, worker, UI, deployment, commit, push, or PR.
