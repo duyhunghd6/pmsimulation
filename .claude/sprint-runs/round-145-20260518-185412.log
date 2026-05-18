@@ -1,0 +1,15 @@
+Selected story/work item: **US-078 Instructor live leaderboard UI**. Lane: **normal**.
+
+Implemented one bounded vertical slice:
+- `/instructor/dashboard` now reuses `executeInstructorLiveLeaderboardQuery` and renders leaderboard-safe rows beside the pending-order monitor: `app/(instructor)/instructor/dashboard/page.tsx:6`, `app/(instructor)/instructor/dashboard/page.tsx:102`.
+- Added bounded dashboard row reader for both pending-order and live-leaderboard UI data: `app/(instructor)/instructor/dashboard/page.tsx:185`.
+- Added story packet and evidence: `docs/stories/US-078-instructor-live-leaderboard-ui.md:1`.
+- Updated README, AGENTS/CLAUDE guidance, product docs, backlog, and `docs/TEST_MATRIX.md`.
+
+Validation:
+- `npm run validate:quick` passed: **36 test files, 447 tests**.
+- `npm run build` passed.
+- Local route smoke against the existing dev server returned HTTP 200 for `/instructor/dashboard` with the safe no-session fallback.
+
+Not attempted:
+- Live Supabase reads, provider-backed authenticated browser proof/E2E, holdings/God Mode, target weights, order details, class creation, aggregate analytics, month advancement, worker, realtime, CI, deployment, or PR/commit.

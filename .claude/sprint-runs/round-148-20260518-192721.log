@@ -1,0 +1,15 @@
+Selected and completed **US-081 Instructor God Mode Portfolio Visibility UI** in the **normal** lane.
+
+Changed:
+- Wired `/instructor/dashboard` to render privileged God Mode holdings through the existing bounded executor at `app/(instructor)/instructor/dashboard/page.tsx:32` and `app/(instructor)/instructor/dashboard/page.tsx:146`.
+- Added bounded fixture holdings to the instructor dashboard row reader at `app/(instructor)/instructor/dashboard/page.tsx:232`.
+- Added story packet `docs/stories/US-081-instructor-god-mode-portfolio-visibility-ui.md:1`.
+- Updated README, AGENTS/CLAUDE guidance, product docs, backlog, and `docs/TEST_MATRIX.md` evidence.
+
+Validation:
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed: 38 test files, 461 tests.
+- `npm run build` passed.
+- `/instructor/dashboard` returned HTTP 200 on the already-running local dev server safe no-session fallback.
+
+Not attempted: live Supabase reads, authenticated provider-backed browser proof, aggregate analytics UI, class creation, month advancement, worker/realtime, CI/deployment, or PR/commit.

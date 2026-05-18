@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  parseInstructorClassAggregateFundRow,
   parseInstructorClassFundRow,
+  parseInstructorCreatedClassRow,
   parseInstructorGodModeHoldingRow,
+  parseInstructorLiveLeaderboardFundRow,
   parseInstructorOwnedClassRow,
   parseInstructorPendingTaraOrderStatusRow,
   parseStudentFundStateRow,
@@ -74,6 +77,52 @@ describe('parseInstructorOwnedClassRow', () => {
     expect(parseInstructorOwnedClassRow({ ...row, student_join_code: 'join-link-secret' }, { session: instructorSession, scope })).toEqual({
       ok: false,
       code: 'invalid_join_code',
+    });
+  });
+});
+
+describe('parseInstructorCreatedClassRow', () => {
+  const row = {
+    id: classId,
+    instructor_id: instructorSession.subjectId,
+    display_name: 'Alpha Capital Lab',
+    trigger_mode: 'manual',
+    current_month_index: 0,
+    total_months: 12,
+    student_join_code: 'ALPHA01',
+  };
+
+  it('accepts an instructor-created class row after insertion', () => {
+    expect(parseInstructorCreatedClassRow(row, { session: instructorSession })).toEqual({
+      ok: true,
+      row: {
+        classId,
+        instructorId: instructorSession.subjectId,
+        displayName: 'Alpha Capital Lab',
+        triggerMode: 'manual',
+        currentMonthIndex: 0,
+        totalMonths: 12,
+        studentJoinCode: 'ALPHA01',
+      },
+    });
+  });
+
+  it('rejects malformed, wrong-role, or non-initial created class rows before result delivery', () => {
+    expect(parseInstructorCreatedClassRow(row, { session: studentSession })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorCreatedClassRow({ ...row, instructor_id: 'bbbbbbbb-1111-4111-8111-bbbbbbbbbbbb' }, { session: instructorSession })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorCreatedClassRow({ ...row, current_month_index: 1 }, { session: instructorSession })).toEqual({
+      ok: false,
+      code: 'invalid_month_index',
+    });
+    expect(parseInstructorCreatedClassRow({ ...row, total_months: 99 }, { session: instructorSession })).toEqual({
+      ok: false,
+      code: 'invalid_total_months',
     });
   });
 });
@@ -203,6 +252,90 @@ describe('parseInstructorClassFundRow', () => {
       ok: false,
       code: 'invalid_id',
     });
+  });
+});
+
+describe('parseInstructorClassAggregateFundRow', () => {
+  const row = {
+    id: fundId,
+    class_id: classId,
+    current_aum: '51000000.00',
+    sharpe_ratio: '1.1500',
+  };
+
+  it('accepts an instructor-scoped aggregate analytics fund row after RLS', () => {
+    expect(parseInstructorClassAggregateFundRow(row, { session: instructorSession, scope })).toEqual({
+      ok: true,
+      row: {
+        fundId,
+        classId,
+        currentAum: 51000000,
+        sharpeRatio: 1.15,
+      },
+    });
+  });
+
+  it('rejects wrong-role, cross-class, malformed, or negative aggregate fund rows before result delivery', () => {
+    expect(parseInstructorClassAggregateFundRow(row, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorClassAggregateFundRow({ ...row, class_id: otherClassId }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorClassAggregateFundRow({ ...row, id: 'not-a-fund-id' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_id',
+    });
+    expect(parseInstructorClassAggregateFundRow({ ...row, current_aum: '-1.00' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_numeric_value',
+    });
+    expect('studentDisplayName' in parseInstructorClassAggregateFundRow(row, { session: instructorSession, scope })).toBe(false);
+  });
+});
+
+describe('parseInstructorLiveLeaderboardFundRow', () => {
+  const row = {
+    id: fundId,
+    class_id: classId,
+    student_display_name: 'Alpha Fund',
+    current_aum: '51000000.00',
+    sharpe_ratio: '1.1500',
+  };
+
+  it('accepts an instructor-scoped live leaderboard fund row after RLS', () => {
+    expect(parseInstructorLiveLeaderboardFundRow(row, { session: instructorSession, scope })).toEqual({
+      ok: true,
+      row: {
+        fundId,
+        classId,
+        studentDisplayName: 'Alpha Fund',
+        currentAum: 51000000,
+        sharpeRatio: 1.15,
+      },
+    });
+  });
+
+  it('rejects wrong-role, cross-class, malformed, or negative leaderboard fund rows before result delivery', () => {
+    expect(parseInstructorLiveLeaderboardFundRow(row, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorLiveLeaderboardFundRow({ ...row, class_id: otherClassId }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorLiveLeaderboardFundRow({ ...row, student_display_name: ' ' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_display_name',
+    });
+    expect(parseInstructorLiveLeaderboardFundRow({ ...row, current_aum: '-1.00' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_numeric_value',
+    });
+    expect('holdings' in parseInstructorLiveLeaderboardFundRow(row, { session: instructorSession, scope })).toBe(false);
   });
 });
 

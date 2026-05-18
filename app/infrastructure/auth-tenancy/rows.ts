@@ -1,4 +1,4 @@
-import { CLASS_TRIGGER_MODES, type ClassTriggerMode } from '../../domain/classes/class-draft';
+import { CLASS_TRIGGER_MODES, INITIAL_CLASS_MONTH_INDEX, type ClassTriggerMode } from '../../domain/classes/class-draft';
 import { MAX_SIMULATION_MONTHS, MIN_SIMULATION_MONTHS } from '../../domain/classes/month-advancement';
 import { TARA_RISK_TREATMENT_CLASSES, type TaraRiskTreatmentClass } from '../../domain/tara/risk-register';
 import type { AuthTenancySession, ParsedAuthTenancyScope } from './session';
@@ -14,6 +14,8 @@ export type InstructorOwnedClassRow = {
   totalMonths: number;
   studentJoinCode: string;
 };
+
+export type InstructorCreatedClassRow = InstructorOwnedClassRow;
 
 export type StudentFundStateRow = {
   fundId: string;
@@ -31,9 +33,24 @@ export type StudentLeaderboardFundRow = {
   sharpeRatio: number;
 };
 
+export type InstructorLiveLeaderboardFundRow = {
+  fundId: string;
+  classId: string;
+  studentDisplayName: string;
+  currentAum: number;
+  sharpeRatio: number;
+};
+
 export type InstructorClassFundRow = {
   fundId: string;
   classId: string;
+};
+
+export type InstructorClassAggregateFundRow = {
+  fundId: string;
+  classId: string;
+  currentAum: number;
+  sharpeRatio: number;
 };
 
 export type StudentOwnHoldingRow = {
@@ -342,6 +359,60 @@ export function parseInstructorOwnedClassRow(
   };
 }
 
+export function parseInstructorCreatedClassRow(
+  input: unknown,
+  boundary: { session: AuthTenancySession },
+): AuthTenancyDatabaseRowParseResult<InstructorCreatedClassRow> {
+  if (boundary.session.role !== 'instructor') {
+    return { ok: false, code: 'invalid_role' };
+  }
+  if (!isRecord(input)) {
+    return { ok: false, code: 'row_not_object' };
+  }
+
+  const classId = input.id;
+  const instructorId = input.instructor_id;
+  if (!isUuid(classId)) {
+    return { ok: false, code: 'invalid_id' };
+  }
+  if (!isUuid(instructorId)) {
+    return { ok: false, code: 'invalid_instructor_id' };
+  }
+  if (instructorId !== boundary.session.subjectId) {
+    return { ok: false, code: 'scope_mismatch' };
+  }
+
+  if (typeof input.display_name !== 'string' || input.display_name.trim() === '') {
+    return { ok: false, code: 'invalid_display_name' };
+  }
+  const triggerMode = parseClassTriggerMode(input.trigger_mode);
+  if (triggerMode === undefined) {
+    return { ok: false, code: 'invalid_trigger_mode' };
+  }
+  if (input.current_month_index !== INITIAL_CLASS_MONTH_INDEX) {
+    return { ok: false, code: 'invalid_month_index' };
+  }
+  if (typeof input.total_months !== 'number' || !Number.isInteger(input.total_months) || input.total_months < MIN_SIMULATION_MONTHS || input.total_months > MAX_SIMULATION_MONTHS) {
+    return { ok: false, code: 'invalid_total_months' };
+  }
+  if (typeof input.student_join_code !== 'string' || !joinCodePattern.test(input.student_join_code)) {
+    return { ok: false, code: 'invalid_join_code' };
+  }
+
+  return {
+    ok: true,
+    row: {
+      classId,
+      instructorId,
+      displayName: input.display_name.trim(),
+      triggerMode,
+      currentMonthIndex: input.current_month_index,
+      totalMonths: input.total_months,
+      studentJoinCode: input.student_join_code,
+    },
+  };
+}
+
 export function parseStudentFundStateRow(
   input: unknown,
   boundary: { session: AuthTenancySession; scope: ParsedAuthTenancyScope },
@@ -446,6 +517,82 @@ export function parseInstructorClassFundRow(
   }
 
   return { ok: true, row: { fundId, classId } };
+}
+
+export function parseInstructorClassAggregateFundRow(
+  input: unknown,
+  boundary: { session: AuthTenancySession; scope: ParsedAuthTenancyScope },
+): AuthTenancyDatabaseRowParseResult<InstructorClassAggregateFundRow> {
+  if (boundary.session.role !== 'instructor') {
+    return { ok: false, code: 'invalid_role' };
+  }
+  if (!isRecord(input)) {
+    return { ok: false, code: 'row_not_object' };
+  }
+
+  const fundId = input.id;
+  const classId = input.class_id;
+  if (!isUuid(fundId)) {
+    return { ok: false, code: 'invalid_id' };
+  }
+  if (!isUuid(classId)) {
+    return { ok: false, code: 'invalid_class_id' };
+  }
+  if (classId !== boundary.scope.classId) {
+    return { ok: false, code: 'scope_mismatch' };
+  }
+
+  const currentAum = parseDatabaseNumber(input.current_aum);
+  const sharpeRatio = parseDatabaseNumber(input.sharpe_ratio);
+  if (currentAum === undefined || currentAum < 0 || sharpeRatio === undefined) {
+    return { ok: false, code: 'invalid_numeric_value' };
+  }
+
+  return { ok: true, row: { fundId, classId, currentAum, sharpeRatio } };
+}
+
+export function parseInstructorLiveLeaderboardFundRow(
+  input: unknown,
+  boundary: { session: AuthTenancySession; scope: ParsedAuthTenancyScope },
+): AuthTenancyDatabaseRowParseResult<InstructorLiveLeaderboardFundRow> {
+  if (boundary.session.role !== 'instructor') {
+    return { ok: false, code: 'invalid_role' };
+  }
+  if (!isRecord(input)) {
+    return { ok: false, code: 'row_not_object' };
+  }
+
+  const fundId = input.id;
+  const classId = input.class_id;
+  if (!isUuid(fundId)) {
+    return { ok: false, code: 'invalid_id' };
+  }
+  if (!isUuid(classId)) {
+    return { ok: false, code: 'invalid_class_id' };
+  }
+  if (classId !== boundary.scope.classId) {
+    return { ok: false, code: 'scope_mismatch' };
+  }
+  if (typeof input.student_display_name !== 'string' || input.student_display_name.trim() === '') {
+    return { ok: false, code: 'invalid_display_name' };
+  }
+
+  const currentAum = parseDatabaseNumber(input.current_aum);
+  const sharpeRatio = parseDatabaseNumber(input.sharpe_ratio);
+  if (currentAum === undefined || currentAum < 0 || sharpeRatio === undefined) {
+    return { ok: false, code: 'invalid_numeric_value' };
+  }
+
+  return {
+    ok: true,
+    row: {
+      fundId,
+      classId,
+      studentDisplayName: input.student_display_name.trim(),
+      currentAum,
+      sharpeRatio,
+    },
+  };
 }
 
 export function parseStudentOwnHoldingRow(

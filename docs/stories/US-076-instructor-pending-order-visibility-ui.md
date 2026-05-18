@@ -55,4 +55,6 @@ No harness changes were needed beyond updating story and matrix evidence.
 ## Evidence
 
 - 2026-05-18 sprint: implemented the protected instructor pending-order visibility UI at `/instructor/dashboard` using the existing safe instructor pending-order executor over bounded scoped rows, plus existing terminal-style global CSS for dashboard panels, metrics, and status rows. The slice did not add live database runtime, order-detail visibility, class creation, God Mode, aggregate analytics, month advancement, realtime, worker, CI, deployment, or provider-backed browser E2E proof.
-- Validation pending in this sprint.
+- `npm run validate:quick` — passed with 35 test files and 440 tests.
+- `npm run build` — passed; `/dashboard`, `/instructor/dashboard`, and `/login` remain dynamic server-rendered routes.
+- Existing dev server route smoke for `/instructor/dashboard` returned HTTP 200; authenticated browser UI proof was not completed because provider-backed Supabase browser session setup is not configured in this environment.

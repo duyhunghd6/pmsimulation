@@ -86,6 +86,11 @@ p {
   padding: 1rem;
 }
 
+.route-banner.danger {
+  border-left-color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .form-stack {
   display: grid;
   gap: 0.75rem;
@@ -98,7 +103,8 @@ p {
   font-weight: 700;
 }
 
-.form-stack input {
+.form-stack input,
+.form-stack select {
   border: 1px solid rgba(148, 163, 184, 0.42);
   border-radius: 0.75rem;
   background: rgba(2, 6, 23, 0.76);
@@ -122,6 +128,11 @@ p {
 .button.secondary {
   background: transparent;
   color: #d7fdf8;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.64;
 }
 
 .auth-banner {

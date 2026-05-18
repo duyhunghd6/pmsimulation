@@ -1,0 +1,19 @@
+Selected story/work item: **US-076 Instructor Pending-Order Visibility UI**  
+Lane: **normal**
+
+Implemented/confirmed one bounded instructor dashboard slice for `/instructor/dashboard`: the protected route renders status-only current-month pending-order visibility using the existing `executeInstructorPendingOrderVisibilityQuery` path over bounded parsed rows. The browser-facing contract remains limited to month, enrolled fund count, pending count, missing count, and per-fund pending/missing status.
+
+Updated evidence/docs:
+- `docs/stories/US-076-instructor-pending-order-visibility-ui.md`
+- `docs/TEST_MATRIX.md`
+
+Validation:
+- `npm run validate:quick` passed: **35 test files, 440 tests**
+- `npm run build` passed
+- Existing dev server smoke for `/instructor/dashboard` returned **HTTP 200**
+
+Not attempted:
+- Live Supabase provider-backed reads
+- Authenticated browser E2E proof
+- Class creation, join links, God Mode, aggregate analytics, month advancement
+- Realtime, worker, CI, deployment, or hosted Supabase setup

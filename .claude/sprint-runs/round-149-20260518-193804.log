@@ -1,0 +1,19 @@
+Selected story/work item: **US-082 Instructor class aggregate analytics UI**  
+Lane: **normal**
+
+Implemented one bounded UI slice:
+
+- Wired the existing aggregate-safe executor into the protected instructor dashboard at `app/(instructor)/instructor/dashboard/page.tsx:35`.
+- Added a “Class aggregate analytics” panel at `app/(instructor)/instructor/dashboard/page.tsx:163` showing class totals only: total/average AUM, nullable average Sharpe, missing orders, pending AUM, and missing AUM.
+- Kept the existing protected instructor session guard and safe no-session/query-failure fallbacks.
+- Added story evidence in `docs/stories/US-082-instructor-class-aggregate-analytics-ui.md`.
+- Updated backlog, product docs, `README.md`, `AGENTS.md`, `CLAUDE.md`, and `docs/TEST_MATRIX.md`.
+
+Validation run:
+
+- `npm run typecheck` — passed.
+- `npm run validate:quick` — passed with **38 test files** and **461 tests**.
+- `npm run build` — passed.
+- Existing dev server smoke for `/instructor/dashboard` — HTTP **200** with safe no-session fallback.
+
+Not attempted: live Supabase reads, authenticated provider-backed browser UI proof, per-fund aggregate rows, order details, target weights, month advancement, worker/realtime, CI/deployment, commit, push, or PR. Authenticated browser testing could not be completed because provider-backed Supabase browser session setup is not configured in this environment.

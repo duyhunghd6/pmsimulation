@@ -1,0 +1,18 @@
+Selected story/work item: US-080 Instructor God Mode portfolio visibility server-query executor. Lane: normal.
+
+Implemented:
+- Added `executeInstructorGodModePortfolioVisibilityQuery` in `app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.ts:62`.
+  - Enforces instructor role and current-month scope before row access.
+  - Parses injected fund, holding, and status-only order rows before delivery.
+  - Rejects cross-class/malformed rows, unknown funds, duplicate holdings/orders, processed orders, incomplete holdings, and invalid allocation totals.
+  - Returns only the existing privileged God Mode result envelope; no database rows/provider clients leak.
+- Added unit coverage in `app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts:100`.
+- Added story packet `docs/stories/US-080-instructor-god-mode-portfolio-visibility-query.md:1`.
+- Updated evidence/status in `docs/TEST_MATRIX.md`, `docs/stories/backlog.md`, `README.md`, `CLAUDE.md`, and relevant product docs.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts app/infrastructure/auth-tenancy/rows.test.ts` passed: 2 files, 37 tests.
+- `npm run validate:quick` passed: 38 files, 461 tests.
+
+Not attempted:
+- No live Supabase reads, UI rendering, browser delivery, target weights, estimated tax drag, order details, ledger drafts, worker/realtime, CI/deployment, commit, push, or PR.

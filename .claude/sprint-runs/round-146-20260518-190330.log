@@ -1,0 +1,14 @@
+Selected: **US-079 Instructor class aggregate analytics server-query executor**; lane: **normal with stronger validation**.
+
+Implemented one bounded slice:
+- Added `executeInstructorClassAggregateAnalyticsQuery` at `app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.ts:55`.
+- Added aggregate-safe fund row parsing at `app/infrastructure/auth-tenancy/rows.ts:466`.
+- Added unit coverage for role/scope enforcement, row rejection, duplicate/unknown order handling, aggregate envelope output, and forbidden payload exclusion.
+- Added `docs/stories/US-079-instructor-class-aggregate-analytics-query.md`.
+- Updated relevant product docs, backlog, `AGENTS.md`, `CLAUDE.md`, `README.md`, and `docs/TEST_MATRIX.md:74`.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.test.ts app/infrastructure/auth-tenancy/rows.test.ts` passed: **2 files, 35 tests**.
+- `npm run validate:quick` passed: **37 files, 454 tests**.
+
+Not attempted: live Supabase reads, provider-backed RLS proof, aggregate analytics UI, God Mode, class creation persistence, month advancement, worker/realtime, browser E2E, CI/deployment, commit, push, or PR.

@@ -1,0 +1,45 @@
+Selected story/work item: **US-077 Instructor Live Leaderboard Query**  
+Lane: **normal**
+
+Implemented one bounded vertical slice:
+
+- Added `executeInstructorLiveLeaderboardQuery` in `app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.ts:55`.
+  - Enforces instructor role before row access.
+  - Requires current-month scope before row access.
+  - Uses injected row reader only.
+  - Parses leaderboard fund rows and status-only TARA order rows before delivery.
+  - Rejects cross-class, future-month, processed, unknown-fund, duplicate, malformed, or unsafe rows.
+  - Returns the existing leaderboard-safe result envelope only.
+
+- Added `parseInstructorLiveLeaderboardFundRow` in `app/infrastructure/auth-tenancy/rows.ts:459`.
+  - Accepts instructor-scoped fund rows.
+  - Rejects wrong role, cross-class rows, malformed display names, invalid ids, and negative AUM.
+  - Does not expose holdings, target weights, tax drag, order details, provider payloads, or UI state.
+
+- Added unit proof in:
+  - `app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts:62`
+  - `app/infrastructure/auth-tenancy/rows.test.ts:210`
+
+Updated evidence/docs:
+
+- Created `docs/stories/US-077-instructor-live-leaderboard-query.md`.
+- Updated proof matrix with US-077 evidence at `docs/TEST_MATRIX.md:71`.
+- Updated E02 rollup in `docs/TEST_MATRIX.md:105`.
+- Updated backlog entry at `docs/stories/backlog.md:56`.
+- Updated product/status docs including `README.md:9`, `CLAUDE.md:7`, `CLAUDE.md:25`, `docs/product/user-surfaces.md:83`, `docs/product/roles-and-permissions.md:85`, and `docs/product/runtime-architecture.md:5`.
+
+Validation run:
+
+- `npm run test:unit -- app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts app/infrastructure/auth-tenancy/rows.test.ts`
+  - Passed: 2 test files, 33 tests.
+- `npm run validate:quick`
+  - Passed: typecheck plus unit tests.
+  - Final run passed: 36 test files, 447 tests.
+
+Not attempted:
+
+- No live Supabase reads.
+- No database runtime or hosted Supabase project wiring.
+- No UI/browser delivery for live leaderboard.
+- No holdings, target weights, estimated tax drag, or order-detail visibility.
+- No worker, realtime provider, CI, deployment, commit, push, or PR.

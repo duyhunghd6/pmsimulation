@@ -1,0 +1,17 @@
+Selected story/work item: **US-083 Instructor class creation server-action executor**  
+Lane: **normal with stronger validation**
+
+Implemented one bounded vertical slice:
+
+- Added `executeInstructorClassCreationAction` at `app/infrastructure/auth-tenancy/instructor-class-creation-action.ts:40`.
+- Added a creation-specific persisted class row parser at `app/infrastructure/auth-tenancy/rows.ts:362`.
+- Added unit coverage for success, role denial, invalid draft safe failure, persisted-row rejection, and persisted-command mismatch.
+- Added story packet `docs/stories/US-083-instructor-class-creation-action.md:1`.
+- Updated product docs, backlog, agent guidance, and test matrix evidence, including `docs/TEST_MATRIX.md:65`.
+
+Validation run:
+
+- `npm run test:unit -- app/infrastructure/auth-tenancy/instructor-class-creation-action.test.ts app/infrastructure/auth-tenancy/rows.test.ts` — passed, 2 files / 37 tests.
+- `npm run validate:quick` — passed, 39 files / 468 tests.
+
+Not attempted in this slice: browser class creation UI, live Supabase writes/RLS proof, join-code generation, roster management, realtime publication, worker dispatch, E2E, platform, deployment, commit, push, or PR.
