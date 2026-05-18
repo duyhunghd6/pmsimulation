@@ -1,0 +1,19 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**  
+Lane: **high-risk** — auth, authorization, data model, security, external provider proof.
+
+Implemented one bounded slice:
+- Tightened US-038 safe authorization metadata in `app/infrastructure/auth-tenancy/session.ts`.
+- Added allowlisted authorization `resourceKind` and `action` types.
+- Added fixed-field JSON serialization so denied-access observability does not leak accidental DB URLs, future scenario rows, unauthorized holdings, or raw forbidden payloads.
+- Extended unit proof in `app/infrastructure/auth-tenancy/session.test.ts`.
+- Updated `docs/product/roles-and-permissions.md`, US-038 story evidence, and `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` — passed, 2 files / 8 tests.
+- `npm run test:integration:auth-tenancy` — passed SQL contract tests, 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run validate:quick` — passed, 26 files / 365 tests.
+- Scoped whitespace check on touched docs passed. Repo-wide `git diff --check` still reports existing trailing whitespace in `.claude/sprint-runs/round-121-20260518-143406.log`.
+
+Not attempted:
+- No live Supabase database execution proof.
+- No browser UI, hosted Supabase, production migration path, CI, worker, realtime provider, commit, push, or PR.

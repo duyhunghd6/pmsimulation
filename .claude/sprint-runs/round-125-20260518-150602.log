@@ -1,0 +1,18 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**.  
+Lane: **high-risk**, narrowed to one bounded server-side row-parsing slice.
+
+Implemented:
+- Added parse-first database row guards for scoped result delivery:
+  - `parseStudentFundStateRow` in `app/infrastructure/auth-tenancy/rows.ts:72`
+  - `parseInstructorGodModeHoldingRow` in `app/infrastructure/auth-tenancy/rows.ts:108`
+  - `parseStudentRevealedMacroNarrativeRow` in `app/infrastructure/auth-tenancy/rows.ts:155`
+- Added unit coverage for own-fund, God Mode holding, cross-class/role mismatch, and future scenario denial cases.
+- Updated US-038 evidence/status plus relevant product/status docs and `docs/TEST_MATRIX.md`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` — passed, 3 files / 14 tests.
+- `npm run validate:quick` — passed, 27 files / 371 tests.
+- `npm run test:integration:auth-tenancy` — SQL contract tests passed; local RLS test still skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted:
+- No live Supabase runtime, browser auth flow, UI, worker, realtime provider, CI/deployment, commit, push, or PR.

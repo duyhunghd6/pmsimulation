@@ -1,0 +1,13 @@
+Selected story/work item: **US-038 Data, auth, and tenancy foundation**. Lane: **high-risk**, using the already-approved narrow local Supabase/Drizzle proof slice.
+
+Implemented one bounded slice:
+- Added `StudentRevealedMarketMetricRow` and `parseStudentRevealedMarketMetricRow` in `app/infrastructure/auth-tenancy/rows.ts:28` and `app/infrastructure/auth-tenancy/rows.ts:274`.
+- Added unit coverage for allowed current/past market metrics and denied future/cross-class/malformed rows in `app/infrastructure/auth-tenancy/rows.test.ts:157`.
+- Updated US-038 evidence and current status docs, including `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:51` and `docs/TEST_MATRIX.md:38`.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` passed: 3 files, 20 tests.
+- `npm run validate:quick` passed: 27 files, 377 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests: 1 file passed, 1 skipped; 3 tests passed, 1 skipped.
+
+Not attempted: local Supabase RLS execution remains skipped because `AUTH_TENANCY_DATABASE_URL` is not configured; no browser UI, hosted Supabase, production migration path, worker, realtime provider, deployment, commit, push, or PR was attempted.

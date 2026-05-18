@@ -16,11 +16,27 @@ Do not create every possible story packet up front. Create story packets when wo
 
 ## Autonomous Sprint Queue Status
 
-As of 2026-05-18, the human approved the full-stack MVP implementation track and the first US-038 provider-backed auth/tenancy proof slice. Autonomous sprint rounds should proceed through the selected US-038 foundation before UI, worker, realtime, CI, deployment, or release-proof stories. Do not reselect older blocked-provider evidence unless new ambiguity appears.
+As of 2026-05-18, the human approved the full-stack MVP implementation track for the complete simulation game. Autonomous sprint rounds should move through the full-stack sprint sequence below instead of repeatedly ending with “UI/auth/worker/realtime not attempted.” US-038 local Supabase RLS execution proof remains important, but if it is blocked only by missing `AUTH_TENANCY_DATABASE_URL`, agents should record that blocker and continue with the next safe bounded full-stack slice that does not expose protected gameplay data.
+
+## Full-Stack MVP Sprint Sequence
+
+Use this order for autonomous full-stack work. Select the earliest item that is not implemented and is not blocked by an unavailable external credential or runtime:
+
+1. Finish US-038 local auth-tenancy proof where possible: Supabase Auth claim parsing, Drizzle schema/migrations, RLS policies, deterministic fixtures, server-only environment handling, safe authorization logs, scoped row parsers, and local RLS execution when `AUTH_TENANCY_DATABASE_URL` is configured.
+2. Add the Next.js App Router shell and Supabase browser/server auth flow with student/instructor route groups, login/logout, protected layouts, and no gameplay data exposure before authorized server queries exist.
+3. Add server query execution for current-turn student dashboard data through the existing scoped parsers and RLS-backed boundaries.
+4. Build the student dashboard UI: macro news, Driver/String metrics, portfolio pyramid, leaderboard rank, order-entry shell, and post-turn attribution surfaces.
+5. Add student TARA order submission through a server action backed by persistence, authorization checks, validation, and safe pending-order receipt delivery.
+6. Add instructor class management, join-link, pending-order, live leaderboard, God Mode, aggregate analytics, and manual month-advance UI/server boundaries.
+7. Add Inngest month-advance processing and Vercel cron/live trigger convergence with idempotent class-month processing.
+8. Add Supabase Realtime turn-completion publication, subscription, and authorized client refetch.
+9. Add E2E, platform, deployment, and release proof for the complete MVP path.
+
+Do not stop at a generic “not attempted” list for later layers. If the selected slice cannot proceed, name the exact missing credential, runtime, or decision and then select the next safe slice from this sequence.
 
 ## First Story Candidates
 
-- Establish Supabase auth, class tenancy, and student/instructor RLS boundaries. High-risk story captured as `docs/stories/US-038-data-auth-tenancy-foundation/`; the human approved the first provider-backed proof slice on 2026-05-18 with Supabase Auth JWT claims, local Supabase, Drizzle schema/migrations, Supabase RLS, deterministic fixtures, safe denied-access observability, and `npm run test:integration:auth-tenancy`. This is the next implementation prerequisite before browser UI, worker, realtime, CI, deployment, or release-proof stories.
+- Establish Supabase auth, class tenancy, and student/instructor RLS boundaries. High-risk story captured as `docs/stories/US-038-data-auth-tenancy-foundation/`; the human approved the first provider-backed proof slice on 2026-05-18 with Supabase Auth JWT claims, local Supabase, Drizzle schema/migrations, Supabase RLS, deterministic fixtures, safe denied-access observability, and `npm run test:integration:auth-tenancy`. This remains the security foundation for gameplay data exposure; the first schema/RLS/parser/fixture slice, server-only local database URL parser, and scoped database row parsers for student fund/order/ledger/macro-narrative/market-metric and instructor God Mode holding rows have started, and local Supabase RLS execution proof remains pending. Missing local RLS execution alone should not prevent safe app-shell or browser-auth slices that expose no gameplay data.
 - Seed deterministic macro narratives, market strings, tracked metrics, and asset DNA. First pure-domain scenario catalog slice captured as `docs/stories/US-027-mvp-scenario-catalog.md`; first pure-domain Asset DNA catalog slice captured as `docs/stories/US-010-mvp-asset-dna-catalog.md`; first pure-domain asset-tier return slice captured as `docs/stories/US-011-mvp-asset-tier-return-calculation.md`.
 - Implement the tracked simulation metrics catalog. Sliced as `docs/stories/US-006-tracked-simulation-metrics-catalog.md`.
 - Implement the student current-month macro news terminal without exposing future rows. Pure-domain snapshot and query boundary envelopes captured as `docs/stories/US-007-student-macro-news-snapshot.md`.

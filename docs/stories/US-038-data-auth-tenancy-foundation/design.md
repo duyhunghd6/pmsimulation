@@ -6,7 +6,7 @@ The foundation must preserve the existing product roles and core identifiers: cl
 
 ## Application Flow
 
-Future server queries and commands should parse unknown session claims and request inputs before calling application code. Student query paths should require a viewer identity, class scope, and fund ownership. Instructor query paths should require instructor identity and class administration scope. Month-advance and realtime stories should depend on these server-scoped boundaries rather than carrying authorization assumptions in provider payloads.
+Future server queries and commands should parse unknown session claims and request inputs before calling application code. Student query paths should require a viewer identity, trusted student role claim, class scope, and fund ownership. Instructor query paths should require instructor identity, trusted instructor role claim, and class administration scope. Month-advance and realtime stories should depend on these server-scoped boundaries rather than carrying authorization assumptions in provider payloads.
 
 ## Interface Contract
 

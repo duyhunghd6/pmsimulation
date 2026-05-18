@@ -1,0 +1,18 @@
+Selected story/work item: **US-038 Data, auth, and tenancy foundation**.  
+Lane: **high-risk**, bounded to parse-first database row guards only.
+
+Implemented one vertical slice:
+- Added student TARA order row parsing with role, class/fund/month scope, 100% target-weight, status, tax-drag, and rebalance-trigger validation: `app/infrastructure/auth-tenancy/rows.ts:260`.
+- Added student simulation ledger row parsing with role, class/fund/month scope and attribution numeric validation: `app/infrastructure/auth-tenancy/rows.ts:320`.
+- Added unit proof for accepted and rejected order/ledger rows: `app/infrastructure/auth-tenancy/rows.test.ts:156`, `app/infrastructure/auth-tenancy/rows.test.ts:214`.
+- Updated US-038 evidence, backlog/test matrix, and status docs to reflect the new scoped row-parser coverage.
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` passed: 3 files, 18 tests.
+- `npm run validate:quick` passed: 27 files, 375 tests.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests: 3 passed, 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+
+Not attempted:
+- No commit, push, or PR.
+- No browser UI, hosted Supabase setup, production migration path, worker, realtime provider, CI/deployment, or broad app scaffolding.
+- Local Supabase RLS execution proof remains pending until `AUTH_TENANCY_DATABASE_URL` is configured.

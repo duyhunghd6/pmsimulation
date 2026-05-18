@@ -2,7 +2,7 @@
 
 ## Status
 
-This document captures the PRD blueprint for schema work. Pure TypeScript Asset DNA seed, return-calculation, instructor leaderboard, and month-advance request slices now exist for deterministic domain use. The human approved the full-stack MVP implementation track on 2026-05-18, so accepted stories may now add Supabase PostgreSQL, Drizzle schema/migrations, RLS policies, and deterministic seed fixtures. No database migrations or Drizzle schema files exist yet.
+This document captures the PRD blueprint for schema work. Pure TypeScript Asset DNA seed, return-calculation, instructor leaderboard, and month-advance request slices now exist for deterministic domain use. The human approved the full-stack MVP implementation track on 2026-05-18, so accepted stories may now add Supabase PostgreSQL, Drizzle schema/migrations, RLS policies, and deterministic seed fixtures. A first US-038 Supabase RLS migration, deterministic auth-tenancy fixture, Drizzle schema, server-side database row parsers for scoped student fund/order/ledger/macro-narrative/market-metric and instructor God Mode holding result delivery, and server-only local database URL parser now exist for local proof, with role-claim-aware student/instructor RLS helpers and policies. No live database runtime, hosted Supabase project, production migration path, or fully passing local RLS integration proof is wired yet.
 
 ## Approved MVP Persistence Foundation
 

@@ -1,0 +1,24 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**.  
+Lane: **high-risk**, using the already-approved narrow provider-backed foundation slice.
+
+Implemented one bounded slice:
+- Added Supabase Auth claim/scope parsing and safe auth-denial event shaping in `app/infrastructure/auth-tenancy/session.ts:73`.
+- Added unit coverage for malformed claims, scope inputs, and safe denial metadata.
+- Added first Drizzle schema definitions for the approved tenancy tables in `app/infrastructure/database/schema.ts:3`.
+- Added Supabase RLS migration with tenant/role read policies in `supabase/migrations/202605180001_auth_tenancy_foundation.sql:3`.
+- Added deterministic US-038 local fixture data in `supabase/fixtures/auth-tenancy.sql`.
+- Added `npm run test:integration:auth-tenancy` in `package.json:10` plus integration config/tests.
+- Installed `drizzle-orm` in `package.json:19`.
+
+Updated docs/evidence:
+- Refreshed US-038 overview/execplan/validation evidence.
+- Updated `docs/TEST_MATRIX.md`, `docs/product/data-model.md`, `docs/product/runtime-architecture.md`, `README.md`, `AGENTS.md`, and `CLAUDE.md` to reflect the started foundation slice.
+- Kept US-038 marked **in_progress**, not implemented, because local Supabase RLS execution proof is still pending.
+
+Validation run:
+- `npm run validate:quick` passed: **25 test files, 362 tests**.
+- `npm run test:integration:auth-tenancy` passed SQL contract tests: **1 file passed, 1 skipped; 3 tests passed, 1 skipped**.
+- The skipped test is the actual local Supabase RLS execution proof because `AUTH_TENANCY_DATABASE_URL` is not configured in this environment.
+
+Not attempted:
+- No Next.js app/UI, browser auth flow, hosted Supabase project, production migration path, worker, realtime provider execution, CI, deployment, commit, push, or PR.

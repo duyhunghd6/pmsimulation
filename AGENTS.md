@@ -5,14 +5,23 @@ domain slices for accepted story packets. The human approved the full-stack MVP
 implementation track on 2026-05-18 so the accepted stack can now be introduced
 through selected stories: Next.js App Router, Vercel, Supabase Auth/PostgreSQL/RLS/Realtime,
 Drizzle ORM, Inngest, Tailwind CSS, shadcn/ui, Apache ECharts, Tremor, and
-release proof. It still has no implemented Next.js app, UI, database, auth, CI,
-migrations, deployment automation, worker, or realtime provider code.
+release proof. It still has no implemented Next.js app, UI, CI, deployment automation,
+worker, or realtime provider code. US-038 has started a bounded Supabase/Drizzle
+auth-tenancy foundation, but no live database runtime, browser auth flow, hosted
+Supabase project, or production migration path is wired yet. Its RLS helpers and direct policies now require trusted student/instructor `app_role` paths for the bounded local proof, its local RLS proof harness parses `AUTH_TENANCY_DATABASE_URL` as a server-only PostgreSQL URL before execution, and its server-side database row parsers preserve student fund/order/ledger/macro-narrative/market-metric and instructor God Mode holding scopes before result delivery.
 
 The current job of agents is to preserve and grow the collaboration harness
-while adding only story-selected, bounded implementation slices. Do not scaffold
-broad application shells, platform shells, package scripts, CI, database
-migrations, auth, UI, deployment, worker, or provider code outside an accepted
-story that explicitly requires that layer.
+while adding story-selected, bounded implementation slices toward the complete
+full-stack simulation game. Do not scaffold broad unrelated shells, but do not
+keep reporting auth, UI, database, worker, realtime, CI, or deployment as
+categorically unattempted once the backlog selects a story for that layer.
+
+When an autonomous sprint continues the full-stack MVP, select the earliest
+unimplemented slice from the full-stack sprint sequence in `docs/stories/backlog.md`.
+If local Supabase RLS execution is blocked only because `AUTH_TENANCY_DATABASE_URL`
+is not configured, record that specific blocker and move to the next bounded slice
+that can proceed safely, such as the Next.js app shell or browser auth flow that
+does not expose gameplay data.
 
 ## Source Of Truth
 

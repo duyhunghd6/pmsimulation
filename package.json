@@ -7,11 +7,15 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run",
+    "test:integration:auth-tenancy": "vitest run --config vitest.integration.config.ts tests/integration/auth-tenancy",
     "validate:quick": "npm run typecheck && npm run test:unit"
   },
   "devDependencies": {
     "@types/node": "^25.8.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2"
   }
 }

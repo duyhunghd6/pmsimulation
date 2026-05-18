@@ -49,10 +49,10 @@ Lane: high-risk.
 
 1. Confirm the minimal role/session model for students and instructors.
 2. Select the smallest schema/RLS surface that can prove class tenancy and protected reads.
-3. Define parse-first server command/query boundaries for session claims and database rows.
-4. Add Supabase Auth/PostgreSQL/RLS and Drizzle schema/migrations for the approved proof slice.
-5. Add deterministic fixtures for two classes, two instructors, at least three students, current/past/future scenario rows, and exact holdings.
-6. Add integration proof for allowed and forbidden reads/writes.
+3. Define parse-first server command/query boundaries for session claims and database rows. Session/scope parsers and the first scoped result-row parsers for student own-fund state, instructor God Mode holdings, and student revealed macro narrative and market metric rows are present.
+4. Add Supabase Auth/PostgreSQL/RLS and Drizzle schema/migrations for the approved proof slice. First bounded schema/RLS files are present, and RLS helpers/policies now check the trusted `app_role` claim for student and instructor paths; local database execution remains pending.
+5. Add deterministic fixtures for two classes, two instructors, at least three students, current/past/future scenario rows, and exact holdings. First deterministic fixture file is present.
+6. Add integration proof for allowed and forbidden reads/writes. The command and SQL contract tests exist; safe authorization event serialization now emits fixed fields only, scoped database row parsers preserve result scope before delivery for student fund, TARA order, ledger, revealed macro narrative, revealed market metric, and instructor God Mode holding rows, a server-only parser validates `AUTH_TENANCY_DATABASE_URL` for the local proof harness, and the local Supabase RLS test is skipped until that variable points at a local Supabase database.
 7. Update product docs, story evidence, test matrix, and decisions if the security architecture changes.
 
 ## Approved Unblockers

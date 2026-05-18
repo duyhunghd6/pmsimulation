@@ -2,7 +2,7 @@
 
 ## Status
 
-The PRD selects the web application stack, and the human approved the full-stack MVP implementation track on 2026-05-18. No application files, package manifests, infrastructure config, or CI exist yet, but accepted stories may now introduce the selected stack layer by layer.
+The PRD selects the web application stack, and the human approved the full-stack MVP implementation track on 2026-05-18. A first US-038 server-side auth-tenancy parser, server-side database row parsers for scoped student fund/order/ledger/macro-narrative/market-metric and instructor God Mode holding result delivery, server-only local database URL parser for the RLS proof harness, Drizzle schema, Supabase RLS migration with role-claim-aware student/instructor policies, deterministic fixtures, and auth-tenancy integration command now exist. No Next.js app shell, browser UI, CI, deployment automation, worker, realtime provider execution, hosted Supabase project, or live database runtime is wired yet.
 
 ## Target Stack
 
@@ -23,14 +23,14 @@ Implementation may now proceed through bounded accepted stories for:
 
 - Supabase Auth as the trusted student/instructor session source.
 - Supabase PostgreSQL plus Drizzle schema and migrations for the gameplay data model.
-- Supabase RLS as the primary tenant and role authorization boundary, with parse-first server guards before database access.
+- Supabase RLS as the primary tenant and role authorization boundary, with parse-first server guards before database access and role-claim-aware helper functions/policies for student and instructor paths.
 - Next.js App Router server components and server actions for student and instructor surfaces.
 - Inngest month-advance processing reached by both Vercel cron and instructor live triggers.
 - Supabase Realtime turn-completion publication and client refetch.
 - Tailwind CSS, shadcn/ui, Apache ECharts, and Tremor for the desktop-first terminal UI.
 - Unit, integration, E2E, platform, and release validation commands as the corresponding layers are added.
 
-Do not scaffold unrelated app shells or provider code ahead of the selected story. Each story should introduce only the minimal files needed for its vertical slice and update this architecture contract when proof expectations change.
+Do not scaffold unrelated app shells or provider code ahead of the selected story. Each story should introduce only the minimal files needed for its vertical slice and update this architecture contract when proof expectations change. If the only blocker is an unavailable local Supabase database URL, agents may continue with safe app-shell or browser-auth slices that do not return gameplay data.
 
 ## Architectural Constraints
 
@@ -89,7 +89,7 @@ Do not scaffold unrelated app shells or provider code ahead of the selected stor
 
 ## Future Implementation Shape
 
-The first full-stack implementation story should introduce only the files required for its vertical slice. Do not scaffold the full stack ahead of selected work.
+Full-stack implementation should follow the sprint sequence in `docs/stories/backlog.md`: finish available US-038 auth-tenancy proof, then add the Next.js app shell and Supabase auth flow, then server query execution, student UI, order submission, instructor UI, Inngest processing, Supabase Realtime, and release proof. Do not scaffold the full stack ahead of selected work, but do select the next safe layer instead of repeatedly reporting future layers as skipped.
 
 Expected MVP surfaces:
 

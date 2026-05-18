@@ -1,0 +1,15 @@
+Selected story/work item: **US-038 Data, auth, and tenancy foundation**.  
+Lane: **high-risk** due auth, authorization, data model, RLS/security, external provider proof, and weak pending integration proof.
+
+Implemented one bounded slice:
+- Tightened Supabase RLS role enforcement so helper functions and direct policies require the trusted `app_role` claim for student/instructor paths in `supabase/migrations/202605180001_auth_tenancy_foundation.sql:182`.
+- Added integration contract coverage for role-claim-aware SQL in `tests/integration/auth-tenancy/sql-contract.test.ts:49`.
+- Extended the local Supabase proof expectations so an instructor subject with a student-role claim gets no admin/God Mode rows in `tests/integration/auth-tenancy/local-supabase.test.ts:60`.
+- Updated US-038/product/test-matrix docs to record the new role-claim-aware RLS behavior and evidence.
+
+Validation run:
+- `npm run test:integration:auth-tenancy` passed SQL contract tests: **3 passed, 1 skipped**. The skipped test is still the local Supabase RLS execution proof because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run validate:quick` passed: **25 test files, 362 tests**.
+
+Not attempted:
+- No browser UI, live database runtime setup, hosted Supabase project, production migration path, worker, realtime provider, CI/deployment, commit, push, or PR.

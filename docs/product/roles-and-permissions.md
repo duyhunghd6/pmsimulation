@@ -2,7 +2,7 @@
 
 ## Approved Auth and Tenancy Direction
 
-Supabase Auth JWT claims are the trusted session source for the full-stack MVP. Server boundaries must parse session claims, request inputs, and database rows before returning typed student or instructor outcomes. Supabase RLS is the primary tenant enforcement layer for persisted gameplay records, with server-side guards preserving the same class, fund, role, and month scope before database access.
+Supabase Auth JWT claims are the trusted session source for the full-stack MVP. Server boundaries must parse session claims, request inputs, and database rows before returning typed student or instructor outcomes. Supabase RLS is the primary tenant enforcement layer for persisted gameplay records, with server-side guards preserving the same class, fund, role, and month scope before database access. RLS helpers and direct policies must honor the trusted `app_role` claim so student and instructor subjects cannot use persisted membership/admin rows through the wrong role path.
 
 The first integration proof must show that students can read their own fund state and current/past class scenario data, cannot read future rows or other students' exact holdings, and cannot cross class tenants. Instructors can read God Mode data only for classes they administer and cannot access unowned classes.
 
@@ -79,4 +79,4 @@ Forbidden capabilities:
 
 ## Authorization Proof Expectations
 
-Future implementation should include integration proof for tenant isolation and role-scoped reads/writes before any user-visible implementation is considered complete.
+Future implementation should include integration proof for tenant isolation and role-scoped reads/writes before any user-visible implementation is considered complete. US-038 now includes a fixed-field safe authorization event serializer for denied-access observability and server-side database row parsers for scoped student fund/order/ledger/macro-narrative/market-metric and instructor God Mode holding result delivery; local Supabase RLS execution proof remains pending before user-visible auth or tenancy flows are marked implemented.

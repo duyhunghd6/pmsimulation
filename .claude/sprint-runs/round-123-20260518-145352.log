@@ -1,0 +1,23 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**  
+Lane: **high-risk** — auth, authorization, data model, RLS/provider proof, and weak-proof boundaries.
+
+Implemented one bounded slice:
+- Added `app/infrastructure/auth-tenancy/environment.ts` to parse `AUTH_TENANCY_DATABASE_URL` as a server-side PostgreSQL URL for the local RLS proof harness.
+- Added unit coverage in `app/infrastructure/auth-tenancy/environment.test.ts`.
+- Wired `tests/integration/auth-tenancy/local-supabase.test.ts` through the parser so malformed configured DB URLs fail explicitly.
+- Updated US-038 evidence/status in:
+  - `docs/stories/US-038-data-auth-tenancy-foundation/`
+  - `docs/TEST_MATRIX.md`
+  - `docs/product/data-model.md`
+  - `docs/product/runtime-architecture.md`
+  - `docs/stories/backlog.md`
+  - `README.md`, `AGENTS.md`, `CLAUDE.md`
+
+Validation run:
+- `npm run test:unit -- app/infrastructure/auth-tenancy` — passed, 2 files / 7 tests.
+- `npm run test:integration:auth-tenancy` — passed SQL contract tests, 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+- `npm run validate:quick` — passed, 26 files / 364 tests.
+
+Not attempted:
+- No live Supabase database runtime was configured.
+- No browser UI, hosted Supabase project, production migration path, CI, deployment, worker, realtime provider, commit, push, or PR.

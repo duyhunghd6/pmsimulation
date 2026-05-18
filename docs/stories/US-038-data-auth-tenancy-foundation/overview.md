@@ -2,7 +2,7 @@
 
 ## Current Behavior
 
-The repository has pure TypeScript domain slices and product contracts for class, fund, student, instructor, order, ledger, scenario, and realtime descriptor behavior. No Supabase project boundary, authentication/session model, database schema, RLS policy set, server query boundary, integration proof harness, or app runtime exists.
+The repository has pure TypeScript domain slices and product contracts for class, fund, student, instructor, order, ledger, scenario, and realtime descriptor behavior. A first bounded Supabase/Drizzle foundation now exists with server-side Supabase Auth claim parsing, scoped database row parsing before result delivery for student fund, TARA order, ledger, revealed macro narrative, revealed market metric, and instructor God Mode holding rows, fixed-field safe authorization event serialization, server-only local database URL parsing for the RLS proof harness, a minimum Drizzle schema, a Supabase RLS migration with role-claim-aware student/instructor access policies, deterministic local fixtures, and `npm run test:integration:auth-tenancy`. No live database runtime, browser auth flow, hosted Supabase project, production migration path, server query execution boundary, or fully passing local RLS proof is wired yet.
 
 ## Target Behavior
 
