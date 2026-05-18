@@ -1,0 +1,14 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**.  
+Lane: **high-risk**.
+
+Changed:
+- Clarified US-038 blocker and prerequisite status in `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:35`.
+- Added minimum unblockers to `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:58`.
+- Recorded validation/blocker evidence in `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:35`.
+- Updated backlog and matrix evidence in `docs/stories/backlog.md:19` and `docs/TEST_MATRIX.md:29`.
+
+Validation:
+- `npm run validate:quick` passed: **24 test files, 200 tests**.
+
+Not attempted:
+- No auth/session model, Supabase/Drizzle dependency, schema/RLS, server runtime, UI, realtime provider, worker, CI, deployment, commit, push, or PR.

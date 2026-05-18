@@ -32,4 +32,4 @@ TBD: platform/release smoke command after deployment configuration exists
 
 ## Acceptance Evidence
 
-Blocked in this sprint. No app runtime, CI, deployment platform, provider environment, integration suite, E2E suite, or platform smoke command exists yet.
+Blocked in this sprint. No app runtime, CI, deployment platform, provider environment, integration suite, E2E suite, platform smoke command, or release evidence format exists yet. US-039 was reselected only to refresh the high-risk release-proof blocker after confirming the remaining E04 provider/release path depends on blocked auth/tenancy and realtime-provider boundaries. `npm run validate:quick` passed with 24 test files and 247 tests.

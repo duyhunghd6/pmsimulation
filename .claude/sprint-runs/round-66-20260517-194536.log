@@ -1,0 +1,16 @@
+Selected story/work item: **US-067 Student Dashboard Post-Turn Query Result Validation Failure Envelope**.  
+Lane: **normal** — bounded pure TypeScript/domain descriptor slice, no app/auth/database/provider scaffolding.
+
+Changed:
+- Added post-turn query result validation failure envelope support in `app/domain/student/dashboard-snapshot.ts:632`.
+- Added unit coverage for missing/mismatched post-turn query results and valid-result rejection in `app/domain/student/dashboard-snapshot.test.ts:794`.
+- Added story packet `docs/stories/US-067-student-dashboard-post-turn-query-result-validation-failure-envelope.md:1`.
+- Updated product docs, backlog, README/CLAUDE status text, and test matrix evidence, including `docs/TEST_MATRIX.md:50`.
+
+Validation run:
+- `npm run test:unit -- app/domain/student/dashboard-snapshot.test.ts` — passed, 24 tests.
+- `npm run validate:quick` — passed, 24 test files / 274 tests.
+
+Not attempted:
+- No UI, server query execution, auth/session checks, RLS, database, Supabase/Drizzle, realtime provider, worker, cron, CI, deployment, commit, push, or PR.
+- Existing unrelated uncommitted/untracked files remain in the working tree.

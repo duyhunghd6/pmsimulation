@@ -1,0 +1,13 @@
+Selected story/work item: **US-069 Instructor Pending-Order Visibility Query Boundary Envelopes**. Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added instructor pending-order visibility query descriptor/result/failure envelope contracts in `app/domain/classes/pending-order-visibility.ts:148`, `app/domain/classes/pending-order-visibility.ts:192`, and `app/domain/classes/pending-order-visibility.ts:232`.
+- Added unit coverage in `app/domain/classes/pending-order-visibility.test.ts:30` and `app/domain/classes/pending-order-visibility.test.ts:96`.
+- Added story evidence in `docs/stories/US-069-instructor-pending-order-visibility-query-boundary-envelopes.md:1`.
+- Updated product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md:58`.
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/pending-order-visibility.test.ts` — passed, 1 file / 16 tests.
+- `npm run validate:quick` — passed, 24 files / 297 tests.
+
+Not attempted: no UI, auth, database, Supabase/RLS, API routes, server-query execution, provider clients, commits, pushes, or PRs. The working tree still contains many pre-existing uncommitted/untracked sprint changes outside this slice.

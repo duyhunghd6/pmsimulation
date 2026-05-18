@@ -1,0 +1,14 @@
+Selected story/work item: `US-038 Data, auth, and tenancy foundation`.  
+Lane: high-risk.
+
+Changed:
+- Added a “Next Human Decision Gate” to `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:91`.
+- Updated blocker/evidence notes in `overview.md:37` and `validation.md:39`.
+- Updated the US-038 evidence row in `docs/TEST_MATRIX.md:34`.
+- Added a harness backlog proposal for repeated blocked high-risk story reselection in `docs/HARNESS_BACKLOG.md:42`.
+
+Validation:
+- `npm run validate:quick` passed: 24 test files, 288 tests.
+
+Not attempted:
+- No auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, commit, push, or PR work.

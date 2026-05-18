@@ -1,0 +1,14 @@
+Selected story/work item: **US-052 Auto Month Advance Scheduled Trigger Descriptor**  
+Lane: **normal** — pure-domain contract extension, no auth/database/provider/UI/platform execution.
+
+Implemented one bounded slice:
+- Added auto scheduled-trigger validation failure envelope support in `app/domain/classes/month-advancement.ts:580`.
+- Added unit coverage for invalid auto trigger inputs, fallback keys, valid-request rejection, and payload exclusions in `app/domain/classes/month-advancement.test.ts:1610`.
+- Updated product/story/test evidence, including `docs/stories/US-052-auto-month-advance-scheduled-trigger-descriptor.md:13` and `docs/TEST_MATRIX.md:61`.
+- Updated repository status docs to include the new pure-domain envelope.
+
+Validation run:
+- `npm run validate:quick` — passed, **24 test files / 230 tests**.
+
+Not attempted:
+- No cron/Vercel scheduling, Supabase, auth/RLS, database, worker, realtime provider, UI, API route, ledger persistence, commit, push, or PR.

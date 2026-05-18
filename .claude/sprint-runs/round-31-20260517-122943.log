@@ -1,0 +1,14 @@
+Selected story/work item: **US-041 Realtime Authorized Current-Turn Query Result Envelope**. Lane: **normal**.
+
+Changed:
+- Added pure-domain result envelope creation in `app/domain/classes/realtime-query-result.ts:59`.
+- Added unit coverage in `app/domain/classes/realtime-query-result.test.ts:66`.
+- Added story packet `docs/stories/US-041-realtime-authorized-current-turn-query-result-envelope.md`.
+- Updated product docs, backlog, `docs/TEST_MATRIX.md`, README/CLAUDE status, and refreshed the US-037 blocker language.
+
+Validation:
+- `npm run validate:quick` passed.
+- 24 test files passed, 196 tests passed.
+
+Not attempted:
+- No Supabase client, auth/RLS, database, server query execution, UI refetch, worker/cron, platform, commit, push, or PR.

@@ -1,0 +1,16 @@
+Selected story: **US-046 Instructor class server-action command descriptor**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorClassServerActionCommandDescriptor` for validated instructor class drafts.
+- Added unit coverage for descriptor shape, deterministic command key, idempotency key, scope, and persistence intent.
+- Added `docs/stories/US-046-instructor-class-server-action-command-descriptor.md`.
+- Updated README, product docs, backlog, and `docs/TEST_MATRIX.md` evidence.
+
+Validation:
+- `npm run validate:quick` passed.
+- 24 test files passed.
+- 209 tests passed.
+
+Not attempted:
+- No UI, server action execution, auth/session enforcement, database/Supabase/Drizzle, RLS, join-code generation, worker, realtime, CI, deployment, commit, push, or PR.

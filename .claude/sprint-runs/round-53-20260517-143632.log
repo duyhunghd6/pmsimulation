@@ -1,0 +1,13 @@
+Selected story/work item: `US-037 Supabase Realtime client publication`  
+Lane: high-risk.
+
+Changed:
+- Refreshed US-037 blocker documentation to note that US-040, US-041, and US-056 now cover the query handoff/result/failure-envelope descriptors, but actual Supabase publication remains blocked: `docs/stories/US-037-supabase-realtime-client-publication/overview.md:32`
+- Updated US-037 validation evidence with the current blocker state and validation count: `docs/stories/US-037-supabase-realtime-client-publication/validation.md:34`
+- Updated the test matrix US-037 row to show this sprint reselected the story, found no smaller unblocked E04 pure-domain/descriptor slice, and stopped at blocker evidence: `docs/TEST_MATRIX.md:79`
+
+Validation:
+- `npm run validate:quick` passed: 24 test files, 244 tests.
+
+Not attempted:
+- No Supabase SDK/client, auth/session, RLS, database, server query execution, UI refetch, worker, platform, commit, push, or PR work.

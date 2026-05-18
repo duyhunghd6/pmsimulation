@@ -1,0 +1,15 @@
+Selected story/work item: **US-047 Instructor class server-action result envelope**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+- Added instructor class result-envelope types and mapper in `app/domain/classes/class-draft.ts:49` and `app/domain/classes/class-draft.ts:104`.
+- Added unit coverage for envelope creation, deterministic keys, scope preservation, and payload exclusions in `app/domain/classes/class-draft.test.ts:100`.
+- Added story packet `docs/stories/US-047-instructor-class-server-action-result-envelope.md:1`.
+- Updated product docs, backlog, README/CLAUDE status text, and `docs/TEST_MATRIX.md:48`.
+
+Validation run:
+- `npm run validate:quick` — passed: **24 test files**, **211 tests**.
+
+Not attempted:
+- No UI, server action execution, auth/session enforcement, Supabase/Drizzle/RLS, persistence, join-code generation, worker, realtime provider, CI/platform work, commit, push, or PR.
+- The working tree already had many other modified/untracked files; I left unrelated existing changes as-is.

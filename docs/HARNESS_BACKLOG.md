@@ -35,5 +35,31 @@ proposed | accepted | implemented | rejected
 
 ## Items
 
-No backlog items yet.
+## Missing Harness Capability
+
+### Title
+
+Blocked high-risk story reselection guard.
+
+### Discovered While
+
+US-038 data, auth, and tenancy foundation autonomous sprint on 2026-05-17.
+
+### Current Pain
+
+After pure-domain descriptor slices are exhausted, autonomous sprint rounds can keep reselecting the same high-risk provider-backed prerequisite and only restate blocker evidence. That is safe, but it creates churn and makes it harder to tell when human approval is the only remaining path forward.
+
+### Suggested Improvement
+
+Add a blocked-story stop rule or backlog marker that tells future autonomous rounds to stop after recording the blocker once, unless the user has supplied the missing approval inputs or explicitly asks for another blocker refinement.
+
+Implemented in `docs/HARNESS.md` as the blocked high-risk reselection guard.
+
+### Risk
+
+Normal.
+
+### Status
+
+implemented
 

@@ -1,0 +1,15 @@
+Selected story/work item: **US-040 Realtime authorized current-turn query descriptor**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+- Added `RealtimeAuthorizedCurrentTurnQueryDescriptor` and `createRealtimeAuthorizedCurrentTurnQueryDescriptor` in `app/domain/classes/month-advancement.ts:350`.
+- Added unit coverage in `app/domain/classes/month-advancement.test.ts:605`.
+- Created story packet and evidence in `docs/stories/US-040-realtime-authorized-current-turn-query-descriptor.md:1`.
+- Updated product/docs evidence in `docs/TEST_MATRIX.md:61`, `docs/product/runtime-architecture.md:37`, and `docs/product/simulation-engine.md:121`.
+
+Validation run:
+- `npm run validate:quick` — passed, **23 test files / 193 tests**.
+
+Not attempted:
+- No Next.js app, UI, auth, database, RLS, Supabase client, provider subscription, server query execution, CI, deployment, commit, push, or PR.
+- Existing untracked `.claude/sprint-runs/round-01-20260517-121847.log` was left untouched.

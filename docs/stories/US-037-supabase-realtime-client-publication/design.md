@@ -2,11 +2,11 @@
 
 ## Domain Model
 
-Use the existing `SupabaseRealtimePublicationDescriptor` as the input contract. The descriptor already carries class channel, broadcast event, audience, delivery semantics, idempotency metadata, and refresh-only payload fields.
+Use the existing `SupabaseRealtimePublicationDescriptor` as the input contract. The descriptor already carries class channel, broadcast event, audience, delivery semantics, idempotency metadata, and refresh-only payload fields. The downstream US-040 `RealtimeAuthorizedCurrentTurnQueryDescriptor` and US-041 query result envelope remain the future server-query handoff and are not realtime payloads.
 
 ## Application Flow
 
-A future month-processing completion handler should create the turn-completion event, derive the refresh signal, wrap it in the provider-neutral publication envelope, map it to the Supabase publication descriptor, and pass that descriptor to a server-only publisher.
+A future month-processing completion handler should create the turn-completion event, derive the refresh signal, wrap it in the provider-neutral publication envelope, map it to the Supabase publication descriptor, and pass that descriptor to a server-only publisher. Subscription, refetch, and server-query descriptors remain separate contracts that clients and server query surfaces use after the broadcast is received.
 
 ## Interface Contract
 

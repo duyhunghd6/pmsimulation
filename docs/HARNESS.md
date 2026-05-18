@@ -151,6 +151,21 @@ When an agent is confused, repeats manual reasoning, needs a new validation
 command, discovers a missing rule, or sees a recurring failure pattern, it must
 either improve the harness directly or add a proposal to `HARNESS_BACKLOG.md`.
 
+## Blocked High-Risk Reselection Guard
+
+When a high-risk story is already documented as blocked and its unblockers have
+not changed, autonomous sprint rounds should not reselect it just to restate the
+same blocker. Select a smaller unblocked story or harness improvement instead.
+If none exists, stop after citing the existing blocker evidence and ask for the
+missing human approval inputs.
+
+Reselect a blocked high-risk story only when one of these is true:
+
+- The human supplied new approval inputs or narrowed the implementation path.
+- The story packet lacks concrete blocker evidence or decision inputs.
+- A product, architecture, or validation contract changed since the blocker was
+  recorded.
+
 ## Future Validation Ladder
 
 No validation scripts exist yet. When implementation begins, the expected ladder

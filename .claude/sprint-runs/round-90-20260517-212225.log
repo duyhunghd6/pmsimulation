@@ -1,0 +1,15 @@
+Selected story/work item: **US-070 Instructor live leaderboard query boundary envelopes**.  
+Lane: **normal** — pure TypeScript query-boundary contracts around an existing instructor snapshot, with no auth/DB/provider/UI/platform execution.
+
+Implemented:
+- Added live leaderboard query descriptor/result/failure envelope types and functions in `app/domain/classes/live-leaderboard.ts:156`.
+- Added unit coverage for descriptor creation, invalid scope, result wrapping, scope mismatch, validation failure envelopes, and forbidden payload exclusions in `app/domain/classes/live-leaderboard.test.ts:48`.
+- Added story packet `docs/stories/US-070-instructor-live-leaderboard-query-boundary-envelopes.md:1`.
+- Updated product docs, backlog, README/CLAUDE status, and test matrix evidence at `docs/TEST_MATRIX.md:60`.
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/live-leaderboard.test.ts` — passed, 1 file / 17 tests.
+- `npm run validate:quick` — passed, 24 files / 315 tests.
+
+Not attempted:
+- No UI, server query execution, auth/RLS, Supabase, database, provider clients, worker/realtime execution, commit, push, or PR. The working tree already had many unrelated modified/untracked files before this sprint; I did not try to clean or commit them.

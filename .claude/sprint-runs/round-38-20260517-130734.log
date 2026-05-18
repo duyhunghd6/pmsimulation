@@ -1,0 +1,19 @@
+Selected story/work item: **US-045 Student TARA order server-action validation failure envelope**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+
+- Added `createStudentTaraOrderServerActionValidationFailureEnvelope` and related types in `app/domain/tara/order.ts:143` and `app/domain/tara/order.ts:336`.
+- Added unit coverage for invalid submission failures, fallback result keys, valid-submission rejection, and payload exclusions in `app/domain/tara/order.test.ts:354`.
+- Added story packet `docs/stories/US-045-student-tara-order-server-action-validation-failure-envelope.md:1`.
+- Updated product docs, backlog, README/CLAUDE status, and test matrix evidence, including `docs/TEST_MATRIX.md:28`.
+
+Validation run:
+
+- `npm run validate:quick` — passed.
+- Result: **24 test files passed, 208 tests passed**.
+
+Not attempted:
+
+- No Next.js app, UI, server action runtime, auth/RLS, database, Supabase, worker, realtime provider, CI, deployment, commit, push, or PR.
+- Existing unrelated working-tree changes and untracked sprint artifacts were left untouched.

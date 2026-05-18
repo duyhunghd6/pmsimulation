@@ -68,6 +68,254 @@ export type InstructorGodModePortfolioVisibilityResult =
   | { ok: true; value: InstructorGodModePortfolioVisibilitySnapshot }
   | { ok: false; errors: InstructorGodModePortfolioVisibilityError[] };
 
+export type InstructorGodModePortfolioVisibilityQueryDescriptorInput = {
+  classId: string;
+  currentMonthIndex: number;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryDescriptor = {
+  descriptorType: 'instructor_god_mode_portfolio_visibility_query_descriptor';
+  queryDescriptorKey: string;
+  queryBoundary: 'server_query_descriptor_boundary';
+  queryName: 'get_instructor_god_mode_portfolio_visibility';
+  requiredScope: 'instructor_scoped_class';
+  classId: string;
+  currentMonthIndex: number;
+  currentTurnOnly: true;
+  includeFutureScenarioRows: false;
+  includeStudentExactHoldingsForInstructor: true;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeEstimatedTaxDrag: false;
+  includeProviderPayload: false;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryDescriptorErrorCode =
+  | 'invalid_class_id'
+  | 'invalid_current_month_index';
+
+export type InstructorGodModePortfolioVisibilityQueryDescriptorError = {
+  code: InstructorGodModePortfolioVisibilityQueryDescriptorErrorCode;
+  message: string;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryDescriptorResult =
+  | { ok: true; value: InstructorGodModePortfolioVisibilityQueryDescriptor }
+  | { ok: false; errors: InstructorGodModePortfolioVisibilityQueryDescriptorError[] };
+
+export type InstructorGodModePortfolioVisibilityQueryResultEnvelope = {
+  envelopeType: 'instructor_god_mode_portfolio_visibility_query_result';
+  queryResultKey: string;
+  queryBoundary: 'server_query_result_boundary';
+  queryDescriptorKey: string;
+  queryName: 'get_instructor_god_mode_portfolio_visibility';
+  requiredScope: 'instructor_scoped_class';
+  classId: string;
+  currentMonthIndex: number;
+  resultStatus: 'ready';
+  currentTurnOnly: true;
+  includeFutureScenarioRows: false;
+  includeStudentExactHoldingsForInstructor: true;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeEstimatedTaxDrag: false;
+  includeProviderPayload: false;
+  snapshot: InstructorGodModePortfolioVisibilitySnapshot;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelope = {
+  envelopeType: 'instructor_god_mode_portfolio_visibility_query_result_validation_failure';
+  queryResultKey: string;
+  queryBoundary: 'server_query_result_boundary';
+  queryDescriptorKey: string;
+  queryName: 'get_instructor_god_mode_portfolio_visibility';
+  requiredScope: 'instructor_scoped_class';
+  classId: string;
+  currentMonthIndex: number;
+  resultStatus: 'validation_failed';
+  currentTurnOnly: true;
+  includeFutureScenarioRows: false;
+  includeStudentExactHoldingsForInstructor: true;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeEstimatedTaxDrag: false;
+  includeProviderPayload: false;
+  validationErrors: InstructorGodModePortfolioVisibilityQueryResultEnvelopeError[];
+};
+
+export type InstructorGodModePortfolioVisibilityQueryResultEnvelopeInput = {
+  descriptor: InstructorGodModePortfolioVisibilityQueryDescriptor;
+  snapshot?: InstructorGodModePortfolioVisibilitySnapshot;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryResultEnvelopeErrorCode =
+  | 'missing_god_mode_portfolio_visibility_snapshot'
+  | 'mismatched_class_id'
+  | 'mismatched_current_month_index';
+
+export type InstructorGodModePortfolioVisibilityQueryResultEnvelopeError = {
+  code: InstructorGodModePortfolioVisibilityQueryResultEnvelopeErrorCode;
+  message: string;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryResultEnvelopeResult =
+  | { ok: true; value: InstructorGodModePortfolioVisibilityQueryResultEnvelope }
+  | { ok: false; errors: InstructorGodModePortfolioVisibilityQueryResultEnvelopeError[] };
+
+export type InstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelopeError = {
+  code: 'query_result_is_valid';
+  message: string;
+};
+
+export type InstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelopeResult =
+  | { ok: true; value: InstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelope }
+  | { ok: false; errors: InstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelopeError[] };
+
+export function createInstructorGodModePortfolioVisibilityQueryDescriptor(
+  input: InstructorGodModePortfolioVisibilityQueryDescriptorInput,
+): InstructorGodModePortfolioVisibilityQueryDescriptorResult {
+  const errors: InstructorGodModePortfolioVisibilityQueryDescriptorError[] = [];
+  const classId = input.classId.trim();
+
+  if (classId === '') {
+    errors.push({
+      code: 'invalid_class_id',
+      message: 'Class id is required.',
+    });
+  }
+
+  if (!Number.isInteger(input.currentMonthIndex) || input.currentMonthIndex < 0) {
+    errors.push({
+      code: 'invalid_current_month_index',
+      message: 'Current month index must be a non-negative integer.',
+    });
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    value: {
+      descriptorType: 'instructor_god_mode_portfolio_visibility_query_descriptor',
+      queryDescriptorKey: `class:${classId}:month:${input.currentMonthIndex}:instructor-god-mode-portfolio-visibility-query`,
+      queryBoundary: 'server_query_descriptor_boundary',
+      queryName: 'get_instructor_god_mode_portfolio_visibility',
+      requiredScope: 'instructor_scoped_class',
+      classId,
+      currentMonthIndex: input.currentMonthIndex,
+      currentTurnOnly: true,
+      includeFutureScenarioRows: false,
+      includeStudentExactHoldingsForInstructor: true,
+      includeTargetWeights: false,
+      includeOrderDetails: false,
+      includeEstimatedTaxDrag: false,
+      includeProviderPayload: false,
+    },
+  };
+}
+
+export function createInstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelope(
+  input: InstructorGodModePortfolioVisibilityQueryResultEnvelopeInput,
+): InstructorGodModePortfolioVisibilityQueryResultValidationFailureEnvelopeResult {
+  const result = createInstructorGodModePortfolioVisibilityQueryResultEnvelope(input);
+
+  if (result.ok) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: 'query_result_is_valid',
+          message: 'Validation failure envelopes require an invalid instructor God Mode portfolio visibility query result.',
+        },
+      ],
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      envelopeType: 'instructor_god_mode_portfolio_visibility_query_result_validation_failure',
+      queryResultKey: `${input.descriptor.queryDescriptorKey}:validation-failure`,
+      queryBoundary: 'server_query_result_boundary',
+      queryDescriptorKey: input.descriptor.queryDescriptorKey,
+      queryName: input.descriptor.queryName,
+      requiredScope: input.descriptor.requiredScope,
+      classId: input.descriptor.classId,
+      currentMonthIndex: input.descriptor.currentMonthIndex,
+      resultStatus: 'validation_failed',
+      currentTurnOnly: input.descriptor.currentTurnOnly,
+      includeFutureScenarioRows: input.descriptor.includeFutureScenarioRows,
+      includeStudentExactHoldingsForInstructor: input.descriptor.includeStudentExactHoldingsForInstructor,
+      includeTargetWeights: input.descriptor.includeTargetWeights,
+      includeOrderDetails: input.descriptor.includeOrderDetails,
+      includeEstimatedTaxDrag: input.descriptor.includeEstimatedTaxDrag,
+      includeProviderPayload: input.descriptor.includeProviderPayload,
+      validationErrors: result.errors,
+    },
+  };
+}
+
+export function createInstructorGodModePortfolioVisibilityQueryResultEnvelope(
+  input: InstructorGodModePortfolioVisibilityQueryResultEnvelopeInput,
+): InstructorGodModePortfolioVisibilityQueryResultEnvelopeResult {
+  const errors: InstructorGodModePortfolioVisibilityQueryResultEnvelopeError[] = [];
+
+  if (!input.snapshot) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: 'missing_god_mode_portfolio_visibility_snapshot',
+          message: 'Instructor God Mode portfolio visibility query result envelopes require the already-authorized snapshot.',
+        },
+      ],
+    };
+  }
+
+  if (input.snapshot.classId !== input.descriptor.classId) {
+    errors.push({
+      code: 'mismatched_class_id',
+      message: 'Instructor God Mode portfolio visibility query result class must match the descriptor class.',
+    });
+  }
+
+  if (input.snapshot.monthIndex !== input.descriptor.currentMonthIndex) {
+    errors.push({
+      code: 'mismatched_current_month_index',
+      message: 'Instructor God Mode portfolio visibility query result month must match the descriptor current month.',
+    });
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    value: {
+      envelopeType: 'instructor_god_mode_portfolio_visibility_query_result',
+      queryResultKey: `${input.descriptor.queryDescriptorKey}:result-envelope`,
+      queryBoundary: 'server_query_result_boundary',
+      queryDescriptorKey: input.descriptor.queryDescriptorKey,
+      queryName: input.descriptor.queryName,
+      requiredScope: input.descriptor.requiredScope,
+      classId: input.descriptor.classId,
+      currentMonthIndex: input.descriptor.currentMonthIndex,
+      resultStatus: 'ready',
+      currentTurnOnly: input.descriptor.currentTurnOnly,
+      includeFutureScenarioRows: input.descriptor.includeFutureScenarioRows,
+      includeStudentExactHoldingsForInstructor: input.descriptor.includeStudentExactHoldingsForInstructor,
+      includeTargetWeights: input.descriptor.includeTargetWeights,
+      includeOrderDetails: input.descriptor.includeOrderDetails,
+      includeEstimatedTaxDrag: input.descriptor.includeEstimatedTaxDrag,
+      includeProviderPayload: input.descriptor.includeProviderPayload,
+      snapshot: input.snapshot,
+    },
+  };
+}
+
 export function createInstructorGodModePortfolioVisibilitySnapshot(
   input: InstructorGodModePortfolioVisibilityInput,
 ): InstructorGodModePortfolioVisibilityResult {

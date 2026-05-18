@@ -1,0 +1,18 @@
+Selected story/work item: `US-058 Month advance fund processing validation failure envelope`  
+Lane: normal
+
+Implemented one bounded pure-domain E03 slice:
+
+- Added `MonthAdvanceFundProcessingValidationFailureEnvelope` and `createMonthAdvanceFundProcessingValidationFailureEnvelope` in `app/domain/classes/month-advancement.ts:396` and `app/domain/classes/month-advancement.ts:1043`.
+- Added unit coverage for invalid attribution inputs, blank fund ids, payload exclusions, and valid-input rejection in `app/domain/classes/month-advancement.test.ts:1163`.
+- Added the story packet at `docs/stories/US-058-month-advance-fund-processing-validation-failure-envelope.md:1`.
+- Updated product contract and evidence in `docs/product/simulation-engine.md:113`, `docs/product/data-model.md:261`, `docs/product/runtime-architecture.md:34`, and `docs/TEST_MATRIX.md:68`.
+- Updated backlog/status references in `docs/stories/backlog.md`.
+
+Validation run:
+
+- `npm run validate:quick` passed: 24 test files, 247 tests.
+
+Not attempted:
+
+- No Next.js app, UI, Supabase, auth/RLS, database, migrations, worker, realtime provider, CI, deployment, or platform scaffolding was added.

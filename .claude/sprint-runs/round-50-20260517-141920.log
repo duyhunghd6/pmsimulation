@@ -1,0 +1,12 @@
+Selected story/work item: `US-038 Data, auth, and tenancy foundation` blocker refinement.  
+Lane: high-risk.
+
+Changed:
+- Tightened the US-038 blocker evidence and minimum unblockers in `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:31`, `execplan.md:58`, and `validation.md:33`.
+- Updated backlog and matrix evidence in `docs/stories/backlog.md:19` and `docs/TEST_MATRIX.md:32`.
+
+Validation:
+- `npm run validate:quick` passed: 24 test files, 238 tests.
+
+Not attempted:
+- No auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, commit, push, or PR.

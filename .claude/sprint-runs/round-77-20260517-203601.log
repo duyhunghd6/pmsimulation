@@ -1,0 +1,6 @@
+Selected work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk, due to auth, authorization, data model, audit/security, external-provider, public-contract, weak-proof, and multi-domain flags.
+
+This sprint stopped at the documented blocker: US-038 already requires a human decision gate before leaving blocker mode, so I did not add Supabase, RLS, app/runtime, schema, provider dependencies, or a pure TypeScript policy-helper slice without approval. No additional repository files were changed in this round because the blocker evidence, approval checklist, harness backlog note, backlog, and test matrix are already current.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 288 tests.

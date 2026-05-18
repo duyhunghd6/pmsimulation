@@ -1,0 +1,23 @@
+Selected story/work item: **US-048 Instructor class server-action validation failure envelope**.  
+Lane: **normal** — bounded pure-domain public-contract slice; no auth/database/platform execution.
+
+Implemented:
+- Added instructor class validation-failure envelope types and factory in `app/domain/classes/class-draft.ts:64` and `app/domain/classes/class-draft.ts:154`.
+- Added unit coverage for invalid draft failures, fallback keys, valid-draft rejection, and payload exclusions in `app/domain/classes/class-draft.test.ts:159`.
+- Added story packet `docs/stories/US-048-instructor-class-server-action-validation-failure-envelope.md:1`.
+- Updated product/docs evidence:
+  - `docs/product/roles-and-permissions.md:35`
+  - `docs/product/user-surfaces.md:71`
+  - `docs/product/data-model.md:31`
+  - `docs/product/runtime-architecture.md:44`
+  - `docs/TEST_MATRIX.md:49`
+  - `docs/stories/backlog.md`
+  - `README.md:9`
+  - `CLAUDE.md:7`
+
+Validation:
+- `npm run validate:quick` passed: **24 test files, 215 tests**.
+
+Not attempted:
+- No UI, server actions, auth/session checks, database/Supabase/Drizzle/RLS, join-code generation, realtime, worker, CI, commit, push, or PR.
+- The working tree already had many pre-existing uncommitted/untracked changes; I only worked within this bounded sprint slice.

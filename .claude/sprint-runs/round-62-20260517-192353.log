@@ -1,0 +1,18 @@
+Selected story/work item: **US-064 Instructor Dashboard Current-Turn Query Result Validation Failure Envelope**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+
+- Added `createInstructorDashboardCurrentTurnQueryResultValidationFailureEnvelope` and supporting types in `app/domain/classes/dashboard-snapshot.ts:125`.
+- Added unit coverage for invalid-result envelope creation, payload exclusions, and valid-result rejection in `app/domain/classes/dashboard-snapshot.test.ts:274`.
+- Created the story packet at `docs/stories/US-064-instructor-dashboard-current-turn-query-result-validation-failure-envelope.md:1`.
+- Updated product docs, backlog, repository status text, and `docs/TEST_MATRIX.md:61`.
+
+Validation run:
+
+- `npm run validate:quick` passed.
+- Result: **24 test files passed, 265 tests passed**.
+
+Not attempted:
+
+- No Next.js app, UI, server query execution, auth/session checks, RLS, database, Supabase, Drizzle, realtime provider, worker, cron, platform, deployment, commit, push, or PR work. Existing unrelated working-tree changes and untracked sprint artifacts were left untouched.

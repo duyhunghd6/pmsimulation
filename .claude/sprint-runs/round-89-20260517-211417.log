@@ -1,0 +1,15 @@
+Selected story/work item: `US-024 Instructor God Mode portfolio visibility snapshot` continuation.  
+Lane: normal.
+
+Implemented one bounded slice:
+- Added pure-domain God Mode portfolio visibility query descriptor, result envelope, and validation failure envelope in `app/domain/classes/god-mode-portfolio-visibility.ts:174`.
+- Added unit coverage for descriptor creation, result wrapping, mismatch errors, failure envelopes, and payload exclusions in `app/domain/classes/god-mode-portfolio-visibility.test.ts:51`.
+- Updated the story and evidence in `docs/stories/US-024-instructor-god-mode-portfolio-visibility-snapshot.md:15`.
+- Updated product docs, backlog, `README.md`, `CLAUDE.md`, and `docs/TEST_MATRIX.md` to reflect the new query-boundary envelope slice.
+
+Validation run:
+- `npm run test:unit -- app/domain/classes/god-mode-portfolio-visibility.test.ts` — passed, 1 file / 17 tests.
+- `npm run validate:quick` — passed, 24 files / 306 tests.
+
+Not attempted:
+- No UI, auth, database, RLS, Supabase, server query execution, provider code, commit, push, or PR. The working tree already had many unrelated modified/untracked files before this sprint; I did not try to clean or commit them.

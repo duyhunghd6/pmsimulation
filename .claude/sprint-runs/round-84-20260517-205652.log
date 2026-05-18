@@ -1,0 +1,7 @@
+Selected work item: `docs/TEST_MATRIX.md` evidence-link cleanup, lane: tiny. I fixed the stale E01 evidence path at `docs/TEST_MATRIX.md:52` so it points to the existing `docs/stories/US-034-student-post-turn-dashboard-snapshot.md`.
+
+Validation run:
+- Story link check for `docs/TEST_MATRIX.md` and `docs/stories/backlog.md`: passed.
+- `npm run validate:quick`: passed with 24 test files and 288 tests.
+
+Not attempted: no app/platform scaffolding, no provider/auth/database work, no high-risk blocked story implementation, no commit/push/PR.

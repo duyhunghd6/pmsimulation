@@ -1,0 +1,15 @@
+Selected story/work item: **US-051 Instructor Live Month-Advance Server Action Validation Failure Envelope**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorLiveMonthAdvanceServerActionValidationFailureEnvelope` in `app/domain/classes/month-advancement.ts:488`.
+- Added unit coverage for invalid input, deterministic fallback keys, valid-request rejection, and payload exclusions in `app/domain/classes/month-advancement.test.ts:1183`.
+- Added story packet `docs/stories/US-051-instructor-live-month-advance-server-action-validation-failure-envelope.md`.
+- Updated product docs, backlog, README/CLAUDE status text, and `docs/TEST_MATRIX.md:59`.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: 24 test files passed, 223 tests passed.
+
+Not attempted:
+- No UI, server actions, API routes, auth/RLS, database, Supabase, worker dispatch, realtime provider, ledger persistence, deployment, commit, push, or PR.

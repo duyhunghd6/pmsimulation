@@ -1,0 +1,15 @@
+Selected story/work item: **US-039 Release Validation and Deployment Proof**.  
+Lane: **high-risk** — platform/provider/CI/deployment proof crosses external-system, cross-platform, weak-proof, and multi-domain gates.
+
+Changed:
+- Refined the US-039 blocker and non-attempted scope in `docs/stories/US-039-release-validation-and-deployment-proof/overview.md:30`.
+- Tightened release-proof preconditions in `docs/stories/US-039-release-validation-and-deployment-proof/execplan.md:41`.
+- Recorded validation evidence in `docs/stories/US-039-release-validation-and-deployment-proof/validation.md:35`.
+- Updated proof status in `docs/TEST_MATRIX.md:81` and E04 aggregate status in `docs/TEST_MATRIX.md:84`.
+- Updated the E04 backlog note in `docs/stories/backlog.md:38`.
+
+Validation:
+- `npm run validate:quick` passed: **24 test files**, **247 tests**.
+
+Not attempted:
+- No CI, deployment automation, Vercel/Supabase config, provider SDK, app runtime, browser UI, server runtime, worker, realtime provider, release command, commit, push, or PR was created.

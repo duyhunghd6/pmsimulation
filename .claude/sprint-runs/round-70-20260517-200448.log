@@ -1,0 +1,14 @@
+Selected story/work item: **US-026 continuation — Student attribution report query boundary envelopes**.  
+Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added student attribution report query descriptor/result/failure envelope types and functions in `app/domain/student/attribution-report.ts:65`, `app/domain/student/attribution-report.ts:170`, `app/domain/student/attribution-report.ts:222`, and `app/domain/student/attribution-report.ts:282`.
+- Added unit coverage for descriptor creation, scoped result wrapping, validation failure envelopes, and anti-leakage boundaries.
+- Updated product docs, backlog, story evidence, README/project guidance, and `docs/TEST_MATRIX.md:42`.
+
+Validation run:
+- `npm run test:unit -- app/domain/student/attribution-report.test.ts` — passed, 1 file / 15 tests.
+- `npm run validate:quick` — passed, 24 files / 282 tests.
+
+Not attempted:
+- No UI, auth/RLS, Supabase/Drizzle, persistence, server query execution, worker, realtime provider, CI, commit, push, or PR.

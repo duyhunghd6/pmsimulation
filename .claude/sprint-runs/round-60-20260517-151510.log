@@ -1,0 +1,14 @@
+Selected story/work item: **US-062 Instructor dashboard current-turn query descriptor**. Lane: **normal**.
+
+Implemented one bounded pure-domain slice:
+- Added `createInstructorDashboardCurrentTurnQueryDescriptor` in `app/domain/classes/dashboard-snapshot.ts:106`.
+- Added unit coverage in `app/domain/classes/dashboard-snapshot.test.ts`.
+- Added story packet `docs/stories/US-062-instructor-dashboard-current-turn-query-descriptor.md:1`.
+- Updated product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md:59`.
+
+Validation:
+- `npm run validate:quick` passed.
+- Result: 24 test files passed, 259 tests passed.
+
+Not attempted:
+- No UI, server query execution, auth/RLS, database, Supabase/Drizzle, realtime provider, worker, cron, CI, deployment, commit, push, or PR.

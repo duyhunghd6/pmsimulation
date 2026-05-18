@@ -1,0 +1,7 @@
+Selected work item: `US-038 Data, auth, and tenancy foundation`; lane: high-risk.
+
+No product or docs changes were made this sprint. The story remains blocked by its documented human decision gate in `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:91`, and `docs/HARNESS.md:154` says not to reselect blocked high-risk stories just to restate the same blocker.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 288 tests.
+
+Not attempted: Supabase/Drizzle setup, auth/RLS, schema, app/runtime scaffolding, provider-backed proof, CI/deployment, commit, push, or PR.

@@ -11,11 +11,13 @@ In scope:
 - A Supabase Realtime publication boundary that consumes `SupabaseRealtimePublicationDescriptor`.
 - Environment and channel naming contract needed by the publisher.
 - Integration proof that the broadcast payload remains refresh-only.
+- Preservation of the US-040/US-041 server-query handoff and result envelope; realtime publication must not execute current-turn queries or carry query results.
 - Failure handling for provider publication errors at the application boundary.
 
 Out of scope:
 
 - Browser UI subscription/refetch execution.
+- Server query execution for authorized current-turn surfaces.
 - Worker provider selection or worker execution.
 - Database schema design unrelated to realtime authorization proof.
 - Weakening the existing refresh-only realtime payload contract.

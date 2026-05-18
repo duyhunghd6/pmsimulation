@@ -1,0 +1,8 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk, due to auth, authorization, data model, audit/security, external provider behavior, weak proof, and multi-domain scope.
+
+This sprint stopped at the documented blocker: no smaller unblocked normal-lane slice remains ahead of the auth/tenancy foundation, and the US-038 packet already records the blocker, unblockers, and next human decision gate. I did not modify files in this round to avoid churn.
+
+Validation run: `npm run validate:quick` passed — 24 test files, 288 tests.
+
+Not attempted: Supabase, auth, RLS, database schema, app runtime, UI, worker, realtime provider, CI/deployment, commits, pushes, or PR creation.

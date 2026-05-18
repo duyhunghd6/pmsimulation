@@ -27,4 +27,6 @@ After this story is implemented, the project has an accepted release proof path 
 
 ## Sprint Blocker
 
-Implementation is blocked in this sprint because there is no deployable application surface, platform configuration, CI runner, provider environment, integration suite, or E2E suite to validate. Adding those ad hoc would scaffold broad platform shells and cross external-provider/platform gates before the lower-layer app, auth, database, worker, and realtime stories are unblocked.
+Implementation remains blocked in this sprint because there is no deployable application surface, platform configuration, CI runner, provider environment, integration suite, E2E suite, platform smoke command, or release evidence format to validate. Adding those ad hoc would scaffold broad platform shells and cross external-provider/platform gates before the lower-layer app, auth, database, worker, and realtime stories are unblocked.
+
+This sprint reselected US-039 after confirming the remaining E04 implementation path still depends on blocked US-038 auth/tenancy and US-037 Supabase Realtime provider boundaries. It stopped at blocker refinement; no CI, deployment automation, Vercel, Supabase, worker, realtime provider, browser app, server runtime, or release command was introduced.

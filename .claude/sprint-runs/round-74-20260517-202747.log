@@ -1,0 +1,7 @@
+Selected work item: `US-038 Data, Auth, and Tenancy Foundation`; lane: high-risk.
+
+This sprint stopped at the existing blocker instead of implementing: US-038 requires human-approved auth/session, schema/RLS, provider/environment, fixture, audit/logging, and integration-proof decisions before code can safely begin. The blocker is already documented in `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:31`, `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:91`, and `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:33`, so I made no repository edits this round.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 288 tests.
+
+Not attempted: auth, database, Supabase/RLS, app runtime, UI, worker, realtime provider, CI, deployment, or broad platform scaffolding.

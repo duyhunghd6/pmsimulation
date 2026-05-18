@@ -38,7 +38,7 @@ Lane: high-risk.
 
 ## Work Phases
 
-1. Confirm app/runtime, CI, provider, auth, database, worker, realtime, integration, and E2E boundaries exist.
+1. Confirm app/runtime, CI, provider, auth, database, worker, realtime, integration, E2E, platform smoke, and release evidence boundaries exist.
 2. Define the smallest release validation command or checklist that aggregates existing proof and adds platform smoke checks.
 3. Add deterministic fixtures or smoke records only through accepted provider/data stories.
 4. Implement release validation without weakening lower-layer proof.

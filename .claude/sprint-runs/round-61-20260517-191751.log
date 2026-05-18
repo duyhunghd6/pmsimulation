@@ -1,0 +1,17 @@
+Selected story/work item: **US-063 Instructor Dashboard Current-Turn Query Result Envelope**  
+Lane: **normal**
+
+Implemented one bounded pure-domain slice:
+
+- Added `createInstructorDashboardCurrentTurnQueryResultEnvelope` in `app/domain/classes/dashboard-snapshot.ts:195`.
+- Added unit coverage for valid envelopes, instructor scope/anti-leakage boundaries, permitted God Mode holdings, and missing/mismatched snapshot rejection in `app/domain/classes/dashboard-snapshot.test.ts:132`.
+- Added story packet `docs/stories/US-063-instructor-dashboard-current-turn-query-result-envelope.md`.
+- Updated product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md:60`.
+
+Validation run:
+
+- `npm run validate:quick` — passed with **24 test files** and **262 tests**.
+
+Not attempted:
+
+- No UI, server query execution, auth/session checks, RLS, database, Supabase/Drizzle, realtime provider, worker, cron, CI, deployment, commit, push, or PR.

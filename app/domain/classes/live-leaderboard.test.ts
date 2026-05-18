@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { createInstructorLiveLeaderboardSnapshot } from './live-leaderboard';
+import {
+  createInstructorLiveLeaderboardQueryDescriptor,
+  createInstructorLiveLeaderboardQueryResultEnvelope,
+  createInstructorLiveLeaderboardQueryResultValidationFailureEnvelope,
+  createInstructorLiveLeaderboardSnapshot,
+} from './live-leaderboard';
 
 const defaultInput = {
   classId: 'class-001',
@@ -39,6 +44,340 @@ function errorCodesFor(input: Parameters<typeof createInstructorLiveLeaderboardS
 
   return result.errors.map((error) => error.code);
 }
+
+describe('createInstructorLiveLeaderboardQueryDescriptor', () => {
+  it('creates a server-query descriptor for scoped instructor live leaderboard access', () => {
+    const result = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: ' class-001 ',
+      currentMonthIndex: 4,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        descriptorType: 'instructor_live_leaderboard_query_descriptor',
+        queryDescriptorKey: 'class:class-001:month:4:instructor-live-leaderboard-query',
+        queryBoundary: 'server_query_descriptor_boundary',
+        queryName: 'get_instructor_live_leaderboard',
+        requiredScope: 'instructor_scoped_class',
+        classId: 'class-001',
+        currentMonthIndex: 4,
+        currentTurnOnly: true,
+        includeFutureScenarioRows: false,
+        includeHoldings: false,
+        includeTargetWeights: false,
+        includeOrderDetails: false,
+        includeEstimatedTaxDrag: false,
+        includeProviderPayload: false,
+      },
+    });
+  });
+
+  it('keeps the descriptor free of snapshots, holdings, order details, and provider clients', () => {
+    const result = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      return;
+    }
+
+    expect(result.value.requiredScope).toBe('instructor_scoped_class');
+    expect(result.value.includeFutureScenarioRows).toBe(false);
+    expect(result.value.includeHoldings).toBe(false);
+    expect(result.value.includeTargetWeights).toBe(false);
+    expect(result.value.includeOrderDetails).toBe(false);
+    expect(result.value.includeEstimatedTaxDrag).toBe(false);
+    expect(result.value.includeProviderPayload).toBe(false);
+    expect('snapshot' in result.value).toBe(false);
+    expect('databaseRows' in result.value).toBe(false);
+    expect('supabaseClient' in result.value).toBe(false);
+  });
+
+  it('rejects invalid descriptor scope inputs', () => {
+    const result = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: ' ',
+      currentMonthIndex: 1.5,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      errors: [
+        { code: 'invalid_class_id', message: 'Class id is required.' },
+        { code: 'invalid_current_month_index', message: 'Current month index must be a non-negative integer.' },
+      ],
+    });
+  });
+});
+
+describe('createInstructorLiveLeaderboardQueryResultEnvelope', () => {
+  it('wraps an already-authorized live leaderboard snapshot for the descriptor scope', () => {
+    const descriptor = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+    const snapshot = createInstructorLiveLeaderboardSnapshot(defaultInput);
+
+    expect(descriptor.ok).toBe(true);
+    expect(snapshot.ok).toBe(true);
+
+    if (!descriptor.ok || !snapshot.ok) {
+      return;
+    }
+
+    expect(
+      createInstructorLiveLeaderboardQueryResultEnvelope({
+        descriptor: descriptor.value,
+        snapshot: snapshot.value,
+      }),
+    ).toEqual({
+      ok: true,
+      value: {
+        envelopeType: 'instructor_live_leaderboard_query_result',
+        queryResultKey: 'class:class-001:month:4:instructor-live-leaderboard-query:result-envelope',
+        queryBoundary: 'server_query_result_boundary',
+        queryDescriptorKey: 'class:class-001:month:4:instructor-live-leaderboard-query',
+        queryName: 'get_instructor_live_leaderboard',
+        requiredScope: 'instructor_scoped_class',
+        classId: 'class-001',
+        currentMonthIndex: 4,
+        resultStatus: 'ready',
+        currentTurnOnly: true,
+        includeFutureScenarioRows: false,
+        includeHoldings: false,
+        includeTargetWeights: false,
+        includeOrderDetails: false,
+        includeEstimatedTaxDrag: false,
+        includeProviderPayload: false,
+        snapshot: snapshot.value,
+      },
+    });
+  });
+
+  it('keeps the query result envelope scoped to leaderboard-safe instructor payloads', () => {
+    const descriptor = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+    const snapshot = createInstructorLiveLeaderboardSnapshot(defaultInput);
+
+    expect(descriptor.ok).toBe(true);
+    expect(snapshot.ok).toBe(true);
+
+    if (!descriptor.ok || !snapshot.ok) {
+      return;
+    }
+
+    const result = createInstructorLiveLeaderboardQueryResultEnvelope({
+      descriptor: descriptor.value,
+      snapshot: snapshot.value,
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      return;
+    }
+
+    expect(result.value.requiredScope).toBe('instructor_scoped_class');
+    expect(result.value.currentTurnOnly).toBe(true);
+    expect(result.value.includeFutureScenarioRows).toBe(false);
+    expect(result.value.includeHoldings).toBe(false);
+    expect(result.value.includeTargetWeights).toBe(false);
+    expect(result.value.includeOrderDetails).toBe(false);
+    expect(result.value.includeEstimatedTaxDrag).toBe(false);
+    expect(result.value.includeProviderPayload).toBe(false);
+    expect(result.value.snapshot.rows[0]).toEqual({
+      rank: 1,
+      fundId: 'fund-003',
+      studentDisplayName: 'Chi Fund',
+      currentAum: 54_000_000,
+      sharpeRatio: 1.2,
+      orderStatus: 'pending',
+    });
+    expect('databaseRows' in result.value).toBe(false);
+    expect('supabaseClient' in result.value).toBe(false);
+    expect('uiState' in result.value).toBe(false);
+    expect('holdings' in result.value.snapshot.rows[0]).toBe(false);
+    expect('targetWeights' in result.value.snapshot.rows[0]).toBe(false);
+    expect('estimatedTaxDrag' in result.value.snapshot.rows[0]).toBe(false);
+  });
+
+  it('rejects missing or mismatched live leaderboard query results', () => {
+    const descriptor = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+    const snapshot = createInstructorLiveLeaderboardSnapshot(defaultInput);
+
+    expect(descriptor.ok).toBe(true);
+    expect(snapshot.ok).toBe(true);
+
+    if (!descriptor.ok || !snapshot.ok) {
+      return;
+    }
+
+    expect(
+      createInstructorLiveLeaderboardQueryResultEnvelope({
+        descriptor: descriptor.value,
+      }),
+    ).toEqual({
+      ok: false,
+      errors: [
+        {
+          code: 'missing_live_leaderboard_snapshot',
+          message: 'Instructor live leaderboard query result envelopes require the already-authorized snapshot.',
+        },
+      ],
+    });
+
+    expect(
+      createInstructorLiveLeaderboardQueryResultEnvelope({
+        descriptor: descriptor.value,
+        snapshot: {
+          ...snapshot.value,
+          classId: 'class-999',
+          monthIndex: 5,
+        },
+      }),
+    ).toEqual({
+      ok: false,
+      errors: [
+        {
+          code: 'mismatched_class_id',
+          message: 'Instructor live leaderboard query result class must match the descriptor class.',
+        },
+        {
+          code: 'mismatched_current_month_index',
+          message: 'Instructor live leaderboard query result month must match the descriptor current month.',
+        },
+      ],
+    });
+  });
+
+  it('creates a validation failure envelope for an invalid live leaderboard query result', () => {
+    const descriptor = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+
+    expect(descriptor.ok).toBe(true);
+
+    if (!descriptor.ok) {
+      return;
+    }
+
+    expect(
+      createInstructorLiveLeaderboardQueryResultValidationFailureEnvelope({
+        descriptor: descriptor.value,
+      }),
+    ).toEqual({
+      ok: true,
+      value: {
+        envelopeType: 'instructor_live_leaderboard_query_result_validation_failure',
+        queryResultKey: 'class:class-001:month:4:instructor-live-leaderboard-query:validation-failure',
+        queryBoundary: 'server_query_result_boundary',
+        queryDescriptorKey: 'class:class-001:month:4:instructor-live-leaderboard-query',
+        queryName: 'get_instructor_live_leaderboard',
+        requiredScope: 'instructor_scoped_class',
+        classId: 'class-001',
+        currentMonthIndex: 4,
+        resultStatus: 'validation_failed',
+        currentTurnOnly: true,
+        includeFutureScenarioRows: false,
+        includeHoldings: false,
+        includeTargetWeights: false,
+        includeOrderDetails: false,
+        includeEstimatedTaxDrag: false,
+        includeProviderPayload: false,
+        validationErrors: [
+          {
+            code: 'missing_live_leaderboard_snapshot',
+            message: 'Instructor live leaderboard query result envelopes require the already-authorized snapshot.',
+          },
+        ],
+      },
+    });
+  });
+
+  it('keeps validation failures free of snapshots, database rows, and provider clients', () => {
+    const descriptor = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+    const snapshot = createInstructorLiveLeaderboardSnapshot(defaultInput);
+
+    expect(descriptor.ok).toBe(true);
+    expect(snapshot.ok).toBe(true);
+
+    if (!descriptor.ok || !snapshot.ok) {
+      return;
+    }
+
+    const result = createInstructorLiveLeaderboardQueryResultValidationFailureEnvelope({
+      descriptor: descriptor.value,
+      snapshot: {
+        ...snapshot.value,
+        classId: 'class-999',
+      },
+    });
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      return;
+    }
+
+    expect(result.value.resultStatus).toBe('validation_failed');
+    expect(result.value.validationErrors).toEqual([
+      {
+        code: 'mismatched_class_id',
+        message: 'Instructor live leaderboard query result class must match the descriptor class.',
+      },
+    ]);
+    expect(result.value.includeHoldings).toBe(false);
+    expect(result.value.includeTargetWeights).toBe(false);
+    expect(result.value.includeOrderDetails).toBe(false);
+    expect(result.value.includeEstimatedTaxDrag).toBe(false);
+    expect('snapshot' in result.value).toBe(false);
+    expect('databaseRows' in result.value).toBe(false);
+    expect('supabaseClient' in result.value).toBe(false);
+    expect('uiState' in result.value).toBe(false);
+  });
+
+  it('does not create a validation failure envelope for a valid live leaderboard query result', () => {
+    const descriptor = createInstructorLiveLeaderboardQueryDescriptor({
+      classId: 'class-001',
+      currentMonthIndex: 4,
+    });
+    const snapshot = createInstructorLiveLeaderboardSnapshot(defaultInput);
+
+    expect(descriptor.ok).toBe(true);
+    expect(snapshot.ok).toBe(true);
+
+    if (!descriptor.ok || !snapshot.ok) {
+      return;
+    }
+
+    expect(
+      createInstructorLiveLeaderboardQueryResultValidationFailureEnvelope({
+        descriptor: descriptor.value,
+        snapshot: snapshot.value,
+      }),
+    ).toEqual({
+      ok: false,
+      errors: [
+        {
+          code: 'query_result_is_valid',
+          message: 'Validation failure envelopes require an invalid instructor live leaderboard query result.',
+        },
+      ],
+    });
+  });
+});
 
 describe('createInstructorLiveLeaderboardSnapshot', () => {
   it('creates an instructor live leaderboard ranked by AUM and Sharpe ratio', () => {

@@ -1,0 +1,7 @@
+Selected: US-038 Data, Auth, and Tenancy Foundation. Lane: high-risk blocker refinement only.
+
+No files were changed this round. The blocker is already current in `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:31` and `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:58`, and `docs/HARNESS.md:154` says not to reselect blocked high-risk stories just to restate the same blocker without new approval inputs.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 288 tests.
+
+Not attempted: Supabase/Auth/RLS, schema, app runtime, UI, provider-backed proof, CI, deployment, or another descriptor layer. Next unblocker is human selection of one US-038 path from `execplan.md:91`: provider-backed proof, docs-only deferral, or a narrowed pure TypeScript policy-helper slice.

@@ -1,0 +1,14 @@
+Selected story/work item: **US-037 Supabase Realtime client publication**.  
+Lane: **high-risk** because it crosses authorization and external-provider hard gates.
+
+Changed:
+- Updated blocker validation evidence for US-037 to include the current `npm run validate:quick` result: `docs/stories/US-037-supabase-realtime-client-publication/validation.md:34`.
+- Updated the test matrix US-037 evidence row with the same validation result and blocker scope: `docs/TEST_MATRIX.md:63`.
+
+Validation:
+- `npm run validate:quick` passed.
+- 24 test files passed.
+- 196 tests passed.
+
+Not attempted:
+- No Supabase SDK/client, auth/session, RLS, server query execution, UI refetch, worker, platform, CI, deployment, commit, push, or PR work was introduced.

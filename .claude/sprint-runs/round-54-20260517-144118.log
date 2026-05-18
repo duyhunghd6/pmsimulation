@@ -1,0 +1,11 @@
+Selected story/work item: **US-038 Data, Auth, and Tenancy Foundation**. Lane: **high-risk** due to auth, authorization, data model, audit/security, external-provider, public-contract, weak-proof, and multi-domain flags.
+
+Changed:
+- Refined US-038 blocker evidence and minimum unblockers, including unowned-class rejection and authorization-failure logging expectations: `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:35`, `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:61`, `docs/stories/US-038-data-auth-tenancy-foundation/execplan.md:64`, `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:35`.
+- Updated backlog and test matrix evidence for the 2026-05-17 sprint: `docs/stories/backlog.md:19`, `docs/TEST_MATRIX.md:32`, `docs/TEST_MATRIX.md:33`.
+
+Validation:
+- `npm run validate:quick` passed: **24 test files**, **244 tests**.
+
+Not attempted:
+- No auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, commit, push, or PR was created.

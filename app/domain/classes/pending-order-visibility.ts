@@ -47,6 +47,246 @@ export type InstructorPendingOrderVisibilityResult =
   | { ok: true; value: InstructorPendingOrderVisibilitySnapshot }
   | { ok: false; errors: InstructorPendingOrderVisibilityError[] };
 
+export type InstructorPendingOrderVisibilityQueryDescriptorInput = {
+  classId: string;
+  currentMonthIndex: number;
+};
+
+export type InstructorPendingOrderVisibilityQueryDescriptor = {
+  descriptorType: 'instructor_pending_order_visibility_query_descriptor';
+  queryDescriptorKey: string;
+  queryBoundary: 'server_query_descriptor_boundary';
+  queryName: 'get_instructor_pending_order_visibility';
+  requiredScope: 'instructor_scoped_class';
+  classId: string;
+  currentMonthIndex: number;
+  currentTurnOnly: true;
+  includeFutureScenarioRows: false;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeEstimatedTaxDrag: false;
+  includeProviderPayload: false;
+};
+
+export type InstructorPendingOrderVisibilityQueryDescriptorErrorCode = 'invalid_class_id' | 'invalid_current_month_index';
+
+export type InstructorPendingOrderVisibilityQueryDescriptorError = {
+  code: InstructorPendingOrderVisibilityQueryDescriptorErrorCode;
+  message: string;
+};
+
+export type InstructorPendingOrderVisibilityQueryDescriptorResult =
+  | { ok: true; value: InstructorPendingOrderVisibilityQueryDescriptor }
+  | { ok: false; errors: InstructorPendingOrderVisibilityQueryDescriptorError[] };
+
+export type InstructorPendingOrderVisibilityQueryResultEnvelope = {
+  envelopeType: 'instructor_pending_order_visibility_query_result';
+  queryResultKey: string;
+  queryBoundary: 'server_query_result_boundary';
+  queryDescriptorKey: string;
+  queryName: 'get_instructor_pending_order_visibility';
+  requiredScope: 'instructor_scoped_class';
+  classId: string;
+  currentMonthIndex: number;
+  resultStatus: 'ready';
+  currentTurnOnly: true;
+  includeFutureScenarioRows: false;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeEstimatedTaxDrag: false;
+  includeProviderPayload: false;
+  snapshot: InstructorPendingOrderVisibilitySnapshot;
+};
+
+export type InstructorPendingOrderVisibilityQueryResultValidationFailureEnvelope = {
+  envelopeType: 'instructor_pending_order_visibility_query_result_validation_failure';
+  queryResultKey: string;
+  queryBoundary: 'server_query_result_boundary';
+  queryDescriptorKey: string;
+  queryName: 'get_instructor_pending_order_visibility';
+  requiredScope: 'instructor_scoped_class';
+  classId: string;
+  currentMonthIndex: number;
+  resultStatus: 'validation_failed';
+  currentTurnOnly: true;
+  includeFutureScenarioRows: false;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeEstimatedTaxDrag: false;
+  includeProviderPayload: false;
+  validationErrors: InstructorPendingOrderVisibilityQueryResultEnvelopeError[];
+};
+
+export type InstructorPendingOrderVisibilityQueryResultEnvelopeInput = {
+  descriptor: InstructorPendingOrderVisibilityQueryDescriptor;
+  snapshot?: InstructorPendingOrderVisibilitySnapshot;
+};
+
+export type InstructorPendingOrderVisibilityQueryResultEnvelopeErrorCode =
+  | 'missing_pending_order_visibility_snapshot'
+  | 'mismatched_class_id'
+  | 'mismatched_current_month_index';
+
+export type InstructorPendingOrderVisibilityQueryResultEnvelopeError = {
+  code: InstructorPendingOrderVisibilityQueryResultEnvelopeErrorCode;
+  message: string;
+};
+
+export type InstructorPendingOrderVisibilityQueryResultEnvelopeResult =
+  | { ok: true; value: InstructorPendingOrderVisibilityQueryResultEnvelope }
+  | { ok: false; errors: InstructorPendingOrderVisibilityQueryResultEnvelopeError[] };
+
+export type InstructorPendingOrderVisibilityQueryResultValidationFailureEnvelopeError = {
+  code: 'query_result_is_valid';
+  message: string;
+};
+
+export type InstructorPendingOrderVisibilityQueryResultValidationFailureEnvelopeResult =
+  | { ok: true; value: InstructorPendingOrderVisibilityQueryResultValidationFailureEnvelope }
+  | { ok: false; errors: InstructorPendingOrderVisibilityQueryResultValidationFailureEnvelopeError[] };
+
+export function createInstructorPendingOrderVisibilityQueryDescriptor(
+  input: InstructorPendingOrderVisibilityQueryDescriptorInput,
+): InstructorPendingOrderVisibilityQueryDescriptorResult {
+  const errors: InstructorPendingOrderVisibilityQueryDescriptorError[] = [];
+  const classId = input.classId.trim();
+
+  if (classId === '') {
+    errors.push({
+      code: 'invalid_class_id',
+      message: 'Class id is required.',
+    });
+  }
+
+  if (!Number.isInteger(input.currentMonthIndex) || input.currentMonthIndex < 0) {
+    errors.push({
+      code: 'invalid_current_month_index',
+      message: 'Current month index must be a non-negative integer.',
+    });
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    value: {
+      descriptorType: 'instructor_pending_order_visibility_query_descriptor',
+      queryDescriptorKey: `class:${classId}:month:${input.currentMonthIndex}:instructor-pending-order-visibility-query`,
+      queryBoundary: 'server_query_descriptor_boundary',
+      queryName: 'get_instructor_pending_order_visibility',
+      requiredScope: 'instructor_scoped_class',
+      classId,
+      currentMonthIndex: input.currentMonthIndex,
+      currentTurnOnly: true,
+      includeFutureScenarioRows: false,
+      includeTargetWeights: false,
+      includeOrderDetails: false,
+      includeEstimatedTaxDrag: false,
+      includeProviderPayload: false,
+    },
+  };
+}
+
+export function createInstructorPendingOrderVisibilityQueryResultValidationFailureEnvelope(
+  input: InstructorPendingOrderVisibilityQueryResultEnvelopeInput,
+): InstructorPendingOrderVisibilityQueryResultValidationFailureEnvelopeResult {
+  const result = createInstructorPendingOrderVisibilityQueryResultEnvelope(input);
+
+  if (result.ok) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: 'query_result_is_valid',
+          message: 'Validation failure envelopes require an invalid instructor pending-order visibility query result.',
+        },
+      ],
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      envelopeType: 'instructor_pending_order_visibility_query_result_validation_failure',
+      queryResultKey: `${input.descriptor.queryDescriptorKey}:validation-failure`,
+      queryBoundary: 'server_query_result_boundary',
+      queryDescriptorKey: input.descriptor.queryDescriptorKey,
+      queryName: input.descriptor.queryName,
+      requiredScope: input.descriptor.requiredScope,
+      classId: input.descriptor.classId,
+      currentMonthIndex: input.descriptor.currentMonthIndex,
+      resultStatus: 'validation_failed',
+      currentTurnOnly: input.descriptor.currentTurnOnly,
+      includeFutureScenarioRows: input.descriptor.includeFutureScenarioRows,
+      includeTargetWeights: input.descriptor.includeTargetWeights,
+      includeOrderDetails: input.descriptor.includeOrderDetails,
+      includeEstimatedTaxDrag: input.descriptor.includeEstimatedTaxDrag,
+      includeProviderPayload: input.descriptor.includeProviderPayload,
+      validationErrors: result.errors,
+    },
+  };
+}
+
+export function createInstructorPendingOrderVisibilityQueryResultEnvelope(
+  input: InstructorPendingOrderVisibilityQueryResultEnvelopeInput,
+): InstructorPendingOrderVisibilityQueryResultEnvelopeResult {
+  const errors: InstructorPendingOrderVisibilityQueryResultEnvelopeError[] = [];
+
+  if (!input.snapshot) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: 'missing_pending_order_visibility_snapshot',
+          message: 'Instructor pending-order visibility query result envelopes require the already-authorized snapshot.',
+        },
+      ],
+    };
+  }
+
+  if (input.snapshot.classId !== input.descriptor.classId) {
+    errors.push({
+      code: 'mismatched_class_id',
+      message: 'Instructor pending-order visibility query result class must match the descriptor class.',
+    });
+  }
+
+  if (input.snapshot.monthIndex !== input.descriptor.currentMonthIndex) {
+    errors.push({
+      code: 'mismatched_current_month_index',
+      message: 'Instructor pending-order visibility query result month must match the descriptor current month.',
+    });
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    value: {
+      envelopeType: 'instructor_pending_order_visibility_query_result',
+      queryResultKey: `${input.descriptor.queryDescriptorKey}:result-envelope`,
+      queryBoundary: 'server_query_result_boundary',
+      queryDescriptorKey: input.descriptor.queryDescriptorKey,
+      queryName: input.descriptor.queryName,
+      requiredScope: input.descriptor.requiredScope,
+      classId: input.descriptor.classId,
+      currentMonthIndex: input.descriptor.currentMonthIndex,
+      resultStatus: 'ready',
+      currentTurnOnly: input.descriptor.currentTurnOnly,
+      includeFutureScenarioRows: input.descriptor.includeFutureScenarioRows,
+      includeTargetWeights: input.descriptor.includeTargetWeights,
+      includeOrderDetails: input.descriptor.includeOrderDetails,
+      includeEstimatedTaxDrag: input.descriptor.includeEstimatedTaxDrag,
+      includeProviderPayload: input.descriptor.includeProviderPayload,
+      snapshot: input.snapshot,
+    },
+  };
+}
+
 export function createInstructorPendingOrderVisibilitySnapshot(
   input: InstructorPendingOrderVisibilityInput,
 ): InstructorPendingOrderVisibilityResult {

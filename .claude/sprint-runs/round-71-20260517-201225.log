@@ -1,0 +1,15 @@
+Selected story/work item: `US-068 Student TARA Order-Entry Query Boundary Envelopes`  
+Lane: `normal`
+
+Implemented one bounded pure-domain slice:
+- Added student TARA order-entry query descriptor/result/failure envelope functions in `app/domain/tara/order.ts:319`, `app/domain/tara/order.ts:371`, and `app/domain/tara/order.ts:435`.
+- Added unit coverage for descriptor validation, matching result envelopes, mismatched/missing results, and payload exclusions in `app/domain/tara/order.test.ts:462`.
+- Added story packet `docs/stories/US-068-student-tara-order-entry-query-boundary-envelopes.md:1`.
+- Updated product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md` with US-068 evidence.
+
+Validation run:
+- `npm run test:unit -- app/domain/tara/order.test.ts` passed: 1 test file, 30 tests.
+- `npm run validate:quick` passed: 24 test files, 288 tests.
+
+Not attempted:
+- No UI, server query execution, auth/RLS, database, Supabase, worker, realtime, CI, deployment, commit, push, or PR.

@@ -1,0 +1,15 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk, due to auth, authorization, data model, audit/security, external-provider, public-contract, weak-proof, and multi-domain flags.
+
+Changed:
+- Refreshed US-038 blocker evidence in `docs/stories/US-038-data-auth-tenancy-foundation/overview.md:31`.
+- Updated validation evidence in `docs/stories/US-038-data-auth-tenancy-foundation/validation.md:33`.
+- Updated the backlog pointer in `docs/stories/backlog.md:19`.
+- Updated the US-038 row in `docs/TEST_MATRIX.md:33`.
+
+Validation:
+- Ran `npm run validate:quick`
+- Passed: 24 test files, 274 tests.
+
+Not attempted:
+- No auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, commit, push, or PR creation.

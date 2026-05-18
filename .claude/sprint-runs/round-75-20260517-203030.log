@@ -1,0 +1,6 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk, due to auth, authorization, data model, audit/security, external provider, public contract, weak proof, and multi-domain risk flags.
+
+This sprint did not introduce additional file changes because the US-038 blocker is already documented with unblockers, approval checklist, and stop conditions. I intentionally did not add Supabase, auth, RLS, database, app runtime, UI, worker, realtime provider, CI, deployment, or another descriptor layer.
+
+Validation run: `npm run validate:quick` passed with 24 test files and 288 tests.

@@ -55,6 +55,47 @@ Lane: high-risk.
 6. Add integration proof for allowed and forbidden reads/writes.
 7. Update product docs, story evidence, test matrix, and decisions if the security architecture changes.
 
+## Minimum Unblockers
+
+- Role/session claims for student and instructor identities are confirmed, including how class membership and instructor administration are represented in trusted server context.
+- Minimal class membership and instructor-admin schema/RLS shape is confirmed for own-fund reads, future-row denial, other-holding denial, instructor-owned God Mode reads, and unowned-class rejection.
+- The server-side query/command boundary that parses session claims, request inputs, and database rows is selected.
+- Supabase/Drizzle dependency and environment handling are approved for the narrow proof slice, including server-only credential handling.
+- Authorization failure logging or audit expectations are confirmed without exposing credentials, future rows, or unauthorized holdings.
+- A deterministic fixture set and integration validation command are available before any security row is marked implemented.
+
+## Decision Inputs Needed
+
+Before implementation can start, the high-risk lane needs explicit confirmation of:
+
+- The trusted role/session claim source for student and instructor identities.
+- The minimal membership/admin schema needed to prove class tenancy without a full app shell.
+- Whether the first executable proof uses Supabase local development, hosted Supabase, or a different accepted backend harness.
+- The server-only environment and credential handling boundary for tests and future runtime code.
+- The integration command name and fixture ownership model for forbidden-read proof.
+- The safe audit/log shape for denied authorization attempts.
+- Whether this story should now leave pure-domain descriptor mode and introduce the first provider-backed proof slice.
+
+## Approval Checklist For First Provider-Backed Slice
+
+Before implementation can leave blocker mode, the approved slice should name:
+
+- Session source: Supabase Auth JWT claims, including the trusted role claim and subject identifier for student and instructor paths.
+- Minimal schema: classes, instructor administration, class membership or enrollment, funds, holdings, and scenario rows sufficient to prove the forbidden reads.
+- Enforcement boundary: whether proof is primarily Supabase RLS, server-side policy checks, or both, and which checks must be database-enforced.
+- Test harness: local Supabase, hosted Supabase test project, or another accepted backend target, plus the exact integration command name.
+- Environment boundary: required server-only variables and how tests prevent browser/client exposure.
+- Fixtures: deterministic two-class, multi-student, multi-instructor rows with current, past, and future scenario data.
+- Denied-access observability: safe log or audit fields that exclude credentials, future rows, unauthorized holdings, and raw forbidden payloads.
+
+## Next Human Decision Gate
+
+This story should not leave blocker mode until the human selects one of these paths:
+
+1. Approve a first provider-backed proof slice with the checklist above filled in.
+2. Defer provider-backed work and keep future autonomous rounds to docs or harness improvements only.
+3. Narrow a pure TypeScript policy-helper slice while keeping US-038 integration proof explicitly planned, not implemented.
+
 ## Stop Conditions
 
 Pause for human confirmation if:

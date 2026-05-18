@@ -26,7 +26,24 @@ fi
 mkdir -p "${LOG_DIR}"
 cd "${ROOT_DIR}"
 
-for round in $(seq 1 "${ROUNDS}"); do
+latest_round=0
+shopt -s nullglob
+for existing_log in "${LOG_DIR}"/round-[0-9]*-*.log; do
+  existing_name="$(basename "${existing_log}")"
+  if [[ "${existing_name}" =~ ^round-([0-9]+)-[0-9]{8}-[0-9]{6}\.log$ ]]; then
+    round_number="$((10#${BASH_REMATCH[1]}))"
+    if (( round_number > latest_round )); then
+      latest_round="${round_number}"
+    fi
+  fi
+done
+shopt -u nullglob
+
+start_round="$((latest_round + 1))"
+end_round="$((latest_round + ROUNDS))"
+
+for round in $(seq "${start_round}" "${end_round}"); do
+  iteration="$((round - latest_round))"
   stamp="$(date +%Y%m%d-%H%M%S)"
   log_file="${LOG_DIR}/round-$(printf '%02d' "${round}")-${stamp}.log"
 
@@ -57,7 +74,7 @@ Do not commit, push, or create a pull request.
 PROMPT
 )"
 
-  echo "==> Claude sprint round ${round}/${ROUNDS}"
+  echo "==> Claude sprint round ${round} (${iteration}/${ROUNDS} this run)"
   echo "==> Log: ${log_file}"
 
   if [[ -n "${CLAUDE_EXTRA_ARGS:-}" ]]; then
@@ -69,7 +86,7 @@ PROMPT
     "${CLAUDE_BIN}" --dangerously-skip-permissions -p "${prompt}" 2>&1 | tee "${log_file}"
   fi
 
-  echo "==> Completed round ${round}/${ROUNDS}"
+  echo "==> Completed sprint round ${round} (${iteration}/${ROUNDS} this run)"
 done
 
-echo "==> Completed ${ROUNDS} Claude sprint rounds. Logs are in ${LOG_DIR}."
+echo "==> Completed ${ROUNDS} Claude sprint rounds (${start_round}-${end_round}). Logs are in ${LOG_DIR}."

@@ -1,0 +1,8 @@
+Selected story/work item: `US-038 Data, Auth, and Tenancy Foundation`  
+Lane: high-risk
+
+Outcome: no implementation change was made. The existing US-038 blocker remains valid, and the harness guard says not to re-document unchanged blocked high-risk stories. Implementation is still blocked until the human confirms the role/session model, minimal schema/RLS shape, Supabase/Drizzle/environment boundary, fixture/proof command, audit/log shape, and approval to leave pure-domain descriptor mode.
+
+Validation run: `npm run validate:quick` passed — 24 test files, 288 tests.
+
+Not attempted: auth, database, Supabase, RLS, app runtime, UI, worker, realtime provider, CI, deployment, or any broad scaffolding.

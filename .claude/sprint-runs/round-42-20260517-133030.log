@@ -1,0 +1,14 @@
+Selected story/work item: **US-049 Instructor live month-advance server-action command descriptor**.  
+Lane: **normal** — bounded pure-domain command-boundary contract; no runtime/auth/database/provider execution.
+
+Changed:
+- Added `InstructorLiveMonthAdvanceServerActionCommandDescriptor` and `createInstructorLiveMonthAdvanceServerActionCommandDescriptor` in `app/domain/classes/month-advancement.ts:25` and `app/domain/classes/month-advancement.ts:385`.
+- Added unit coverage for descriptor shape, deterministic command key, scope metadata, idempotency preservation, and payload exclusions in `app/domain/classes/month-advancement.test.ts:1069`.
+- Added story packet `docs/stories/US-049-instructor-live-month-advance-server-action-command-descriptor.md`.
+- Updated product docs, backlog, README/CLAUDE status, and `docs/TEST_MATRIX.md:57`.
+
+Validation:
+- `npm run validate:quick` passed: **24 test files, 217 tests**.
+
+Not attempted:
+- No UI, server action runtime, API route, auth/RLS, database, Supabase, worker dispatch, realtime publication, ledger persistence, deployment, commit, push, or PR. The working tree still contains pre-existing unrelated modified/untracked files outside this sprint.

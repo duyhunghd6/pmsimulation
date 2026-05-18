@@ -1,0 +1,14 @@
+Selected story/work item: **US-060 Student dashboard current-turn query result envelope**. Lane: **normal**.
+
+Changed:
+- Added pure-domain `createStudentDashboardCurrentTurnQueryResultEnvelope` for already-authorized student dashboard query results at `app/domain/student/dashboard-snapshot.ts:204`.
+- Added unit coverage for success, anti-leakage boundaries, missing snapshots, and mismatched scope at `app/domain/student/dashboard-snapshot.test.ts:175`.
+- Added story packet `docs/stories/US-060-student-dashboard-current-turn-query-result-envelope.md:1`.
+- Updated product docs/backlog/matrix evidence, including `docs/TEST_MATRIX.md:45` and runtime constraint text at `docs/product/runtime-architecture.md:46`.
+- Updated repository status text in `README.md` and `CLAUDE.md`.
+
+Validation:
+- `npm run validate:quick` passed: **24 test files**, **253 tests**.
+
+Not attempted:
+- No UI, server query execution, auth/session, RLS, database, Supabase, Drizzle, realtime provider, worker, cron, platform, deployment, commit, push, or PR work.

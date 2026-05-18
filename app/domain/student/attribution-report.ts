@@ -62,7 +62,268 @@ export type StudentAttributionReportResult =
   | { ok: true; value: StudentAttributionReportSnapshot }
   | { ok: false; errors: StudentAttributionReportError[] };
 
+export type StudentAttributionReportQueryDescriptorInput = {
+  classId: string;
+  processedMonthIndex: number;
+  viewerFundId: string;
+};
+
+export type StudentAttributionReportQueryDescriptor = {
+  descriptorType: 'student_attribution_report_query_descriptor';
+  queryDescriptorKey: string;
+  queryBoundary: 'server_query_descriptor_boundary';
+  queryName: 'get_student_attribution_report';
+  requiredScope: 'viewer_fund_in_class';
+  classId: string;
+  processedMonthIndex: number;
+  viewerFundId: string;
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeOtherFundLedgerDrafts: false;
+  includeDatabaseRows: false;
+  includeProviderPayload: false;
+};
+
+export type StudentAttributionReportQueryDescriptorErrorCode =
+  | 'invalid_class_id'
+  | 'invalid_processed_month_index'
+  | 'invalid_viewer_fund_id';
+
+export type StudentAttributionReportQueryDescriptorError = {
+  code: StudentAttributionReportQueryDescriptorErrorCode;
+  message: string;
+};
+
+export type StudentAttributionReportQueryDescriptorResult =
+  | { ok: true; value: StudentAttributionReportQueryDescriptor }
+  | { ok: false; errors: StudentAttributionReportQueryDescriptorError[] };
+
+export type StudentAttributionReportQueryResultEnvelope = {
+  envelopeType: 'student_attribution_report_query_result';
+  queryResultKey: string;
+  queryBoundary: 'server_query_result_boundary';
+  queryDescriptorKey: string;
+  queryName: 'get_student_attribution_report';
+  requiredScope: 'viewer_fund_in_class';
+  classId: string;
+  processedMonthIndex: number;
+  viewerFundId: string;
+  resultStatus: 'ready';
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeOtherFundLedgerDrafts: false;
+  includeDatabaseRows: false;
+  includeProviderPayload: false;
+  snapshot: StudentAttributionReportSnapshot;
+};
+
+export type StudentAttributionReportQueryResultValidationFailureEnvelope = {
+  envelopeType: 'student_attribution_report_query_result_validation_failure';
+  queryResultKey: string;
+  queryBoundary: 'server_query_result_boundary';
+  queryDescriptorKey: string;
+  queryName: 'get_student_attribution_report';
+  requiredScope: 'viewer_fund_in_class';
+  classId: string;
+  processedMonthIndex: number;
+  viewerFundId: string;
+  resultStatus: 'validation_failed';
+  includeTargetWeights: false;
+  includeOrderDetails: false;
+  includeOtherFundLedgerDrafts: false;
+  includeDatabaseRows: false;
+  includeProviderPayload: false;
+  validationErrors: StudentAttributionReportQueryResultEnvelopeError[];
+};
+
+export type StudentAttributionReportQueryResultEnvelopeInput = {
+  descriptor: StudentAttributionReportQueryDescriptor;
+  snapshot?: StudentAttributionReportSnapshot;
+};
+
+export type StudentAttributionReportQueryResultEnvelopeErrorCode =
+  | 'missing_student_attribution_report_snapshot'
+  | 'mismatched_class_id'
+  | 'mismatched_processed_month_index'
+  | 'mismatched_viewer_fund_id';
+
+export type StudentAttributionReportQueryResultEnvelopeError = {
+  code: StudentAttributionReportQueryResultEnvelopeErrorCode;
+  message: string;
+};
+
+export type StudentAttributionReportQueryResultEnvelopeResult =
+  | { ok: true; value: StudentAttributionReportQueryResultEnvelope }
+  | { ok: false; errors: StudentAttributionReportQueryResultEnvelopeError[] };
+
+export type StudentAttributionReportQueryResultValidationFailureEnvelopeError = {
+  code: 'query_result_is_valid';
+  message: string;
+};
+
+export type StudentAttributionReportQueryResultValidationFailureEnvelopeResult =
+  | { ok: true; value: StudentAttributionReportQueryResultValidationFailureEnvelope }
+  | { ok: false; errors: StudentAttributionReportQueryResultValidationFailureEnvelopeError[] };
+
 const ENDING_AUM_TOLERANCE = 0.000001;
+
+export function createStudentAttributionReportQueryDescriptor(
+  input: StudentAttributionReportQueryDescriptorInput,
+): StudentAttributionReportQueryDescriptorResult {
+  const errors: StudentAttributionReportQueryDescriptorError[] = [];
+  const classId = input.classId.trim();
+  const viewerFundId = input.viewerFundId.trim();
+
+  if (classId === '') {
+    errors.push({
+      code: 'invalid_class_id',
+      message: 'Class id is required.',
+    });
+  }
+
+  if (!Number.isInteger(input.processedMonthIndex) || input.processedMonthIndex < 0) {
+    errors.push({
+      code: 'invalid_processed_month_index',
+      message: 'Processed month index must be a non-negative integer.',
+    });
+  }
+
+  if (viewerFundId === '') {
+    errors.push({
+      code: 'invalid_viewer_fund_id',
+      message: 'Viewer fund id is required.',
+    });
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    value: {
+      descriptorType: 'student_attribution_report_query_descriptor',
+      queryDescriptorKey: `class:${classId}:month:${input.processedMonthIndex}:fund:${viewerFundId}:student-attribution-report-query`,
+      queryBoundary: 'server_query_descriptor_boundary',
+      queryName: 'get_student_attribution_report',
+      requiredScope: 'viewer_fund_in_class',
+      classId,
+      processedMonthIndex: input.processedMonthIndex,
+      viewerFundId,
+      includeTargetWeights: false,
+      includeOrderDetails: false,
+      includeOtherFundLedgerDrafts: false,
+      includeDatabaseRows: false,
+      includeProviderPayload: false,
+    },
+  };
+}
+
+export function createStudentAttributionReportQueryResultEnvelope(
+  input: StudentAttributionReportQueryResultEnvelopeInput,
+): StudentAttributionReportQueryResultEnvelopeResult {
+  if (input.snapshot === undefined) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: 'missing_student_attribution_report_snapshot',
+          message: 'Student attribution report query result envelopes require the already-authorized report snapshot.',
+        },
+      ],
+    };
+  }
+
+  const errors: StudentAttributionReportQueryResultEnvelopeError[] = [];
+  const snapshot = input.snapshot;
+
+  if (snapshot.classId !== input.descriptor.classId) {
+    errors.push({
+      code: 'mismatched_class_id',
+      message: 'Student attribution report query result class must match the descriptor class.',
+    });
+  }
+
+  if (snapshot.monthIndex !== input.descriptor.processedMonthIndex) {
+    errors.push({
+      code: 'mismatched_processed_month_index',
+      message: 'Student attribution report query result month must match the descriptor processed month.',
+    });
+  }
+
+  if (snapshot.viewerFundId !== input.descriptor.viewerFundId) {
+    errors.push({
+      code: 'mismatched_viewer_fund_id',
+      message: 'Student attribution report query result viewer fund must match the descriptor viewer fund.',
+    });
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    value: {
+      envelopeType: 'student_attribution_report_query_result',
+      queryResultKey: `${input.descriptor.queryDescriptorKey}:result-envelope`,
+      queryBoundary: 'server_query_result_boundary',
+      queryDescriptorKey: input.descriptor.queryDescriptorKey,
+      queryName: input.descriptor.queryName,
+      requiredScope: input.descriptor.requiredScope,
+      classId: input.descriptor.classId,
+      processedMonthIndex: input.descriptor.processedMonthIndex,
+      viewerFundId: input.descriptor.viewerFundId,
+      resultStatus: 'ready',
+      includeTargetWeights: false,
+      includeOrderDetails: false,
+      includeOtherFundLedgerDrafts: false,
+      includeDatabaseRows: false,
+      includeProviderPayload: false,
+      snapshot,
+    },
+  };
+}
+
+export function createStudentAttributionReportQueryResultValidationFailureEnvelope(
+  input: StudentAttributionReportQueryResultEnvelopeInput,
+): StudentAttributionReportQueryResultValidationFailureEnvelopeResult {
+  const result = createStudentAttributionReportQueryResultEnvelope(input);
+
+  if (result.ok) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: 'query_result_is_valid',
+          message: 'Validation failure envelopes require an invalid student attribution report query result.',
+        },
+      ],
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      envelopeType: 'student_attribution_report_query_result_validation_failure',
+      queryResultKey: `${input.descriptor.queryDescriptorKey}:validation-failure`,
+      queryBoundary: 'server_query_result_boundary',
+      queryDescriptorKey: input.descriptor.queryDescriptorKey,
+      queryName: input.descriptor.queryName,
+      requiredScope: input.descriptor.requiredScope,
+      classId: input.descriptor.classId,
+      processedMonthIndex: input.descriptor.processedMonthIndex,
+      viewerFundId: input.descriptor.viewerFundId,
+      resultStatus: 'validation_failed',
+      includeTargetWeights: false,
+      includeOrderDetails: false,
+      includeOtherFundLedgerDrafts: false,
+      includeDatabaseRows: false,
+      includeProviderPayload: false,
+      validationErrors: result.errors,
+    },
+  };
+}
 
 export function createStudentAttributionReportSnapshot(
   input: StudentAttributionReportInput,
