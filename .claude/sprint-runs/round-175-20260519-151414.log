@@ -1,0 +1,15 @@
+Sequence preflight:
+- Item 1: blocked — US-038 local RLS execution proof still requires AUTH_TENANCY_DATABASE_URL; parser/schema/RLS/query-executor portions are already started and backlog says not to select more parser-only/query-executor-only work for this blocker.
+- Item 2: implemented — US-071 and US-072 provide the App Router shell, magic-link login/logout, auth callback, and protected student/instructor route guards.
+- Item 3: implemented — US-097 wires the current-turn student dashboard to a Supabase-backed row reader when the App Router server client is available; remaining hosted Supabase proof is credential/runtime-bound.
+- Item 4: implemented — US-073 and US-088 render protected student current-turn and post-turn dashboard UI surfaces.
+- Item 5: implemented — US-074, US-085, and US-098 provide bounded student TARA submission, browser form UI, and a Supabase-backed pending-order writer; hosted/provider E2E proof remains credential/runtime-bound.
+- Item 6: selected candidate — instructor dashboard UI and server boundaries exist, and US-102 added the pending-order Supabase reader, but live provider reads for the instructor live leaderboard, aggregate analytics, and God Mode panels remain unimplemented; the live leaderboard is the earliest bounded provider-reader gap in this item.
+- Item 7: skipped — Inngest handoff, cron handoff, class-month executor, and Supabase processing store slices already exist, but item 6 has an earlier safe unimplemented provider-reader gap.
+- Item 8: skipped — realtime publication/subscription/refetch UI slices already exist locally, but item 6 has an earlier safe unimplemented provider-reader gap.
+- Item 9: skipped — local release/CI/smoke proof exists locally, but item 6 has an earlier safe unimplemented provider-reader gap.
+- Selected: item 6, Instructor live leaderboard Supabase reader, because items 1 is blocked by missing AUTH_TENANCY_DATABASE_URL, items 2-5 are locally implemented or blocked only by hosted/provider proof, and item 6 has an unblocked non-UI provider-reader slice that reduces a remaining accepted-product gap.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI over US-097 exists; student TARA order form over US-098 exists; instructor class creation/list UI over US-099/US-100 exists; instructor pending-order UI over US-102 exists; instructor live leaderboard UI over US-077 exists; instructor aggregate analytics and God Mode UIs over existing safe executors exist.
+- Decision: proceed with non-UI, because no unblocked missing browser UI exists over an already-backed safe server boundary before this provider-reader gap.

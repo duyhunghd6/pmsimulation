@@ -53,6 +53,20 @@ describe('US-038 Supabase auth-tenancy SQL contract', () => {
     expect(migration).toContain('public.is_class_admin(class_id)');
   });
 
+  it('defines a student-safe leaderboard RPC contract', () => {
+    const leaderboardFunction = migration.match(/create or replace function public\.student_leaderboard_funds[\s\S]*?\$\$;/)?.[0] ?? '';
+
+    expect(leaderboardFunction).toContain('returns table');
+    expect(leaderboardFunction).toContain('student_display_name text');
+    expect(leaderboardFunction).toContain('current_aum numeric');
+    expect(leaderboardFunction).toContain('sharpe_ratio numeric');
+    expect(leaderboardFunction).toContain('public.is_class_student(target_class_id)');
+    expect(leaderboardFunction).not.toContain('public.asset_holdings');
+    expect(leaderboardFunction).not.toContain('public.tara_orders');
+    expect(leaderboardFunction).not.toContain('target_weights_json');
+    expect(migration).toContain('grant execute on function public.student_leaderboard_funds(uuid) to authenticated');
+  });
+
   it('provides deterministic fixture actors, classes, scenario rows, and exact holdings', () => {
     expect(fixtures.match(/'student'/g)).toHaveLength(3);
     expect(fixtures.match(/'instructor'/g)).toHaveLength(2);

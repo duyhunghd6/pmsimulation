@@ -43,7 +43,9 @@ runIfConfigured('US-038 local Supabase auth-tenancy RLS proof', () => {
         'studentOtherHoldings', (select count(*) from public.asset_holdings where fund_id = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'),
         'studentRevealedScenarioRows', (select count(*) from public.macro_narratives where class_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
         'studentFutureScenarioRows', (select count(*) from public.macro_narratives where class_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' and month_index = 2),
-        'studentCrossClassFunds', (select count(*) from public.funds where class_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')
+        'studentCrossClassFunds', (select count(*) from public.funds where class_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+        'studentLeaderboardRows', (select count(*) from public.student_leaderboard_funds('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')),
+        'studentCrossClassLeaderboardRows', (select count(*) from public.student_leaderboard_funds('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'))
       )::text;
 
       reset role;
@@ -78,6 +80,8 @@ runIfConfigured('US-038 local Supabase auth-tenancy RLS proof', () => {
       studentRevealedScenarioRows: 2,
       studentFutureScenarioRows: 0,
       studentCrossClassFunds: 0,
+      studentLeaderboardRows: 2,
+      studentCrossClassLeaderboardRows: 0,
     });
     expect(instructorProof).toEqual({
       instructorOwnedHoldings: 6,

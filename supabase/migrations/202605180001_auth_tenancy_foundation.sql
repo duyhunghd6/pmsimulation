@@ -237,6 +237,96 @@ as $$
     )
 $$;
 
+create or replace function public.student_leaderboard_funds(target_class_id uuid)
+returns table (
+  id uuid,
+  class_id uuid,
+  student_display_name text,
+  current_aum numeric,
+  sharpe_ratio numeric
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    fund.id,
+    fund.class_id,
+    profile.display_name as student_display_name,
+    fund.current_aum,
+    fund.sharpe_ratio
+  from public.funds fund
+  join public.profiles profile on profile.id = fund.student_id
+  where fund.class_id = target_class_id
+    and public.is_class_student(target_class_id)
+  order by fund.current_aum desc, fund.sharpe_ratio desc, fund.id asc
+$$;
+
+create or replace function public.create_instructor_class(
+  target_class_id uuid,
+  target_display_name text,
+  target_trigger_mode text,
+  target_current_month_index integer,
+  target_total_months integer,
+  target_student_join_code text
+)
+returns table (
+  id uuid,
+  instructor_id uuid,
+  display_name text,
+  trigger_mode text,
+  current_month_index integer,
+  total_months integer,
+  student_join_code text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  requesting_instructor_id uuid := auth.uid();
+begin
+  if public.current_app_role() <> 'instructor' or requesting_instructor_id is null then
+    raise exception 'instructor role required' using errcode = '42501';
+  end if;
+
+  insert into public.classes (
+    id,
+    instructor_id,
+    display_name,
+    trigger_mode,
+    current_month_index,
+    total_months,
+    student_join_code
+  ) values (
+    target_class_id,
+    requesting_instructor_id,
+    btrim(target_display_name),
+    target_trigger_mode,
+    target_current_month_index,
+    target_total_months,
+    upper(btrim(target_student_join_code))
+  );
+
+  insert into public.class_administrators (class_id, instructor_id)
+  values (target_class_id, requesting_instructor_id);
+
+  return query
+    select
+      c.id,
+      c.instructor_id,
+      c.display_name,
+      c.trigger_mode,
+      c.current_month_index,
+      c.total_months,
+      c.student_join_code
+    from public.classes c
+    where c.id = target_class_id
+      and c.instructor_id = requesting_instructor_id;
+end;
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.classes enable row level security;
 alter table public.class_administrators enable row level security;
@@ -271,6 +361,8 @@ grant execute on function public.is_class_admin(uuid) to authenticated;
 grant execute on function public.is_class_student(uuid) to authenticated;
 grant execute on function public.owns_fund(uuid) to authenticated;
 grant execute on function public.administers_fund(uuid) to authenticated;
+grant execute on function public.student_leaderboard_funds(uuid) to authenticated;
+grant execute on function public.create_instructor_class(uuid, text, text, integer, integer, text) to authenticated;
 
 create policy profiles_select_own_or_administered
 on public.profiles

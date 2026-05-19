@@ -131,6 +131,21 @@ describe('executeInstructorPendingOrderVisibilityQuery', () => {
     expect(readCount).toBe(0);
   });
 
+  it('fails closed when the row reader cannot return provider rows', async () => {
+    const reader: InstructorPendingOrderVisibilityQueryRowReader = {
+      async readInstructorPendingOrderVisibilityRows() {
+        throw new Error('provider details');
+      },
+    };
+
+    await expect(
+      executeInstructorPendingOrderVisibilityQuery({ session: instructorSession, scope, rowReader: reader }),
+    ).resolves.toEqual({
+      ok: false,
+      failure: { code: 'row_reader_failed' },
+    });
+  });
+
   it('rejects cross-class fund rows before result delivery', async () => {
     await expect(
       executeInstructorPendingOrderVisibilityQuery({

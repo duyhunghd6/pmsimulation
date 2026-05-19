@@ -283,4 +283,44 @@ describe('executeStudentTaraOrderSubmissionAction', () => {
 
     expect(result).toEqual({ ok: false, failure: { code: 'persisted_order_mismatch' } });
   });
+
+  it('fails closed if the row store fails before validation', async () => {
+    const store: StudentTaraOrderSubmissionActionStore = {
+      async readStudentTaraOrderSubmissionRows() {
+        throw new Error('provider read detail');
+      },
+      async createPendingStudentTaraOrder() {
+        throw new Error('not used');
+      },
+    };
+
+    const result = await executeStudentTaraOrderSubmissionAction({
+      session: studentSession,
+      scope: studentScope,
+      targetWeights: { Base: 50, Core: 30, Apex: 20 },
+      store,
+    });
+
+    expect(result).toEqual({ ok: false, failure: { code: 'row_store_failed' } });
+  });
+
+  it('fails closed if pending-order persistence fails', async () => {
+    const store: StudentTaraOrderSubmissionActionStore = {
+      async readStudentTaraOrderSubmissionRows() {
+        return createRows();
+      },
+      async createPendingStudentTaraOrder() {
+        throw new Error('provider write detail');
+      },
+    };
+
+    const result = await executeStudentTaraOrderSubmissionAction({
+      session: studentSession,
+      scope: studentScope,
+      targetWeights: { Base: 50, Core: 30, Apex: 20 },
+      store,
+    });
+
+    expect(result).toEqual({ ok: false, failure: { code: 'pending_order_store_failed' } });
+  });
 });

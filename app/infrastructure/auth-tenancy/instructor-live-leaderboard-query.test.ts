@@ -190,6 +190,19 @@ describe('executeInstructorLiveLeaderboardQuery', () => {
     });
   });
 
+  it('fails closed when the row reader throws', async () => {
+    const reader: InstructorLiveLeaderboardQueryRowReader = {
+      async readInstructorLiveLeaderboardRows() {
+        throw new Error('provider failed');
+      },
+    };
+
+    await expect(executeInstructorLiveLeaderboardQuery({ session: instructorSession, scope, rowReader: reader })).resolves.toEqual({
+      ok: false,
+      failure: { code: 'row_reader_failed' },
+    });
+  });
+
   it('rejects cross-class, future-month, duplicate, unknown, or processed order rows before result delivery', async () => {
     await expect(
       executeInstructorLiveLeaderboardQuery({

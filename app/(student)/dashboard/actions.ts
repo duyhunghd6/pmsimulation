@@ -6,7 +6,8 @@ import {
   executeStudentTaraOrderSubmissionAction,
   type StudentTaraOrderSubmissionActionStore,
 } from '../../infrastructure/auth-tenancy/student-tara-order-submission-action';
-import { readAuthTenancyRouteSession } from '../../infrastructure/auth-tenancy/supabase-server';
+import { createSupabaseStudentTaraOrderSubmissionStore } from '../../infrastructure/auth-tenancy/student-tara-order-submission-supabase-store';
+import { createAuthTenancySupabaseServerClient, readAuthTenancyRouteSession } from '../../infrastructure/auth-tenancy/supabase-server';
 import type { TaraTargetWeights } from '../../infrastructure/auth-tenancy/rows';
 
 const classId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -34,7 +35,7 @@ export async function submitStudentTaraOrder(formData: FormData): Promise<void> 
     session: routeSession.session,
     scope: { classId, fundId, monthIndex: currentMonthIndex },
     targetWeights,
-    store: createBoundedStudentTaraOrderSubmissionStore(routeSession.session.subjectId),
+    store: await createStudentTaraOrderSubmissionStore(routeSession.session.subjectId),
   });
 
   if (!result.ok) {
@@ -57,6 +58,15 @@ export async function submitStudentTaraOrder(formData: FormData): Promise<void> 
       taxDragPct: String(result.value.receipt.estimatedTaxDrag.taxDragPct),
     }),
   );
+}
+
+async function createStudentTaraOrderSubmissionStore(studentId: string): Promise<StudentTaraOrderSubmissionActionStore> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  if (supabase.ok) {
+    return createSupabaseStudentTaraOrderSubmissionStore(supabase.client);
+  }
+
+  return createBoundedStudentTaraOrderSubmissionStore(studentId);
 }
 
 function createBoundedStudentTaraOrderSubmissionStore(studentId: string): StudentTaraOrderSubmissionActionStore {

@@ -21,6 +21,7 @@ The repository exposes a bounded local release proof command that aggregates the
 ## Acceptance Criteria
 
 - `npm run release:local` runs the current local release gate in order: `npm run validate:quick`, `npm run smoke:routes`, and `npm run build`.
+- The route smoke step verifies default public route content and protected-route redirect or safe protected-state behavior, not only HTTP status.
 - The command writes a structured JSON report with check names, commands, status, exit code, timing, output tails, and explicit non-goals for no deployment/provider/CI mutation.
 - The command fails on the first failed gate while still writing the report.
 - Hosted Supabase, hosted Inngest, Vercel cron, provider-backed browser E2E, and deployment proof remain out of scope until credentials/runtimes exist.
@@ -50,4 +51,4 @@ The repository exposes a bounded local release proof command that aggregates the
 
 ## Evidence
 
-- `npm run release:local` passed on 2026-05-19, running `npm run validate:quick` (43 test files, 490 tests), `npm run smoke:routes` (`/` 200, `/login` 200, `/dashboard` 307, `/instructor/dashboard` 307), and `npm run build`; report written to `reports/local-release-proof.json`.
+- `npm run release:local` passed on 2026-05-19, running `npm run validate:quick` (43 test files, 490 tests), strengthened `npm run smoke:routes` (`/` 200 content checked, `/login` 200 content checked, `/dashboard` 307 redirect checked, `/instructor/dashboard` 307 redirect checked), and `npm run build`; report written to `reports/local-release-proof.json`.

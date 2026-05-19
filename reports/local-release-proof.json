@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-19T05:38:57.733Z",
+  "generatedAt": "2026-05-19T06:29:21.677Z",
   "status": "passed",
   "scope": "local-bounded-release-proof",
   "nonGoals": [
@@ -8,19 +8,19 @@
     "No hosted provider credentials are required.",
     "No CI or shared platform state is mutated."
   ],
-  "startedAt": "2026-05-19T05:38:52.277Z",
-  "finishedAt": "2026-05-19T05:38:57.733Z",
-  "durationMs": 5456,
+  "startedAt": "2026-05-19T06:29:16.059Z",
+  "finishedAt": "2026-05-19T06:29:21.677Z",
+  "durationMs": 5618,
   "checks": [
     {
       "name": "validate:quick",
       "command": "npm run validate:quick",
       "status": "passed",
       "exitCode": 0,
-      "startedAt": "2026-05-19T05:38:52.277Z",
-      "finishedAt": "2026-05-19T05:38:53.844Z",
-      "durationMs": 1567,
-      "stdoutTail": "\n> apex-alpha-portfolio-simulator@0.1.0 validate:quick\n> npm run typecheck && npm run test:unit\n\n\n> apex-alpha-portfolio-simulator@0.1.0 typecheck\n> tsc --noEmit\n\n\n> apex-alpha-portfolio-simulator@0.1.0 test:unit\n> vitest run\n\n\n RUN  v4.1.6 /Users/steve/duyhunghd6/pmsimulation\n\n\n Test Files  43 passed (43)\n      Tests  490 passed (490)\n   Start at  12:38:53\n   Duration  537ms (transform 1.11s, setup 0ms, import 1.91s, tests 217ms, environment 2ms)\n\n",
+      "startedAt": "2026-05-19T06:29:16.059Z",
+      "finishedAt": "2026-05-19T06:29:17.664Z",
+      "durationMs": 1605,
+      "stdoutTail": "\n> apex-alpha-portfolio-simulator@0.1.0 validate:quick\n> npm run typecheck && npm run test:unit\n\n\n> apex-alpha-portfolio-simulator@0.1.0 typecheck\n> tsc --noEmit\n\n\n> apex-alpha-portfolio-simulator@0.1.0 test:unit\n> vitest run\n\n\n RUN  v4.1.6 /Users/steve/duyhunghd6/pmsimulation\n\n\n Test Files  43 passed (43)\n      Tests  490 passed (490)\n   Start at  13:29:17\n   Duration  555ms (transform 1.15s, setup 0ms, import 1.97s, tests 211ms, environment 2ms)\n\n",
       "stderrTail": ""
     },
     {
@@ -28,10 +28,10 @@
       "command": "npm run smoke:routes",
       "status": "passed",
       "exitCode": 0,
-      "startedAt": "2026-05-19T05:38:53.844Z",
-      "finishedAt": "2026-05-19T05:38:54.023Z",
-      "durationMs": 179,
-      "stdoutTail": "\n> apex-alpha-portfolio-simulator@0.1.0 smoke:routes\n> node scripts/smoke-routes.mjs\n\nPASS / 200\nPASS /login 200\nPASS /dashboard 307\nPASS /instructor/dashboard 307\n",
+      "startedAt": "2026-05-19T06:29:17.665Z",
+      "finishedAt": "2026-05-19T06:29:17.850Z",
+      "durationMs": 185,
+      "stdoutTail": "\n> apex-alpha-portfolio-simulator@0.1.0 smoke:routes\n> node scripts/smoke-routes.mjs\n\nPASS / 200 content checked\nPASS /login 200 content checked\nPASS /dashboard 307 redirect /login?status=sign-in-required\nPASS /instructor/dashboard 307 redirect /login?status=sign-in-required\n",
       "stderrTail": ""
     },
     {
@@ -39,10 +39,10 @@
       "command": "npm run build",
       "status": "passed",
       "exitCode": 0,
-      "startedAt": "2026-05-19T05:38:54.023Z",
-      "finishedAt": "2026-05-19T05:38:57.733Z",
-      "durationMs": 3710,
-      "stdoutTail": "\n> apex-alpha-portfolio-simulator@0.1.0 build\n> next build\n\n▲ Next.js 16.2.6 (Turbopack)\n- Environments: .env.local\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 1041ms\n  Running TypeScript ...\n  Finished TypeScript in 1708ms ...\n  Collecting page data using 10 workers ...\n  Generating static pages using 10 workers (0/7) ...\n  Generating static pages using 10 workers (1/7) \r\n  Generating static pages using 10 workers (3/7) \r\n  Generating static pages using 10 workers (5/7) \r\n✓ Generating static pages using 10 workers (7/7) in 174ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n├ ƒ /api/cron/month-advance\n├ ƒ /api/inngest\n├ ƒ /auth/callback\n├ ƒ /dashboard\n├ ƒ /instructor/dashboard\n└ ƒ /login\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\n",
+      "startedAt": "2026-05-19T06:29:17.850Z",
+      "finishedAt": "2026-05-19T06:29:21.677Z",
+      "durationMs": 3827,
+      "stdoutTail": "\n> apex-alpha-portfolio-simulator@0.1.0 build\n> next build\n\n▲ Next.js 16.2.6 (Turbopack)\n- Environments: .env.local\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 1078ms\n  Running TypeScript ...\n  Finished TypeScript in 1795ms ...\n  Collecting page data using 10 workers ...\n  Generating static pages using 10 workers (0/7) ...\n  Generating static pages using 10 workers (1/7) \r\n  Generating static pages using 10 workers (3/7) \r\n  Generating static pages using 10 workers (5/7) \r\n✓ Generating static pages using 10 workers (7/7) in 183ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n├ ƒ /api/cron/month-advance\n├ ƒ /api/inngest\n├ ƒ /auth/callback\n├ ƒ /dashboard\n├ ƒ /instructor/dashboard\n└ ƒ /login\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\n",
       "stderrTail": ""
     }
   ]

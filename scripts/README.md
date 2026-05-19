@@ -45,7 +45,7 @@ The runner appends `git status --short`, `git diff --stat`, and runner-level val
 
 ## Route Smoke
 
-`npm run smoke:routes` checks the default App Router surfaces (`/`, `/login`, `/dashboard`, and `/instructor/dashboard`). It reuses an existing server at `SMOKE_BASE_URL` or starts `npm run dev` when none is reachable.
+`npm run smoke:routes` checks the default App Router surfaces (`/`, `/login`, `/dashboard`, and `/instructor/dashboard`). It reuses an existing server at `SMOKE_BASE_URL` or starts `npm run dev` when none is reachable. For the default routes, it verifies expected public content plus protected-route redirect or safe protected-state behavior instead of relying on HTTP status alone.
 
 Optional environment variables:
 

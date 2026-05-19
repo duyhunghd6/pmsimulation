@@ -144,6 +144,19 @@ describe('executeInstructorClassAggregateAnalyticsQuery', () => {
     expect(readCount).toBe(0);
   });
 
+  it('fails closed when the row reader throws before result delivery', async () => {
+    const reader: InstructorClassAggregateAnalyticsQueryRowReader = {
+      async readInstructorClassAggregateAnalyticsRows() {
+        throw new Error('provider failed with raw payload');
+      },
+    };
+
+    await expect(executeInstructorClassAggregateAnalyticsQuery({ session: instructorSession, scope, rowReader: reader })).resolves.toEqual({
+      ok: false,
+      failure: { code: 'row_reader_failed' },
+    });
+  });
+
   it('rejects cross-class or malformed fund rows before result delivery', async () => {
     await expect(
       executeInstructorClassAggregateAnalyticsQuery({

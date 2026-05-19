@@ -5,7 +5,8 @@ import {
   type StudentDashboardPostTurnSnapshot,
 } from '../../domain/student/dashboard-snapshot';
 import { executeStudentDashboardCurrentTurnQuery } from '../../infrastructure/auth-tenancy/student-dashboard-current-turn-query';
-import { readAuthTenancyRouteSession } from '../../infrastructure/auth-tenancy/supabase-server';
+import { createSupabaseStudentDashboardCurrentTurnRowReader } from '../../infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader';
+import { createAuthTenancySupabaseServerClient, readAuthTenancyRouteSession } from '../../infrastructure/auth-tenancy/supabase-server';
 import { RealtimeRefreshPanel } from '../../realtime-refresh-panel';
 import { createRealtimeRefreshPanelConfig } from '../../realtime-refresh-plan';
 import type { AuthTenancySession } from '../../infrastructure/auth-tenancy/session';
@@ -47,10 +48,11 @@ export default async function StudentDashboardShellPage({ searchParams }: Studen
     return <StudentDashboardUnavailable />;
   }
 
+  const currentTurnRowReader = await createCurrentTurnRowReader(routeSession.session);
   const queryResult = await executeStudentDashboardCurrentTurnQuery({
     session: routeSession.session,
     scope: { classId, fundId, monthIndex: currentMonthIndex },
-    rowReader: createBoundedCurrentTurnRowReader(routeSession.session),
+    rowReader: currentTurnRowReader,
     intendedWeights: { Base: 35, Core: 45, Apex: 20 },
     dangerousDriftThresholdPct: 8,
   });
@@ -478,6 +480,16 @@ function createBoundedPostTurnDashboard(): PostTurnDashboardState {
   }
 
   return { status: 'ready', snapshot: envelopeResult.value.snapshot };
+}
+
+async function createCurrentTurnRowReader(session: AuthTenancySession): Promise<StudentDashboardCurrentTurnQueryRowReader> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+
+  if (!supabase.ok) {
+    return createBoundedCurrentTurnRowReader(session);
+  }
+
+  return createSupabaseStudentDashboardCurrentTurnRowReader(supabase.client);
 }
 
 function StudentDashboardUnavailable() {

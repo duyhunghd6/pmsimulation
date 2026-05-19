@@ -1,0 +1,15 @@
+Sequence preflight:
+- Item 1: blocked — US-038 local RLS execution is blocked because AUTH_TENANCY_DATABASE_URL is not configured; parser/schema/RLS/fixture/query-executor portions are already started and additional parser/query-only work is disallowed by backlog guidance.
+- Item 2: implemented — US-071/US-072 no-gameplay App Router shell, Supabase magic-link login/logout, and protected student/instructor route guards exist with validate/build/smoke evidence in docs/TEST_MATRIX.md.
+- Item 3: implemented — US-097 adds a Supabase-backed student current-turn row reader behind the safe executor; hosted Supabase execution/local RLS/provider browser auth proof remain blocked by missing local/hosted provider runtime.
+- Item 4: implemented — US-073 renders the protected current-turn student dashboard UI and US-088 renders the protected post-turn attribution panel; live provider-backed data remains pending.
+- Item 5: selected candidate — US-074/US-085 provide the bounded TARA order submission executor and browser form, but live Supabase pending-order writes/durable provider persistence are still missing and can be narrowed to a local provider adapter without hosted mutation.
+- Item 6: skipped — later sequence item; local instructor UI/server boundaries exist, but live provider reads/writes remain after the selected earlier student order persistence gap.
+- Item 7: skipped — later sequence item; local Inngest handoff/cron/class-month processing executor exist, but live Supabase reads/writes and hosted worker proof remain after the selected earlier item.
+- Item 8: skipped — later sequence item; local realtime publication/subscription/refetch status exists, but hosted Supabase proof remains after the selected earlier item.
+- Item 9: skipped — later sequence item; local release/CI/smoke proof exists, but hosted CI/platform/provider E2E proof remains after the selected earlier item.
+- Selected: item 5, US-098 student TARA order Supabase pending-order writer, because every earlier item is implemented locally or blocked by missing AUTH_TENANCY_DATABASE_URL/hosted provider runtime, and item 5 has an unblocked non-UI provider adapter slice over existing browser UI and safe server boundary.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI over safe executor (US-073) exists; student post-turn attribution UI over safe envelope (US-088) exists; student TARA order form UI over submission executor (US-085) exists with empty/loading/accepted/validation/auth/failure states; no earlier missing browser UI over an existing safe student server boundary was found.
+- Decision: proceed with non-UI, because the reachable order form already exists and the next PRD-reducing item 5 gap is durable Supabase pending-order persistence behind that existing safe server action.

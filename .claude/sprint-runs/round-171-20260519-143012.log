@@ -1,0 +1,170 @@
+Selected item 6, UI-backed provider read slice: instructor durable class-list refresh after class creation.
+
+Implemented:
+- Added `createSupabaseInstructorClassListReader` at `app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.ts:39`.
+- Added unit coverage for query shape, provider failure sanitization, and instructor-scope rejection in `app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.test.ts:59`.
+- Wired `/instructor/dashboard` to read the class list during protected server render at `app/(instructor)/instructor/dashboard/page.tsx:64`.
+- Added the browser-visible “Class list refresh” panel with safe empty/success/failure states at `app/(instructor)/instructor/dashboard/page.tsx:395`.
+- Added bounded fallback class-list data when the Supabase server client is unavailable at `app/(instructor)/instructor/dashboard/page.tsx:599`.
+- Added story evidence in `docs/stories/US-100-instructor-class-list-refresh-ui.md:1`.
+- Updated product docs, backlog, and `docs/TEST_MATRIX.md`.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.test.ts` passed: 1 file, 3 tests.
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed: 47 files, 505 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/dashboard`, `/instructor/dashboard`; protected routes redirected to `/login?status=sign-in-required`.
+
+Gap reduced: instructor class creation now has a server-refreshed parsed class-list surface instead of only a safe receipt. Hosted Supabase execution proof, local RLS proof with `AUTH_TENANCY_DATABASE_URL`, roster management, realtime publication, and provider-backed browser E2E remain pending.
+
+Dependency audit: no dependency install or update was run, so no audit findings were produced. No commit, push, or PR was created.
+
+==> Harness postflight for sprint round 171
+==> git status --short
+ M AGENTS.md
+ M CLAUDE.md
+ M README.md
+ M app/(instructor)/instructor/dashboard/actions.ts
+ M app/(instructor)/instructor/dashboard/page.tsx
+ M app/(student)/dashboard/actions.ts
+ M app/(student)/dashboard/page.tsx
+ M app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts
+ M app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.ts
+ M app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts
+ M app/infrastructure/auth-tenancy/student-tara-order-submission-action.ts
+ M docs/TEST_MATRIX.md
+ M docs/product/data-model.md
+ M docs/product/roles-and-permissions.md
+ M docs/product/runtime-architecture.md
+ M docs/product/simulation-engine.md
+ M docs/product/user-surfaces.md
+ M docs/stories/US-094-local-release-validation-proof.md
+ M docs/stories/US-095-ci-local-release-validation-workflow.md
+ M docs/stories/backlog.md
+ M reports/local-release-proof.json
+ M scripts/README.md
+ M scripts/run-claude-sprints.sh
+ M scripts/smoke-routes.mjs
+ M supabase/migrations/202605180001_auth_tenancy_foundation.sql
+ M tests/integration/auth-tenancy/local-supabase.test.ts
+ M tests/integration/auth-tenancy/sql-contract.test.ts
+?? .claude/sprint-runs/round-166-20260519-131813.log
+?? .claude/sprint-runs/round-167-20260519-132947.log
+?? .claude/sprint-runs/round-168-20260519-134614.log
+?? .claude/sprint-runs/round-169-20260519-140102.log
+?? .claude/sprint-runs/round-170-20260519-141503.log
+?? .claude/sprint-runs/round-170-20260519-student-tara-order-supabase-writer.log
+?? .claude/sprint-runs/round-171-20260519-143012.log
+?? .claude/sprint-runs/round-171-20260519-instructor-class-creation-supabase-writer.log
+?? app/infrastructure/auth-tenancy/instructor-class-creation-supabase-store.test.ts
+?? app/infrastructure/auth-tenancy/instructor-class-creation-supabase-store.ts
+?? app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.test.ts
+?? app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.ts
+?? app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts
+?? app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.ts
+?? app/infrastructure/auth-tenancy/student-tara-order-submission-supabase-store.test.ts
+?? app/infrastructure/auth-tenancy/student-tara-order-submission-supabase-store.ts
+?? docs/stories/US-096-local-browser-surface-smoke-proof.md
+?? docs/stories/US-097-student-dashboard-live-supabase-row-reader.md
+?? docs/stories/US-098-student-tara-order-supabase-writer.md
+?? docs/stories/US-099-instructor-class-creation-supabase-writer.md
+?? docs/stories/US-100-instructor-class-list-refresh-ui.md
+
+==> git diff --stat
+ AGENTS.md                                          |   2 +-
+ CLAUDE.md                                          |   4 +-
+ README.md                                          |   2 +-
+ app/(instructor)/instructor/dashboard/actions.ts   |  14 ++-
+ app/(instructor)/instructor/dashboard/page.tsx     | 101 ++++++++++++++++++++-
+ app/(student)/dashboard/actions.ts                 |  14 ++-
+ app/(student)/dashboard/page.tsx                   |  16 +++-
+ .../student-dashboard-current-turn-query.test.ts   |  18 ++++
+ .../student-dashboard-current-turn-query.ts        |   9 +-
+ .../student-tara-order-submission-action.test.ts   |  40 ++++++++
+ .../student-tara-order-submission-action.ts        |  16 +++-
+ docs/TEST_MATRIX.md                                |  21 +++--
+ docs/product/data-model.md                         |   4 +-
+ docs/product/roles-and-permissions.md              |   6 +-
+ docs/product/runtime-architecture.md               |  14 +--
+ docs/product/simulation-engine.md                  |   2 +-
+ docs/product/user-surfaces.md                      |  10 +-
+ .../US-094-local-release-validation-proof.md       |   3 +-
+ .../US-095-ci-local-release-validation-workflow.md |   2 +-
+ docs/stories/backlog.md                            |  16 ++--
+ reports/local-release-proof.json                   |  32 +++----
+ scripts/README.md                                  |   2 +-
+ scripts/run-claude-sprints.sh                      |  33 ++++---
+ scripts/smoke-routes.mjs                           |  87 +++++++++++++++++-
+ .../202605180001_auth_tenancy_foundation.sql       |  92 +++++++++++++++++++
+ .../auth-tenancy/local-supabase.test.ts            |   6 +-
+ .../integration/auth-tenancy/sql-contract.test.ts  |  14 +++
+ 27 files changed, 494 insertions(+), 86 deletions(-)
+==> npm run validate:quick postflight
+
+> apex-alpha-portfolio-simulator@0.1.0 validate:quick
+> npm run typecheck && npm run test:unit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 typecheck
+> tsc --noEmit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 test:unit
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90m/Users/steve/duyhunghd6/pmsimulation[39m
+
+ [32m✓[39m app/domain/classes/live-leaderboard.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/tara/allocation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/student/leaderboard-rank.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m app/domain/classes/god-mode-portfolio-visibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m app/domain/student/attribution-report.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/order.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/classes/month-advancement.test.ts [2m([22m[2m83 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/rows.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/student/dashboard-snapshot.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m app/domain/classes/dashboard-snapshot.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-aggregate-analytics.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/classes/pending-order-visibility.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/portfolio/pyramid.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/macro-news.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/driver-string-dashboard.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-draft.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/classes/realtime-query-result.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/metrics/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/liquidity-penalty.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-supabase-store.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/tara/tax-drag.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/attribution.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/session.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/risk-register.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-publication.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/catalog.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-supabase-store.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/environment.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-macro-news-query.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/returns.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/realtime-refresh-plan.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/auth-flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-subscription.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m47 passed[39m[22m[90m (47)[39m
+[2m      Tests [22m [1m[32m505 passed[39m[22m[90m (505)[39m
+[2m   Start at [22m 14:43:02
+[2m   Duration [22m 650ms[2m (transform 1.40s, setup 0ms, import 2.32s, tests 244ms, environment 2ms)[22m
+

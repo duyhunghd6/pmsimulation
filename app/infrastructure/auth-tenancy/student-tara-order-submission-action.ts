@@ -62,6 +62,8 @@ export type StudentTaraOrderSubmissionActionFailureCode =
   | 'invalid_apex_unrealized_gain_pct'
   | 'invalid_submission'
   | 'invalid_validation_failure_envelope'
+  | 'row_store_failed'
+  | 'pending_order_store_failed'
   | 'persisted_order_row_rejected'
   | 'persisted_order_mismatch';
 
@@ -96,7 +98,12 @@ export async function executeStudentTaraOrderSubmissionAction(input: {
     fundId: input.scope.fundId,
     monthIndex: input.scope.monthIndex,
   };
-  const rows = await input.store.readStudentTaraOrderSubmissionRows({ session: input.session, scope });
+  let rows: StudentTaraOrderSubmissionActionRowSet;
+  try {
+    rows = await input.store.readStudentTaraOrderSubmissionRows({ session: input.session, scope });
+  } catch {
+    return { ok: false, failure: { code: 'row_store_failed' } };
+  }
   let currentAum: number | undefined;
   const currentWeights: Record<string, number> = {};
   let apexUnrealizedGainPct: number | undefined;
@@ -191,7 +198,12 @@ export async function executeStudentTaraOrderSubmissionAction(input: {
   }
 
   const command = createStudentTaraOrderServerActionCommandDescriptor(receiptResult.value);
-  const persistedRow = await input.store.createPendingStudentTaraOrder({ session: input.session, scope, command });
+  let persistedRow: unknown;
+  try {
+    persistedRow = await input.store.createPendingStudentTaraOrder({ session: input.session, scope, command });
+  } catch {
+    return { ok: false, failure: { code: 'pending_order_store_failed' } };
+  }
   const parsedPersistedOrder = parseStudentTaraOrderRow(persistedRow, { session: input.session, scope });
   if (!parsedPersistedOrder.ok) {
     return { ok: false, failure: { code: 'persisted_order_row_rejected', rowFailureCode: parsedPersistedOrder.code } };

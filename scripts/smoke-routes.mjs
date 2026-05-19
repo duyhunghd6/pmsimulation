@@ -8,6 +8,35 @@ const routes = (process.env.SMOKE_ROUTES ?? "/,/login,/dashboard,/instructor/das
 const startupTimeoutMs = Number(process.env.SMOKE_STARTUP_TIMEOUT_MS ?? 30000);
 const requestTimeoutMs = Number(process.env.SMOKE_REQUEST_TIMEOUT_MS ?? 10000);
 
+const routeExpectations = new Map([
+  [
+    "/",
+    {
+      content: ["Portfolio simulation shell", "Login boundary", "Student route group", "Instructor route group"],
+    },
+  ],
+  [
+    "/login",
+    {
+      content: ["Sign in boundary", "browser-safe public environment values"],
+    },
+  ],
+  [
+    "/dashboard",
+    {
+      redirectTo: "/login?status=sign-in-required",
+      contentAny: ["Auth configuration required", "Protected dashboard waiting for session", "Apex Alpha command center"],
+    },
+  ],
+  [
+    "/instructor/dashboard",
+    {
+      redirectTo: "/login?status=sign-in-required",
+      contentAny: ["Auth configuration required", "Protected dashboard waiting for session", "Class order monitor"],
+    },
+  ],
+]);
+
 let devServer;
 
 async function fetchRoute(pathname) {
@@ -32,6 +61,56 @@ async function canReachServer() {
   } catch {
     return false;
   }
+}
+
+function normalizeRoute(pathname) {
+  const url = new URL(pathname, baseUrl);
+  return `${url.pathname}${url.search}`;
+}
+
+function normalizeLocation(location) {
+  if (!location) {
+    return null;
+  }
+
+  const url = new URL(location, baseUrl);
+  return `${url.pathname}${url.search}`;
+}
+
+async function assertRouteExpectation(route, response) {
+  const expectation = routeExpectations.get(normalizeRoute(route));
+
+  if (!expectation) {
+    return "status only";
+  }
+
+  if (response.status >= 300 && response.status < 400) {
+    if (!expectation.redirectTo) {
+      throw new Error(`${route} redirected unexpectedly`);
+    }
+
+    const location = normalizeLocation(response.headers.get("location"));
+
+    if (location !== expectation.redirectTo) {
+      throw new Error(`${route} redirected to ${location ?? "missing location"} instead of ${expectation.redirectTo}`);
+    }
+
+    return `redirect ${location}`;
+  }
+
+  const body = await response.text();
+
+  for (const snippet of expectation.content ?? []) {
+    if (!body.includes(snippet)) {
+      throw new Error(`${route} did not render expected content: ${snippet}`);
+    }
+  }
+
+  if (expectation.contentAny && !expectation.contentAny.some((snippet) => body.includes(snippet))) {
+    throw new Error(`${route} did not render any accepted protected-surface state`);
+  }
+
+  return "content checked";
 }
 
 function startDevServer() {
@@ -82,14 +161,16 @@ async function smokeRoutes() {
     try {
       const response = await fetchRoute(route);
       const ok = response.status >= 200 && response.status < 400;
-      console.log(`${ok ? "PASS" : "FAIL"} ${route} ${response.status}`);
+      const proof = ok ? await assertRouteExpectation(route, response) : "status failed";
+      console.log(`${ok ? "PASS" : "FAIL"} ${route} ${response.status} ${proof}`);
 
       if (!ok) {
         failures.push(`${route} returned ${response.status}`);
       }
     } catch (error) {
-      console.log(`FAIL ${route} ${error instanceof Error ? error.message : String(error)}`);
-      failures.push(`${route} failed to fetch`);
+      const message = error instanceof Error ? error.message : String(error);
+      console.log(`FAIL ${route} ${message}`);
+      failures.push(`${route} ${message}`);
     }
   }
 

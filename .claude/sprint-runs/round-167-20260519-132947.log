@@ -1,0 +1,129 @@
+Selected requirement: current-turn student dashboard server query execution with live Supabase row reading behind the existing safe parse-first boundary. Sequence item 3, story `US-097`, lane `normal`, non-UI integration slice.
+
+Changed:
+- Added `app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.ts:1` to read scoped Supabase rows for macro narratives, market metrics, viewer fund, holdings, orders, tracked metric, and RLS-visible leaderboard funds.
+- Wired `/dashboard` to use the Supabase-backed reader when the App Router Supabase server client is available, with bounded rows as local fallback in `app/(student)/dashboard/page.tsx:7`.
+- Added fail-closed `row_reader_failed` handling in `app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.ts:47`.
+- Added unit proof in `app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts:1` and updated executor tests.
+- Added story/evidence docs in `docs/stories/US-097-student-dashboard-live-supabase-row-reader.md:1`.
+- Updated backlog, test matrix, product docs, and repo status docs to reflect the new bounded provider-read adapter.
+
+Validation:
+- `npm run typecheck` passed.
+- Targeted unit tests passed: 2 files, 10 tests.
+- `npm run validate:quick` passed: 44 files, 493 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/dashboard`, and `/instructor/dashboard`.
+
+Remaining out of scope:
+- Hosted Supabase execution proof, local RLS proof with `AUTH_TENANCY_DATABASE_URL`, provider-backed browser auth proof, and safe full-class student leaderboard provider delivery remain pending.
+- No commit, push, PR, dependency install, or hosted-service mutation was performed.
+
+==> Harness postflight for sprint round 167
+==> git status --short
+ M AGENTS.md
+ M CLAUDE.md
+ M README.md
+ M app/(student)/dashboard/page.tsx
+ M app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts
+ M app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.ts
+ M docs/TEST_MATRIX.md
+ M docs/product/runtime-architecture.md
+ M docs/product/user-surfaces.md
+ M docs/stories/US-094-local-release-validation-proof.md
+ M docs/stories/US-095-ci-local-release-validation-workflow.md
+ M docs/stories/backlog.md
+ M reports/local-release-proof.json
+ M scripts/README.md
+ M scripts/run-claude-sprints.sh
+ M scripts/smoke-routes.mjs
+?? .claude/sprint-runs/round-166-20260519-131813.log
+?? .claude/sprint-runs/round-167-20260519-132947.log
+?? app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts
+?? app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.ts
+?? docs/stories/US-096-local-browser-surface-smoke-proof.md
+?? docs/stories/US-097-student-dashboard-live-supabase-row-reader.md
+
+==> git diff --stat
+ AGENTS.md                                          |  2 +-
+ CLAUDE.md                                          |  4 +-
+ README.md                                          |  2 +-
+ app/(student)/dashboard/page.tsx                   | 16 +++-
+ .../student-dashboard-current-turn-query.test.ts   | 18 +++++
+ .../student-dashboard-current-turn-query.ts        |  9 ++-
+ docs/TEST_MATRIX.md                                | 10 ++-
+ docs/product/runtime-architecture.md               | 10 +--
+ docs/product/user-surfaces.md                      |  4 +-
+ .../US-094-local-release-validation-proof.md       |  3 +-
+ .../US-095-ci-local-release-validation-workflow.md |  2 +-
+ docs/stories/backlog.md                            |  8 +-
+ reports/local-release-proof.json                   | 32 ++++----
+ scripts/README.md                                  |  2 +-
+ scripts/run-claude-sprints.sh                      | 33 +++++---
+ scripts/smoke-routes.mjs                           | 87 +++++++++++++++++++++-
+ 16 files changed, 187 insertions(+), 55 deletions(-)
+==> npm run validate:quick postflight
+
+> apex-alpha-portfolio-simulator@0.1.0 validate:quick
+> npm run typecheck && npm run test:unit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 typecheck
+> tsc --noEmit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 test:unit
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90m/Users/steve/duyhunghd6/pmsimulation[39m
+
+ [32m✓[39m app/domain/classes/live-leaderboard.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/catalog.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/student/leaderboard-rank.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m app/domain/portfolio/pyramid.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/classes/god-mode-portfolio-visibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m app/domain/tara/order.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/rows.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/classes/month-advancement.test.ts [2m([22m[2m83 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m app/domain/classes/dashboard-snapshot.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m app/domain/student/dashboard-snapshot.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/domain/tara/tax-drag.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/driver-string-dashboard.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/macro-news.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/classes/pending-order-visibility.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/domain/student/attribution-report.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/metrics/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-aggregate-analytics.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-draft.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/attribution.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/liquidity-penalty.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/allocation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-macro-news-query.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/risk-register.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/classes/realtime-query-result.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/auth-flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-publication.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/session.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/environment.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/realtime-refresh-plan.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/returns.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-subscription.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m44 passed[39m[22m[90m (44)[39m
+[2m      Tests [22m [1m[32m493 passed[39m[22m[90m (493)[39m
+[2m   Start at [22m 13:46:14
+[2m   Duration [22m 592ms[2m (transform 1.22s, setup 0ms, import 2.12s, tests 236ms, environment 2ms)[22m
+

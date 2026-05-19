@@ -1,0 +1,15 @@
+Sequence preflight:
+- Item 1: blocked — US-038 local RLS execution still requires `AUTH_TENANCY_DATABASE_URL`; parser/schema/RLS/fixture/query-executor portions are already started and backlog forbids more parser-only/query-executor-only work for this blocker.
+- Item 2: implemented — US-071/US-072 provide the App Router shell, Supabase magic-link login/logout, and protected student/instructor route guards.
+- Item 3: blocked — US-097 wires the student dashboard Supabase row reader locally, but remaining hosted/local provider proof needs `AUTH_TENANCY_DATABASE_URL` or hosted Supabase credentials.
+- Item 4: implemented — US-073 and US-088 render the protected current-turn student dashboard and post-turn attribution UI.
+- Item 5: implemented — US-074/US-085/US-098 provide bounded student TARA submission, browser form, and Supabase-backed pending-order store; remaining provider/E2E proof is credential/runtime blocked or belongs to later worker/realtime slices.
+- Item 6: selected candidate — instructor dashboard UI/server boundaries exist, but live Supabase class creation writes remain pending and can be wired safely behind the existing class-creation executor.
+- Item 7: skipped — Inngest/cron/class-month executor slices exist through US-091; remaining hosted worker/cron and live Supabase processing need hosted runtime or later persistence work.
+- Item 8: skipped — realtime publication/subscription/refetch UI exists through US-093; hosted Supabase realtime proof needs provider credentials/runtime.
+- Item 9: skipped — local release/CI workflow/smoke proof exists through US-096; hosted CI/platform/deployment proof needs external runtime approval.
+- Selected: item 6, instructor class creation Supabase writer, because every earlier item is implemented or blocked by missing local/hosted provider credentials while this item can reduce the live persistence gap without exposing unsafe gameplay data.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student dashboard current-turn UI, student TARA order form UI, student post-turn attribution UI, instructor class creation UI, pending-order UI, leaderboard UI, aggregate analytics UI, God Mode UI, manual month-advance UI, realtime status UI.
+- Decision: proceed with non-UI, because the relevant class creation browser UI already exists and the remaining unblocked gap is durable Supabase persistence behind its safe server action.

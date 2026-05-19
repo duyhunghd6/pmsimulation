@@ -257,6 +257,24 @@ describe('executeStudentDashboardCurrentTurnQuery', () => {
     });
   });
 
+  it('fails closed when the row reader cannot load provider rows', async () => {
+    const reader: StudentDashboardCurrentTurnQueryRowReader = {
+      async readStudentDashboardCurrentTurnRows() {
+        throw new Error('provider details should not escape');
+      },
+    };
+
+    await expect(
+      executeStudentDashboardCurrentTurnQuery({
+        ...executionInput,
+        rowReader: reader,
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      failure: { code: 'row_reader_failed' },
+    });
+  });
+
   it('rejects future macro rows before composing the dashboard result', async () => {
     await expect(
       executeStudentDashboardCurrentTurnQuery({

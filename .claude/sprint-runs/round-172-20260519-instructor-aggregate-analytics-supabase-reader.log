@@ -1,0 +1,21 @@
+Selected accepted-product requirement: instructors can view class-wide aggregate analytics for an instructor-scoped class using protected App Router surfaces and safe server query boundaries.
+Full-Stack MVP Sprint Sequence item: 6.
+Story/work item: US-104 Instructor class aggregate analytics Supabase reader.
+Lane: normal.
+Browser-visible UI: non-UI; wires an existing reachable instructor dashboard panel to a provider-backed row reader when the App Router Supabase server client is available.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started; local RLS execution is blocked only because AUTH_TENANCY_DATABASE_URL is not configured, so no more parser-only/query-executor-only US-038 work is selected.
+- Item 2: implemented — US-071 and US-072 provide the no-gameplay App Router shell, Supabase magic-link auth actions, and protected student/instructor route guards.
+- Item 3: implemented — US-097 wires the protected student current-turn dashboard to a Supabase-backed row reader when the App Router Supabase server client is available.
+- Item 4: implemented — US-073, US-085, US-088, US-089, and US-093 provide protected student dashboard, order form, post-turn attribution, and realtime status UI surfaces.
+- Item 5: implemented — US-074 and US-098 provide the bounded student TARA order submission executor and Supabase-backed pending-order read/write store; hosted proof and processed execution remain later gaps.
+- Item 6: selected candidate — instructor dashboard UI/server boundaries exist, and Supabase readers exist for class list, pending-order visibility, and live leaderboard, but class aggregate analytics still renders from bounded fallback rows without a Supabase-backed reader.
+- Item 7: skipped — Inngest handoff, cron handoff, processing executor, and Supabase processing store exist; remaining hosted worker/runtime wiring is later than the unimplemented item 6 aggregate provider reader.
+- Item 8: skipped — realtime publication/subscription/refetch UI exists locally; hosted provider proof is later than the unimplemented item 6 aggregate provider reader.
+- Item 9: skipped — local release proof, CI workflow, and route smoke proof exist; hosted CI/platform/deployment proof is later than the unimplemented item 6 aggregate provider reader.
+- Selected: item 6, US-104 Instructor class aggregate analytics Supabase reader, because every earlier item is implemented or blocked by AUTH_TENANCY_DATABASE_URL, and item 6 still has an unblocked provider-backed instructor aggregate analytics gap over an existing safe UI/server boundary.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI, student TARA order form UI, student post-turn attribution UI, instructor class creation/list UI, instructor pending-order UI, instructor live leaderboard UI, instructor aggregate analytics UI, instructor God Mode UI, instructor live month-advance UI, realtime status UI.
+- Decision: proceed with non-UI, because the relevant aggregate analytics browser UI already exists and the missing bounded slice is the Supabase-backed row reader behind its existing safe executor.

@@ -46,4 +46,4 @@ The repository includes a bounded CI workflow that runs the existing local relea
 ## Evidence
 
 - `.github/workflows/local-release-validation.yml` added a non-deploying GitHub Actions workflow with read-only permissions, `npm ci`, `npm run release:local`, and local release report artifact upload.
-- `npm run release:local` passed on 2026-05-19, running `npm run validate:quick` (43 test files, 490 tests), `npm run smoke:routes` (`/` 200, `/login` 200, `/dashboard` 307, `/instructor/dashboard` 307), and `npm run build`; report written to `reports/local-release-proof.json`.
+- `npm run release:local` passed on 2026-05-19, running `npm run validate:quick` (43 test files, 490 tests), strengthened `npm run smoke:routes` (`/` 200 content checked, `/login` 200 content checked, `/dashboard` 307 redirect checked, `/instructor/dashboard` 307 redirect checked), and `npm run build`; report written to `reports/local-release-proof.json`.

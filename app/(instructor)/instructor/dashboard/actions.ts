@@ -12,7 +12,8 @@ import {
   executeInstructorClassCreationAction,
   type InstructorClassCreationActionStore,
 } from '../../../infrastructure/auth-tenancy/instructor-class-creation-action';
-import { readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
+import { createSupabaseInstructorClassCreationStore } from '../../../infrastructure/auth-tenancy/instructor-class-creation-supabase-store';
+import { createAuthTenancySupabaseServerClient, readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
 import {
   executeLiveMonthAdvanceInngestHandoff,
   sendMonthAdvanceRequestedEvent,
@@ -41,7 +42,7 @@ export async function createInstructorClass(formData: FormData): Promise<void> {
       triggerMode: String(formData.get('triggerMode') ?? ''),
       joinCode: String(formData.get('joinCode') ?? '').trim().toUpperCase(),
     },
-    store: createBoundedInstructorClassCreationStore(),
+    store: await createInstructorClassCreationStore(),
   });
 
   if (!result.ok) {
@@ -118,6 +119,15 @@ export async function advanceInstructorLiveMonth(formData: FormData): Promise<vo
 
 function parseFormInteger(value: FormDataEntryValue | null): number {
   return Number.parseInt(String(value ?? ''), 10);
+}
+
+async function createInstructorClassCreationStore(): Promise<InstructorClassCreationActionStore> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  if (supabase.ok) {
+    return createSupabaseInstructorClassCreationStore(supabase.client);
+  }
+
+  return createBoundedInstructorClassCreationStore();
 }
 
 function createBoundedInstructorClassCreationStore(): InstructorClassCreationActionStore {

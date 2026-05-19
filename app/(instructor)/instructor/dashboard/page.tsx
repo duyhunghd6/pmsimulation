@@ -15,7 +15,11 @@ import {
   executeInstructorGodModePortfolioVisibilityQuery,
   type InstructorGodModePortfolioVisibilityQueryRowReader,
 } from '../../../infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query';
-import { readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
+import { createSupabaseInstructorClassAggregateAnalyticsRowReader } from '../../../infrastructure/auth-tenancy/instructor-class-aggregate-analytics-supabase-reader';
+import { createSupabaseInstructorClassListReader, type InstructorClassListReadResult } from '../../../infrastructure/auth-tenancy/instructor-class-list-supabase-reader';
+import { createSupabaseInstructorLiveLeaderboardRowReader } from '../../../infrastructure/auth-tenancy/instructor-live-leaderboard-supabase-reader';
+import { createSupabaseInstructorPendingOrderVisibilityRowReader } from '../../../infrastructure/auth-tenancy/instructor-pending-order-visibility-supabase-reader';
+import { createAuthTenancySupabaseServerClient, readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
 import { RealtimeRefreshPanel } from '../../../realtime-refresh-panel';
 import { createRealtimeRefreshPanelConfig } from '../../../realtime-refresh-plan';
 import type { AuthTenancySession } from '../../../infrastructure/auth-tenancy/session';
@@ -59,21 +63,27 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
   }
 
   const rowReader = createBoundedInstructorDashboardRowReader(routeSession.session);
-  const [pendingOrderResult, liveLeaderboardResult, aggregateAnalyticsResult, godModeResult] = await Promise.all([
+  const [pendingOrderRowReader, liveLeaderboardRowReader, aggregateAnalyticsRowReader] = await Promise.all([
+    createPendingOrderVisibilityRowReader(rowReader),
+    createLiveLeaderboardRowReader(rowReader),
+    createAggregateAnalyticsRowReader(rowReader),
+  ]);
+  const [classListResult, pendingOrderResult, liveLeaderboardResult, aggregateAnalyticsResult, godModeResult] = await Promise.all([
+    readInstructorClassList(routeSession.session),
     executeInstructorPendingOrderVisibilityQuery({
       session: routeSession.session,
       scope: { classId, monthIndex: currentMonthIndex },
-      rowReader,
+      rowReader: pendingOrderRowReader,
     }),
     executeInstructorLiveLeaderboardQuery({
       session: routeSession.session,
       scope: { classId, monthIndex: currentMonthIndex },
-      rowReader,
+      rowReader: liveLeaderboardRowReader,
     }),
     executeInstructorClassAggregateAnalyticsQuery({
       session: routeSession.session,
       scope: { classId, monthIndex: currentMonthIndex },
-      rowReader,
+      rowReader: aggregateAnalyticsRowReader,
     }),
     executeInstructorGodModePortfolioVisibilityQuery({
       session: routeSession.session,
@@ -140,6 +150,7 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
           <MetricTile label="Enrolled funds" value={snapshot.totalFundCount.toString()} />
           <MetricTile label="Pending orders" value={snapshot.pendingOrderCount.toString()} />
           <MetricTile label="Class AUM" value={formatCurrency(aggregateAnalytics.totalCurrentAum)} />
+          <MetricTile label="Classes" value={classListResult.ok ? classListResult.classes.length.toString() : 'Unavailable'} />
           <MetricTile label="Ranked funds" value={leaderboard.rankedFundCount.toString()} />
           <MetricTile label="God Mode funds" value={godMode.fundCount.toString()} />
           <MetricTile
@@ -158,9 +169,10 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
             <strong>Join-link boundary</strong>
           </div>
           <p>
-            Create an instructor-scoped class receipt through the bounded server action executor. This proof store returns a safe
-            join-code receipt; live Supabase writes, roster management, realtime publication, and provider-backed browser proof remain
-            unwired.
+            Create an instructor-scoped class receipt through the bounded server action executor. The server action prefers a Supabase-backed
+            class creation writer when the App Router Supabase client is available and still returns only the safe join-code receipt; the
+            server-rendered class list below refreshes on the next protected render while roster management, realtime publication, and
+            provider-backed browser proof remain unwired.
           </p>
           <form action={createInstructorClass} className="form-stack">
             <label htmlFor="className">Class name</label>
@@ -187,6 +199,8 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
           </form>
           <ClassCreationNotice notice={classCreationNotice} />
         </article>
+
+        <InstructorClassListPanel result={classListResult} />
 
         <article className="terminal-panel wide">
           <div className="panel-heading">
@@ -381,6 +395,69 @@ function createClassCreationNotice(params: Record<string, string | string[] | un
   return { status: 'empty' };
 }
 
+function InstructorClassListPanel({ result }: Readonly<{ result: InstructorClassListReadResult }>) {
+  if (!result.ok) {
+    return (
+      <article className="terminal-panel wide">
+        <div className="panel-heading">
+          <span className="eyebrow">Class list refresh</span>
+          <strong>Read stopped</strong>
+        </div>
+        <p>
+          The instructor class list failed closed before browser delivery. No raw provider errors, database rows, auth sessions, or provider
+          clients were rendered.
+        </p>
+        <p className="route-banner danger">
+          Failure code: {result.code}{result.rowFailureCode ? ` / ${result.rowFailureCode}` : ''}
+        </p>
+      </article>
+    );
+  }
+
+  return (
+    <article className="terminal-panel wide">
+      <div className="panel-heading">
+        <span className="eyebrow">Class list refresh</span>
+        <strong>{result.classes.length === 0 ? 'No classes yet' : `${result.classes.length} instructor class${result.classes.length === 1 ? '' : 'es'}`}</strong>
+      </div>
+      <p>
+        This server-rendered list uses the Supabase classes table when the App Router server client is available and falls back to bounded local
+        proof data otherwise. It renders only parsed instructor-owned class rows.
+      </p>
+      {result.classes.length === 0 ? (
+        <p className="route-banner">No instructor-owned classes were returned for this trusted session.</p>
+      ) : (
+        <table className="terminal-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Join code</th>
+              <th>Trigger</th>
+              <th>Current month</th>
+              <th>Total months</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.classes.map((classRow) => (
+              <tr key={classRow.classId}>
+                <td>{classRow.displayName}</td>
+                <td>{classRow.studentJoinCode}</td>
+                <td>{classRow.triggerMode}</td>
+                <td>M{classRow.currentMonthIndex + 1}</td>
+                <td>{classRow.totalMonths}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="route-banner">
+        Class ids, provider payloads, roster rows, order details, realtime payloads, and secrets stay outside the browser-visible receipt and
+        list copy.
+      </p>
+    </article>
+  );
+}
+
 function ClassCreationNotice({ notice }: Readonly<{ notice: ClassCreationNoticeState }>) {
   if (notice.status === 'created') {
     return (
@@ -525,6 +602,49 @@ function formatFundLabel(fundId: string) {
 
 function formatCurrency(value: number) {
   return `$${(value / 1_000_000).toFixed(1)}M`;
+}
+
+async function createPendingOrderVisibilityRowReader(
+  fallback: InstructorPendingOrderVisibilityQueryRowReader,
+): Promise<InstructorPendingOrderVisibilityQueryRowReader> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  return supabase.ok ? createSupabaseInstructorPendingOrderVisibilityRowReader(supabase.client) : fallback;
+}
+
+async function createLiveLeaderboardRowReader(
+  fallback: InstructorLiveLeaderboardQueryRowReader,
+): Promise<InstructorLiveLeaderboardQueryRowReader> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  return supabase.ok ? createSupabaseInstructorLiveLeaderboardRowReader(supabase.client) : fallback;
+}
+
+async function createAggregateAnalyticsRowReader(
+  fallback: InstructorClassAggregateAnalyticsQueryRowReader,
+): Promise<InstructorClassAggregateAnalyticsQueryRowReader> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  return supabase.ok ? createSupabaseInstructorClassAggregateAnalyticsRowReader(supabase.client) : fallback;
+}
+
+async function readInstructorClassList(session: AuthTenancySession): Promise<InstructorClassListReadResult> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  if (supabase.ok) {
+    return createSupabaseInstructorClassListReader(supabase.client).readInstructorClasses({ session });
+  }
+
+  return {
+    ok: true,
+    classes: [
+      {
+        classId,
+        instructorId: session.subjectId,
+        displayName: 'Alpha Capital Lab',
+        triggerMode,
+        currentMonthIndex,
+        totalMonths,
+        studentJoinCode: 'ALPHA01',
+      },
+    ],
+  };
 }
 
 function createBoundedInstructorDashboardRowReader(
