@@ -11,7 +11,8 @@
     "test:unit": "vitest run",
     "test:integration:auth-tenancy": "vitest run --config vitest.integration.config.ts tests/integration/auth-tenancy",
     "smoke:routes": "node scripts/smoke-routes.mjs",
-    "validate:quick": "npm run typecheck && npm run test:unit"
+    "validate:quick": "npm run typecheck && npm run test:unit",
+    "release:local": "node scripts/local-release-proof.mjs"
   },
   "devDependencies": {
     "@types/node": "^25.8.0",

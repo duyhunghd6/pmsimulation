@@ -1,0 +1,16 @@
+Selected Full-Stack MVP Sprint Sequence item: 8
+Story/work item: US-093 realtime authorized server refetch result UI
+Lane: normal
+Browser-visible UI: yes
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/query-executor portions are started, but local RLS execution remains blocked because AUTH_TENANCY_DATABASE_URL is not configured; backlog instructs not to select more parser-only/query-executor-only work for that blocker.
+- Item 2: implemented — US-071 shell and US-072 Supabase magic-link login/logout plus student/instructor app-role route guards are implemented and current in docs/TEST_MATRIX.md.
+- Item 3: implemented — current-turn student dashboard server query execution exists through executeStudentDashboardCurrentTurnQuery and is evidenced by US-073 plus the US-038 executor evidence in docs/TEST_MATRIX.md.
+- Item 4: implemented — protected student current-turn dashboard UI and post-turn attribution UI are implemented as US-073 and US-088.
+- Item 5: implemented — student TARA order submission executor and protected browser form are implemented as US-074 and US-085; live Supabase writes remain external-provider proof work.
+- Item 6: implemented — instructor class creation, pending-order, leaderboard, aggregate analytics, God Mode, and manual month-advance UI/server boundaries are implemented as US-075 through US-086.
+- Item 7: implemented — Inngest handoff, Vercel cron handoff, injected class-month processing, and worker-to-realtime dispatch are implemented as US-087, US-090, US-091, and US-092; hosted worker/cron proof remains external-runtime work.
+- Item 8: selected candidate — US-037, US-089, and US-092 implement publication boundary, browser subscription/refetch panel, and worker dispatch, but protected dashboards do not yet render a browser-visible server-query-result proof tied to the realtime authorized current-turn query descriptor after route refresh; hosted Supabase proof remains blocked by missing provider runtime.
+- Item 9: skipped — release proof depends on provider/runtime/E2E/platform readiness and remains blocked by the missing hosted app/provider proof path documented in US-039.
+- Selected: item 8, realtime authorized server refetch result UI, because items 1 and hosted/provider portions are blocked by missing credentials/runtime, items 2-7 have bounded implementation evidence, and item 8 still has a safe browser-visible UI slice over existing authorized server query result boundaries.

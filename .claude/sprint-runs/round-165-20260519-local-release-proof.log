@@ -1,0 +1,25 @@
+Selected Full-Stack MVP Sprint Sequence item: item 9 — US-094 local release validation proof command and evidence report.
+Story/work item: local release validation proof command for current bounded MVP path.
+Lane: high-risk, narrowed to local non-deploying validation because release/platform work spans external systems, public contracts, cross-platform proof, weak proof, and multiple domains.
+Browser-visible UI or non-UI: non-UI.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor slices exist, but local RLS execution is skipped until AUTH_TENANCY_DATABASE_URL is configured; backlog says not to select more parser-only/query-executor-only work for this blocker.
+- Item 2: implemented — US-071 and US-072 exist for the Next.js shell, Supabase magic-link login/logout, and protected student/instructor route guards; TEST_MATRIX marks both implemented.
+- Item 3: implemented — current-turn student dashboard server composition/executors are documented in US-038 evidence and TEST_MATRIX as implemented with unit proof over bounded scoped rows.
+- Item 4: implemented — US-073 and US-088 render protected student current-turn and post-turn dashboard UI; TEST_MATRIX marks both implemented.
+- Item 5: implemented — US-074 and US-085 add the bounded student TARA order submission executor and protected order form UI; TEST_MATRIX marks both implemented.
+- Item 6: implemented — US-075 through US-086 cover instructor pending orders, leaderboard, aggregate analytics, God Mode, class creation, and live month-advance UI/server boundaries; TEST_MATRIX marks the bounded slices implemented.
+- Item 7: implemented — US-087, US-090, and US-091 add the bounded Inngest handoff, cron handoff, and injected class-month processing executor; TEST_MATRIX marks them implemented while hosted/runtime proof remains pending.
+- Item 8: implemented — US-037, US-089, US-092, and US-093 add bounded realtime publication, subscription/refetch UI, worker dispatch, and route-scoped server-query result status; TEST_MATRIX marks the bounded slices implemented while hosted Supabase proof remains pending.
+- Item 9: selected candidate — E2E/platform/deployment/release proof remains planned; a local non-deploying release validation command can aggregate existing executable proof without requiring external credentials or hosted runtimes.
+- Selected: item 9, US-094 local release validation proof command and evidence report, because every earlier item is implemented at a bounded level or blocked only by AUTH_TENANCY_DATABASE_URL/hosted provider credentials, and the first safe item 9 slice can add release evidence without deploying or mutating providers.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI over bounded server composition (US-073), student post-turn attribution UI (US-088), student TARA order form UI over bounded executor (US-085), instructor class creation UI (US-084), instructor pending-order UI (US-076), instructor live leaderboard UI (US-078), instructor aggregate analytics UI (US-082), instructor God Mode UI (US-081), instructor live month-advance UI (US-086), realtime subscription/refetch panels with route-scoped server-query result status (US-089/US-093).
+- Decision: proceed with non-UI, because no unblocked missing App Router UI over an existing safe server boundary was found; the remaining item 9 gap is validation/release proof.
+
+Implementation summary:
+- Added `npm run release:local` backed by `scripts/local-release-proof.mjs`.
+- Added `docs/stories/US-094-local-release-validation-proof.md` and updated runtime, backlog, TEST_MATRIX, script README, and operating status docs.
+- `npm run release:local` passed on 2026-05-19, running `validate:quick` (43 test files, 490 tests), `smoke:routes` (`/` 200, `/login` 200, `/dashboard` 307, `/instructor/dashboard` 307), and `build`; report written to `reports/local-release-proof.json`.

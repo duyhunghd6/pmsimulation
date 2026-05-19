@@ -54,6 +54,18 @@ Optional environment variables:
 - `SMOKE_STARTUP_TIMEOUT_MS` — dev-server startup wait. Defaults to `30000`.
 - `SMOKE_REQUEST_TIMEOUT_MS` — per-route fetch timeout. Defaults to `10000`.
 
+## Local Release Proof
+
+`npm run release:local` runs the current local release gate: `validate:quick`, route smoke, and `next build`. It writes a structured JSON report to `reports/local-release-proof.json` by default without deploying, requiring hosted provider credentials, or mutating CI/shared platform state.
+
+Optional environment variables:
+
+- `LOCAL_RELEASE_PROOF_REPORT` — report output path. Defaults to `reports/local-release-proof.json`.
+
+## CI Release Validation
+
+`.github/workflows/local-release-validation.yml` runs the same local release proof on pull requests, pushes to `main`, and manual dispatches. The workflow installs from `package-lock.json`, runs `npm run release:local`, and uploads `reports/local-release-proof.json` as an artifact without deploying or requiring hosted Supabase, Inngest, or Vercel credentials.
+
 ## Future Command Contract
 
 Expected future checks:

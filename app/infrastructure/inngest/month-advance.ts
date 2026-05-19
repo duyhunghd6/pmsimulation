@@ -3,11 +3,14 @@ import { Inngest } from 'inngest';
 import {
   createClassMonthAdvanceProcessingResult,
   createClassMonthAdvanceProcessingValidationFailureEnvelope,
+  createMonthAdvanceRealtimePublicationEnvelope,
+  createMonthAdvanceRealtimeRefreshSignal,
   createMonthAdvanceTurnCompletionEvent,
   createMonthAdvanceWorkerJob,
   createMonthAdvanceWorkerJobResultEnvelope,
   createSharedMonthAdvanceProcessingRequest,
   createSharedMonthAdvanceProcessingValidationFailureEnvelope,
+  createSupabaseRealtimePublicationDescriptor,
   type AutoMonthAdvanceRequest,
   type ClassMonthAdvanceFundProcessingInput,
   type ClassMonthAdvanceProcessingRecord,
@@ -20,6 +23,11 @@ import {
   type SharedMonthAdvanceProcessingValidationFailureEnvelope,
   type SharedMonthAdvanceProcessingRequest,
 } from '../../domain/classes/month-advancement';
+import {
+  publishSupabaseRealtimeRefresh,
+  type SupabaseRealtimeClient,
+  type SupabaseRealtimePublicationResult,
+} from '../realtime/supabase-publication';
 
 export const MONTH_ADVANCE_REQUESTED_EVENT = 'app/month.advance.requested';
 
@@ -75,6 +83,7 @@ export type MonthAdvanceClassMonthProcessingCompleted = {
   processingPath: 'shared_month_advance';
   event: MonthAdvanceTurnCompletionEvent;
   persistence: MonthAdvanceClassMonthProcessingPersistenceReceipt;
+  realtimePublication: SupabaseRealtimePublicationResult;
 };
 
 export type MonthAdvanceClassMonthProcessingResult =
@@ -187,6 +196,7 @@ export async function executeMonthAdvanceClassMonthProcessingFromInngestEventDat
   data: unknown;
   reader: MonthAdvanceClassMonthProcessingReader;
   writer: MonthAdvanceClassMonthProcessingWriter;
+  realtimeClient: SupabaseRealtimeClient;
 }): Promise<MonthAdvanceClassMonthProcessingResult> {
   const processingInput = parseMonthAdvanceInngestEventData(input.data);
   const processingRequest = createSharedMonthAdvanceProcessingRequest(processingInput);
@@ -216,6 +226,13 @@ export async function executeMonthAdvanceClassMonthProcessingFromInngestEventDat
 
   const persistence = await input.writer.writeClassMonthProcessingResult(classMonthProcessingResult.value);
   const event = createMonthAdvanceTurnCompletionEvent(classMonthProcessingResult.value);
+  const signal = createMonthAdvanceRealtimeRefreshSignal(event);
+  const publicationEnvelope = createMonthAdvanceRealtimePublicationEnvelope(signal);
+  const publicationDescriptor = createSupabaseRealtimePublicationDescriptor(publicationEnvelope);
+  const realtimePublication = await publishSupabaseRealtimeRefresh({
+    descriptor: publicationDescriptor,
+    client: input.realtimeClient,
+  });
 
   return {
     ok: true,
@@ -224,6 +241,7 @@ export async function executeMonthAdvanceClassMonthProcessingFromInngestEventDat
       processingPath: 'shared_month_advance',
       event,
       persistence,
+      realtimePublication,
     },
   };
 }

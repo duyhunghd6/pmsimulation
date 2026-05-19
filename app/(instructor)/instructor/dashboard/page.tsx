@@ -103,7 +103,23 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
   const aggregateAnalytics = aggregateAnalyticsResult.value.snapshot;
   const godMode = godModeResult.value.snapshot;
   const liveMonthAdvanceControl = liveMonthAdvanceControlResult.value;
-  const realtimeRefreshConfig = createRealtimeRefreshPanelConfig({ classId, currentMonthIndex, totalMonths });
+  const instructorDashboard = {
+    snapshotType: 'instructor_dashboard_current_turn' as const,
+    classId,
+    monthIndex: currentMonthIndex,
+    pendingOrderVisibility: snapshot,
+    liveLeaderboard: leaderboard,
+    godModePortfolioVisibility: godMode,
+    classAggregateAnalytics: aggregateAnalytics,
+    liveMonthAdvanceControl,
+  };
+  const realtimeRefreshConfig = createRealtimeRefreshPanelConfig({
+    classId,
+    currentMonthIndex,
+    totalMonths,
+    surface: 'instructor_dashboard_current_turn',
+    instructorDashboard,
+  });
   const completionRate = snapshot.totalFundCount === 0 ? 0 : snapshot.pendingOrderCount / snapshot.totalFundCount;
   const missingOrderRate = aggregateAnalytics.fundCount === 0 ? 0 : aggregateAnalytics.missingOrderCount / aggregateAnalytics.fundCount;
 

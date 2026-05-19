@@ -45,6 +45,19 @@ const defaultFundInput = {
   },
 };
 
+function createRealtimeClient(sentMessages: unknown[], ack: 'ok' | 'timed out' | 'error' = 'ok') {
+  return {
+    channel(channelName: string) {
+      return {
+        async send(message: unknown) {
+          sentMessages.push({ channelName, message });
+          return ack;
+        },
+      };
+    },
+  };
+}
+
 describe('createMonthAdvanceInngestEvent', () => {
   it('maps a shared processing request to the Inngest month-advance event', () => {
     expect(createMonthAdvanceInngestEvent(defaultProcessingRequest)).toEqual({
@@ -238,8 +251,9 @@ describe('executeAutoMonthAdvanceInngestHandoff', () => {
 });
 
 describe('executeMonthAdvanceClassMonthProcessingFromInngestEventData', () => {
-  it('processes injected class fund inputs and persists ledger drafts without returning them', async () => {
+  it('processes injected class fund inputs, persists ledger drafts, and publishes a refresh signal without returning drafts', async () => {
     const persistedRecords: unknown[] = [];
+    const sentRealtimeMessages: unknown[] = [];
     const result = await executeMonthAdvanceClassMonthProcessingFromInngestEventData({
       data: createMonthAdvanceInngestEvent(defaultProcessingRequest).data,
       reader: {
@@ -260,6 +274,7 @@ describe('executeMonthAdvanceClassMonthProcessingFromInngestEventData', () => {
           };
         },
       },
+      realtimeClient: createRealtimeClient(sentRealtimeMessages),
     });
 
     expect(persistedRecords).toHaveLength(1);
@@ -283,8 +298,39 @@ describe('executeMonthAdvanceClassMonthProcessingFromInngestEventData', () => {
           processedMonthIndex: 3,
           advancedToMonthIndex: 4,
         },
+        realtimePublication: {
+          ok: true,
+          value: expect.objectContaining({
+            envelopeType: 'supabase_realtime_publication_result',
+            channelName: 'class:class-001:month-advance',
+            broadcastEventName: 'month_advance_refresh_available',
+            deliverySemantics: 'refresh_only_refetch_authorized_surfaces',
+            payload: expect.objectContaining({
+              signalType: 'month_advance_refresh_available',
+              classId: 'class-001',
+              processedMonthIndex: 3,
+              currentMonthIndex: 4,
+              idempotencyKey: 'class:class-001:advance:3->4',
+            }),
+          }),
+        },
       },
     });
+    expect(sentRealtimeMessages).toEqual([
+      {
+        channelName: 'class:class-001:month-advance',
+        message: {
+          type: 'broadcast',
+          event: 'month_advance_refresh_available',
+          payload: expect.objectContaining({
+            signalType: 'month_advance_refresh_available',
+            classId: 'class-001',
+            currentMonthIndex: 4,
+            idempotencyKey: 'class:class-001:advance:3->4',
+          }),
+        },
+      },
+    ]);
 
     if (result.ok) {
       expect('ledgerDrafts' in result.value).toBe(false);
@@ -294,8 +340,54 @@ describe('executeMonthAdvanceClassMonthProcessingFromInngestEventData', () => {
     }
   });
 
-  it('returns class-month-safe validation failure without persisting invalid fund inputs', async () => {
+  it('returns a safe publication failure without exposing provider details when realtime send fails', async () => {
+    const result = await executeMonthAdvanceClassMonthProcessingFromInngestEventData({
+      data: createMonthAdvanceInngestEvent(defaultProcessingRequest).data,
+      reader: {
+        async readFundInputs() {
+          return [defaultFundInput];
+        },
+      },
+      writer: {
+        async writeClassMonthProcessingResult(record) {
+          return {
+            receiptType: 'class_month_processing_persistence_receipt',
+            classMonthWriteKey: `${record.idempotencyKey}:class-month-write`,
+            ledgerWriteCount: record.ledgerDrafts.length,
+            processedMonthIndex: record.processedMonthIndex,
+            advancedToMonthIndex: record.advancedToMonthIndex,
+          };
+        },
+      },
+      realtimeClient: createRealtimeClient([], 'error'),
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      value: expect.objectContaining({
+        resultStatus: 'completed_class_month_processing',
+        realtimePublication: {
+          ok: false,
+          failure: expect.objectContaining({
+            envelopeType: 'supabase_realtime_publication_failure',
+            failureCode: 'provider_error',
+            providerAck: 'error',
+            deliverySemantics: 'refresh_only_refetch_authorized_surfaces',
+          }),
+        },
+      }),
+    });
+
+    if (result.ok) {
+      expect('providerError' in result.value.realtimePublication).toBe(false);
+      expect('providerClient' in result.value.realtimePublication).toBe(false);
+      expect('ledgerDrafts' in result.value.realtimePublication).toBe(false);
+    }
+  });
+
+  it('returns class-month-safe validation failure without persisting invalid fund inputs or publishing realtime', async () => {
     let writerCalled = false;
+    const sentRealtimeMessages: unknown[] = [];
     const result = await executeMonthAdvanceClassMonthProcessingFromInngestEventData({
       data: createMonthAdvanceInngestEvent(defaultProcessingRequest).data,
       reader: {
@@ -315,9 +407,11 @@ describe('executeMonthAdvanceClassMonthProcessingFromInngestEventData', () => {
           };
         },
       },
+      realtimeClient: createRealtimeClient(sentRealtimeMessages),
     });
 
     expect(writerCalled).toBe(false);
+    expect(sentRealtimeMessages).toEqual([]);
     expect(result).toEqual({
       ok: false,
       failure: expect.objectContaining({

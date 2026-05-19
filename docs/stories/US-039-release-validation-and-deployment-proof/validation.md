@@ -27,9 +27,10 @@ This story cannot be implemented until a deployable app/runtime and lower-layer 
 npm run validate:quick
 TBD: integration validation command after provider/data boundaries exist
 TBD: E2E validation command after browser app surfaces exist
-TBD: platform/release smoke command after deployment configuration exists
+npm run release:local
+TBD: hosted platform/release smoke command after deployment configuration exists
 ```
 
 ## Acceptance Evidence
 
-Blocked in this sprint. No app runtime, CI, deployment platform, provider environment, integration suite, E2E suite, platform smoke command, or release evidence format exists yet. US-039 was reselected only to refresh the high-risk release-proof blocker after confirming the remaining E04 provider/release path depends on blocked auth/tenancy and realtime-provider boundaries. `npm run validate:quick` passed with 24 test files and 247 tests.
+A bounded local release evidence format now exists in US-094 through `npm run release:local`, and a bounded non-deploying CI workflow now exists in US-095 to run that local proof; hosted release proof remains blocked until hosted CI run evidence, deployment direction, provider environment, integration suite, provider-backed E2E suite, hosted platform smoke, and complete release evidence requirements exist. US-039 remains the broader high-risk release/deployment story and must not mark hosted platform or full release proof implemented from local-only or workflow-file-only evidence.

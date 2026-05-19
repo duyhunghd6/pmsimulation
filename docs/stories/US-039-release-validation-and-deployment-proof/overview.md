@@ -2,7 +2,7 @@
 
 ## Current Behavior
 
-The repository has pure TypeScript domain validation through `npm run validate:quick` and documentation for expected future release proof. It has no CI workflow, deployment environment, Vercel project boundary, Supabase project boundary, provider secrets contract, platform smoke command, or release validation report path.
+The repository has pure TypeScript/domain validation through `npm run validate:quick`, a bounded Next.js App Router shell, route smoke, build proof, a local non-deploying release evidence command captured by US-094, and a non-deploying CI workflow captured by US-095 that runs the local release proof. It has no hosted CI run proof, deployment environment, Vercel project boundary, Supabase project boundary, provider secrets contract, hosted platform smoke command, provider-backed E2E suite, or complete hosted release validation path.
 
 ## Target Behavior
 
@@ -21,7 +21,7 @@ After this story is implemented, the project has an accepted release proof path 
 
 ## Non-Goals
 
-- Do not add CI, deployment automation, Vercel configuration, Supabase configuration, or provider secrets in this story until the app/runtime and integration boundaries exist.
+- Do not add deploying CI steps, deployment automation, Vercel configuration, Supabase configuration, or provider secrets in this story until the remaining integration, E2E, hosted provider, and deployment boundaries exist.
 - Do not mark release, platform, integration, or E2E proof implemented without executable evidence.
 - Do not weaken existing `npm run validate:quick` expectations for pure domain slices.
 

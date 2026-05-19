@@ -36,6 +36,7 @@ export function RealtimeRefreshPanel({ config, viewerRole }: RealtimeRefreshPane
         },
   );
   const surfaceList = useMemo(() => config.refetchPlan.surfaces.join(', '), [config.refetchPlan.surfaces]);
+  const serverQueryResultLabel = config.serverQueryResult.kind === 'ready' ? 'Ready' : 'Validation stopped';
 
   useEffect(() => {
     if (!config.browserEnv) {
@@ -105,8 +106,12 @@ export function RealtimeRefreshPanel({ config, viewerRole }: RealtimeRefreshPane
         <MetricTile label="Processed month" value={`M${config.refetchPlan.processedMonthIndex + 1}`} />
         <MetricTile label="Authorization" value={config.refetchPlan.requiredAuthorization} />
         <MetricTile label="Query descriptor" value={config.queryDescriptorKey} />
+        <MetricTile label="Server query result" value={serverQueryResultLabel} />
       </dl>
       <p className={status.kind === 'provider_error' || status.kind === 'rejected' ? 'route-banner danger' : 'route-banner'}>{status.detail}</p>
+      <p className={config.serverQueryResult.kind === 'ready' ? 'route-banner' : 'route-banner danger'}>
+        {config.serverQueryResult.detail} Result key: {config.serverQueryResult.queryResultKey}.
+      </p>
       <p className="route-banner">
         Refetch surfaces: {surfaceList}. Realtime payload parsing rejects cross-class, stale-month, wrong-idempotency, and non-refresh
         broadcasts before any router refresh.

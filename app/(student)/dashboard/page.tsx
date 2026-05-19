@@ -75,7 +75,13 @@ export default async function StudentDashboardShellPage({ searchParams }: Studen
   const orderEntry = dashboard.taraOrderEntry;
   const leaderboard = dashboard.leaderboardRank;
   const postTurnDashboard = createBoundedPostTurnDashboard();
-  const realtimeRefreshConfig = createRealtimeRefreshPanelConfig({ classId, currentMonthIndex, totalMonths });
+  const realtimeRefreshConfig = createRealtimeRefreshPanelConfig({
+    classId,
+    currentMonthIndex,
+    totalMonths,
+    surface: 'student_dashboard_current_turn',
+    studentDashboard: dashboard,
+  });
 
   return (
     <main className="shell dashboard-shell">

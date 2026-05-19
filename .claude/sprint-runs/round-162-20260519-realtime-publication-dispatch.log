@@ -1,0 +1,21 @@
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started and documented; local RLS execution is blocked only because AUTH_TENANCY_DATABASE_URL is not configured.
+- Item 2: implemented — US-071 and US-072 provide the App Router shell, Supabase magic-link login/logout, callback, and protected student/instructor route guards with current smoke/build evidence.
+- Item 3: implemented — US-038/US-073 evidence shows current-turn student dashboard server composition over scoped parsers and bounded protected UI are present.
+- Item 4: implemented — US-073, US-085, US-088, and US-089 render the protected student current-turn UI, TARA order form, post-turn attribution panel, and realtime status panel.
+- Item 5: implemented — US-074 and US-085 provide the bounded student TARA submission executor and browser form; live Supabase writes remain a provider/runtime blocker.
+- Item 6: implemented — US-075 through US-086 provide bounded instructor server/UI surfaces for pending orders, leaderboard, aggregate analytics, God Mode, class creation, and manual month advance.
+- Item 7: implemented — US-087, US-090, and US-091 provide Inngest handoff, Vercel cron handoff, live trigger convergence, and injected class-month processing; hosted worker/runtime and live database writes remain blocked.
+- Item 8: selected candidate — US-037 has an injected server-only Supabase Realtime publisher and US-089 has browser subscription/refetch UI, but worker-to-realtime publication dispatch after class-month processing remains unwired and can be implemented without hosted credentials.
+- Item 9: skipped — release proof still depends on lower-layer provider/runtime/E2E/platform evidence and is not earlier than the unblocked item 8 dispatch gap.
+- Selected: item 8, worker-to-Supabase-Realtime publication dispatch after class-month processing, because items 1, 5, 7, and provider-backed portions are blocked by missing credentials/hosted runtime while items 2-7 have bounded implementations; the remaining item 8 dispatch gap can reuse existing safe server-only boundaries without external credentials.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student dashboard current-turn UI (US-073) implemented; student TARA order form UI (US-085) implemented; student post-turn attribution UI (US-088) implemented; instructor class creation UI (US-084) implemented; instructor pending-order/leaderboard/God Mode/aggregate/manual advance UI (US-076/078/081/082/086) implemented; realtime refresh subscription status UI (US-089) implemented.
+- Decision: proceed with non-UI, because no unblocked missing browser UI remains over an existing safe server boundary and the selected gap is server-side publication dispatch from completed month processing into the already bounded realtime publisher.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts` — passed with 1 test file and 11 tests.
+- `npm run typecheck` — passed.
+- `npm run validate:quick` — passed with 42 test files and 487 tests.
+- `npm run build` — passed.

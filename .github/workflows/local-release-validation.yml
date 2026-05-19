@@ -1,0 +1,45 @@
+name: Local release validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-release-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-release:
+    name: Run local release proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run local release proof
+        run: npm run release:local
+
+      - name: Upload local release report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-release-proof
+          path: reports/local-release-proof.json
+          if-no-files-found: warn
+          retention-days: 14
