@@ -1,0 +1,35 @@
+Selected Full-Stack MVP Sprint Sequence item: item 7
+Story/work item: US-087 follow-up — live month-advance server action dispatches to the bounded Inngest handoff path
+Lane: normal
+Browser-visible UI or non-UI: non-UI
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started, but local RLS execution is blocked because AUTH_TENANCY_DATABASE_URL is not configured; backlog says not to select more US-038 parser-only/query-executor-only work for that blocker.
+- Item 2: implemented — US-071 and US-072 provide the App Router shell, Supabase magic-link login/logout, and protected student/instructor route guards; TEST_MATRIX marks both implemented.
+- Item 3: implemented — US-038 current-turn student dashboard server query composition/executors exist over scoped parsed rows, and US-073 renders the resulting safe current-turn dashboard envelope.
+- Item 4: implemented — US-073 implements the protected current-turn student dashboard UI and US-088 implements the protected post-turn attribution panel; live provider data remains outside those UI slices.
+- Item 5: implemented — US-074 implements the bounded student TARA order submission executor and US-085 implements the protected browser order form; live Supabase writes remain pending.
+- Item 6: implemented — US-075 through US-086 cover instructor pending-order, leaderboard, aggregate analytics, God Mode, class creation, and manual month-advance UI/server boundaries; provider-backed persistence remains pending.
+- Item 7: selected candidate — US-087 adds the first Inngest route/function and injected handoff, but TEST_MATRIX/backlog still list instructor server-action provider dispatch and trigger convergence as pending; this can be advanced locally without hosted Inngest credentials.
+- Item 8: implemented — US-037 adds the bounded server-only Realtime publication boundary and US-089 adds browser-visible subscription/refetch UI; hosted Supabase proof remains pending.
+- Item 9: blocked — release proof depends on complete MVP runtime, CI/deployment, provider environment, E2E/platform proof, and hosted evidence that do not exist yet.
+- Selected: item 7, US-087 follow-up live month-advance server action dispatch, because items 1 and 9 are blocked by missing local/provider/runtime proof, items 2 through 6 and 8 have their first bounded slices implemented, and item 7 has an unimplemented safe local convergence gap between the existing live action and Inngest handoff.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI (US-073) exists; student post-turn attribution UI (US-088) exists; student TARA order form UI (US-085) exists; instructor class creation UI (US-084) exists; instructor pending-order UI (US-076) exists; instructor live leaderboard UI (US-078) exists; instructor aggregate analytics UI (US-082) exists; instructor God Mode UI (US-081) exists; instructor manual live month-advance UI (US-086) exists; realtime subscription/refetch status UI (US-089) exists.
+- Decision: proceed with non-UI, because no earlier unblocked missing browser UI over an existing safe server boundary was found and the selected gap is server-action-to-worker handoff convergence.
+
+Implementation:
+- Added `executeLiveMonthAdvanceInngestHandoff` in `app/infrastructure/inngest/month-advance.ts` to convert validated instructor live requests into the existing shared month-advance processing request and dispatch the existing bounded Inngest event path.
+- Updated `advanceInstructorLiveMonth` in `app/(instructor)/instructor/dashboard/actions.ts` to dispatch valid manual/live requests through the bounded handoff before redirecting to the browser-safe accepted receipt.
+- Updated `/instructor/dashboard` copy to describe the bounded Inngest handoff while still excluding worker jobs, ledger drafts, realtime payloads, and processed month results from browser delivery.
+- Added unit proof that live server-action requests converge onto the same worker event path.
+
+Documentation:
+- Updated US-087, US-086, backlog item 7, README project status, product docs, and TEST_MATRIX evidence for the bounded live handoff.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts` passed with 1 test file and 7 tests.
+- `npm run validate:quick` passed with 42 test files and 483 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/dashboard`, and `/instructor/dashboard`.
+- `npm run build` passed and listed `/api/inngest`, `/dashboard`, `/instructor/dashboard`, and `/login` as dynamic routes.

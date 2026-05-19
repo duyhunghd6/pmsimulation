@@ -5,10 +5,10 @@ domain slices for accepted story packets. The human approved the full-stack MVP
 implementation track on 2026-05-18 so the accepted stack can now be introduced
 through selected stories: Next.js App Router, Vercel, Supabase Auth/PostgreSQL/RLS/Realtime,
 Drizzle ORM, Inngest, Tailwind CSS, shadcn/ui, Apache ECharts, Tremor, and
-release proof. It now has a minimal Next.js App Router shell with public home, Supabase magic-link login/logout actions, student/instructor route-group dashboard shells protected by Supabase session plus trusted `app_role` claim checks, a protected student current-turn dashboard UI with a bounded browser TARA order form, a bounded instructor class creation server-action executor, protected instructor class creation UI, and protected instructor pending-order visibility, live leaderboard, class aggregate analytics, and God Mode portfolio visibility UI, but no live provider-backed gameplay database runtime, live provider-backed browser order form, CI, deployment automation,
-worker, hosted Supabase project, provider-backed browser E2E auth proof, or realtime provider code. US-038 has started a bounded Supabase/Drizzle
+release proof. It now has a minimal Next.js App Router shell with public home, Supabase magic-link login/logout actions, student/instructor route-group dashboard shells protected by Supabase session plus trusted `app_role` claim checks, a protected student current-turn dashboard UI with a bounded browser TARA order form and first bounded post-turn attribution panel, a bounded instructor class creation server-action executor, protected instructor class creation UI, protected instructor pending-order visibility, live leaderboard, class aggregate analytics, and God Mode portfolio visibility UI, a first bounded Inngest month-advance worker handoff route, a first bounded `/api/cron/month-advance` scheduled-trigger route that requires `CRON_SECRET` and dispatches valid auto requests into that Inngest handoff, a first bounded injected server-only Supabase Realtime publication boundary, and a first browser-visible Supabase Realtime subscription/refetch status panel with parse-first refresh-only payload validation and safe public-env fallback, but no live provider-backed gameplay database runtime, live provider-backed browser order form, CI, deployment automation,
+durable auto-class discovery, hosted Vercel cron execution, hosted worker execution, hosted realtime provider execution, hosted Supabase subscription/publication proof, live server query execution after realtime refetch, hosted Supabase project, or provider-backed browser E2E auth proof. US-038 has started a bounded Supabase/Drizzle
 auth-tenancy foundation, but no hosted
-Supabase project or production migration path is wired yet. Its RLS helpers and direct policies now require trusted student/instructor `app_role` paths for the bounded local proof, its local RLS proof harness parses `AUTH_TENANCY_DATABASE_URL` as a server-only PostgreSQL URL before execution, its future browser auth setup parses only public Supabase URL/anon-key values, its server-side database row parsers preserve student fund/holding/order/risk-register/ledger/macro-narrative/market-metric/tracked-metric and instructor owned-class/God Mode holding scopes before result delivery, its injected student macro news, current-turn Driver/String dashboard, portfolio pyramid, and TARA order-entry query executors return safe envelopes from parsed RLS-backed rows, its injected instructor class creation executor validates trusted-session class drafts through a parsed persisted class row before returning the existing instructor-safe class creation envelope, its injected instructor pending-order visibility executor returns the existing status-only instructor envelope from parsed scoped class fund and TARA order status rows, its injected instructor live leaderboard executor returns the existing leaderboard-safe envelope from parsed scoped class fund and TARA order status rows, its injected instructor class aggregate analytics executor returns the existing aggregate-safe envelope from parsed scoped class fund and TARA order status rows, its injected instructor God Mode portfolio visibility executor returns the existing privileged envelope from parsed scoped class fund, current holding, and TARA order status rows, and the protected instructor dashboard renders those status-only, leaderboard-safe, aggregate-safe, and privileged God Mode envelopes through bounded parsed rows.
+Supabase project or production migration path is wired yet. Its RLS helpers and direct policies now require trusted student/instructor `app_role` paths for the bounded local proof, its local RLS proof harness parses `AUTH_TENANCY_DATABASE_URL` as a server-only PostgreSQL URL before execution, its future browser auth setup parses only public Supabase URL/anon-key values, its server-side database row parsers preserve student fund/holding/order/risk-register/ledger/macro-narrative/market-metric/tracked-metric and instructor owned-class/God Mode holding scopes before result delivery, its injected student macro news, current-turn Driver/String dashboard, portfolio pyramid, and TARA order-entry query executors return safe envelopes from parsed RLS-backed rows, its protected student dashboard renders a bounded post-turn attribution panel from existing safe post-turn snapshot/query-result envelope builders, its injected instructor class creation executor validates trusted-session class drafts through a parsed persisted class row before returning the existing instructor-safe class creation envelope, its injected instructor pending-order visibility executor returns the existing status-only instructor envelope from parsed scoped class fund and TARA order status rows, its injected instructor live leaderboard executor returns the existing leaderboard-safe envelope from parsed scoped class fund and TARA order status rows, its injected instructor class aggregate analytics executor returns the existing aggregate-safe envelope from parsed scoped class fund and TARA order status rows, its injected instructor God Mode portfolio visibility executor returns the existing privileged envelope from parsed scoped class fund, current holding, and TARA order status rows, and the protected instructor dashboard renders those status-only, leaderboard-safe, aggregate-safe, and privileged God Mode envelopes through bounded parsed rows.
 
 The current job of agents is to preserve and grow the collaboration harness
 while adding story-selected, bounded implementation slices toward the complete
@@ -20,13 +20,16 @@ categorically unattempted.
 
 When an autonomous sprint continues the full-stack MVP, select the earliest
 unimplemented slice from the full-stack sprint sequence in `docs/stories/backlog.md`.
-Do not fall back to the old pure-domain "smallest unblocked" queue. If local
-Supabase RLS execution is blocked only because `AUTH_TENANCY_DATABASE_URL` is
-not configured, record that specific blocker once, do not select more US-038
-parser-only or query-executor-only work unless a concrete security gap blocks
-browser exposure, and move to the next bounded full-stack slice. The auth-protected
-Next.js shell, student current-turn dashboard UI, instructor class creation UI, instructor pending-order UI, instructor live leaderboard UI, instructor class aggregate analytics UI, and instructor God Mode portfolio visibility UI already exist, so current autonomous
-rounds should normally advance to the next bounded instructor management server/UI slice after God Mode UI, or the next full-stack sprint-sequence item.
+Do not fall back to the old pure-domain "smallest unblocked" queue, and do not
+follow stale progression notes from previous sprint logs or older prompts when
+they conflict with the backlog and test matrix. If local Supabase RLS execution
+is blocked only because `AUTH_TENANCY_DATABASE_URL` is not configured, record
+that specific blocker once, do not select more US-038 parser-only or
+query-executor-only work unless a concrete security gap blocks browser exposure,
+and move to the next bounded full-stack slice. Before implementing a non-UI
+slice, explicitly verify that no earlier or already-backed browser-visible UI is
+missing; if an unblocked UI over a safe server boundary is missing, implement the
+UI slice first.
 
 ## Source Of Truth
 
@@ -92,5 +95,7 @@ A task is done only when:
 - The requested change is completed or the blocker is documented.
 - Relevant docs, stories, and test matrix entries remain current.
 - Validation commands were run when they exist.
+- Browser-visible UI changes used `npm run smoke:routes` when practical, or named the exact smoke blocker.
+- Dependency audit findings introduced or surfaced by the slice were recorded with severity/count; force fixes or dependency downgrades were not run without human approval.
 - Missing harness capabilities were added to `docs/HARNESS_BACKLOG.md`.
 - The final response says what changed, validation status, and only what was intentionally out of scope for the selected slice.

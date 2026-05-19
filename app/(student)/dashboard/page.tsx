@@ -1,5 +1,13 @@
+import {
+  buildStudentDashboardPostTurnSnapshot,
+  createStudentDashboardPostTurnQueryDescriptor,
+  createStudentDashboardPostTurnQueryResultEnvelope,
+  type StudentDashboardPostTurnSnapshot,
+} from '../../domain/student/dashboard-snapshot';
 import { executeStudentDashboardCurrentTurnQuery } from '../../infrastructure/auth-tenancy/student-dashboard-current-turn-query';
 import { readAuthTenancyRouteSession } from '../../infrastructure/auth-tenancy/supabase-server';
+import { RealtimeRefreshPanel } from '../../realtime-refresh-panel';
+import { createRealtimeRefreshPanelConfig } from '../../realtime-refresh-plan';
 import type { AuthTenancySession } from '../../infrastructure/auth-tenancy/session';
 import type { StudentDashboardCurrentTurnQueryRowReader } from '../../infrastructure/auth-tenancy/student-dashboard-current-turn-query';
 
@@ -8,7 +16,8 @@ import { SubmitTaraOrderButton } from './submit-tara-order-button';
 
 const classId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const fundId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
-const currentMonthIndex = 2;
+const currentMonthIndex: number = 2;
+const totalMonths = 12;
 
 const formatCurrency = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
@@ -65,6 +74,8 @@ export default async function StudentDashboardShellPage({ searchParams }: Studen
   const pyramid = dashboard.portfolioPyramid;
   const orderEntry = dashboard.taraOrderEntry;
   const leaderboard = dashboard.leaderboardRank;
+  const postTurnDashboard = createBoundedPostTurnDashboard();
+  const realtimeRefreshConfig = createRealtimeRefreshPanelConfig({ classId, currentMonthIndex, totalMonths });
 
   return (
     <main className="shell dashboard-shell">
@@ -83,6 +94,8 @@ export default async function StudentDashboardShellPage({ searchParams }: Studen
       </section>
 
       <section className="surface-grid">
+        <RealtimeRefreshPanel config={realtimeRefreshConfig} viewerRole="student" />
+
         <article className="terminal-panel wide">
           <div className="panel-heading">
             <span className="eyebrow">Macro news terminal</span>
@@ -234,6 +247,8 @@ export default async function StudentDashboardShellPage({ searchParams }: Studen
             </tbody>
           </table>
         </article>
+
+        <PostTurnAttributionPanel postTurnDashboard={postTurnDashboard} />
       </section>
     </main>
   );
@@ -311,6 +326,152 @@ function MetricTile({ label, value }: Readonly<{ label: string; value: string }>
       <dd>{value}</dd>
     </div>
   );
+}
+
+type PostTurnDashboardState =
+  | { status: 'empty' }
+  | { status: 'ready'; snapshot: StudentDashboardPostTurnSnapshot }
+  | { status: 'failed'; reason: string };
+
+function PostTurnAttributionPanel({ postTurnDashboard }: Readonly<{ postTurnDashboard: PostTurnDashboardState }>) {
+  if (postTurnDashboard.status === 'empty') {
+    return (
+      <article className="terminal-panel wide">
+        <div className="panel-heading">
+          <span className="eyebrow">Post-turn attribution</span>
+          <strong>Waiting for processed month</strong>
+        </div>
+        <p className="route-banner">No processed turn is available yet, so no attribution payload is rendered.</p>
+      </article>
+    );
+  }
+
+  if (postTurnDashboard.status === 'failed') {
+    return (
+      <article className="terminal-panel wide">
+        <div className="panel-heading">
+          <span className="eyebrow">Post-turn attribution</span>
+          <strong>Safe failure</strong>
+        </div>
+        <p className="route-banner danger">Post-turn attribution stopped at the bounded query-result envelope: {postTurnDashboard.reason}.</p>
+      </article>
+    );
+  }
+
+  const attribution = postTurnDashboard.snapshot.attributionReport;
+  const leaderboard = postTurnDashboard.snapshot.leaderboardRank;
+  const attributionRows = [
+    { label: 'Market beta impact', value: formatSignedCurrency(attribution.marketBetaImpact) },
+    { label: 'Fee drag', value: `-${formatCurrency.format(attribution.feeDrag)}` },
+    { label: 'Tax paid', value: `-${formatCurrency.format(attribution.taxPaid)}` },
+    { label: 'PvP slippage', value: `-${formatCurrency.format(attribution.pvpSlippagePaid)}` },
+    { label: 'Tax drag', value: formatPercent.format(attribution.taxDragPct / 100) },
+    { label: 'Liquidity penalty', value: formatPercent.format(attribution.liquidityPenaltyPct / 100) },
+    { label: 'Classroom sell concentration', value: formatPercent.format(attribution.classroomSellConcentrationPct / 100) },
+  ];
+
+  return (
+    <article className="terminal-panel wide">
+      <div className="panel-heading">
+        <span className="eyebrow">Post-turn attribution</span>
+        <strong>{`Processed M${postTurnDashboard.snapshot.monthIndex + 1}`}</strong>
+      </div>
+      <dl className="metric-grid compact">
+        <MetricTile label="Starting AUM" value={formatCurrency.format(attribution.startingAum)} />
+        <MetricTile label="Ending AUM" value={formatCurrency.format(attribution.endingAum)} />
+        <MetricTile label="Post-turn rank" value={`${leaderboard.viewerRank}/${leaderboard.rankedFundCount}`} />
+      </dl>
+      <table className="terminal-table">
+        <thead>
+          <tr>
+            <th>Attribution driver</th>
+            <th>Viewer-fund result</th>
+          </tr>
+        </thead>
+        <tbody>
+          {attributionRows.map((row) => (
+            <tr key={row.label}>
+              <td>{row.label}</td>
+              <td>{row.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="route-banner">
+        This processed-turn panel uses a student-safe query-result envelope and excludes target weights, order details, raw ledger drafts,
+        other-fund ledger rows, provider payloads, and future scenario rows.
+      </p>
+    </article>
+  );
+}
+
+function formatSignedCurrency(value: number): string {
+  return `${value >= 0 ? '+' : '-'}${formatCurrency.format(Math.abs(value))}`;
+}
+
+function createBoundedPostTurnDashboard(): PostTurnDashboardState {
+  if (currentMonthIndex === 0) {
+    return { status: 'empty' };
+  }
+
+  const processedMonthIndex = currentMonthIndex - 1;
+  const descriptorResult = createStudentDashboardPostTurnQueryDescriptor({
+    classId,
+    processedMonthIndex,
+    viewerFundId: fundId,
+  });
+
+  if (!descriptorResult.ok) {
+    return { status: 'failed', reason: descriptorResult.errors.map((error) => error.code).join(',') };
+  }
+
+  const snapshotResult = buildStudentDashboardPostTurnSnapshot({
+    classId,
+    monthIndex: processedMonthIndex,
+    viewerFundId: fundId,
+    ledgerDraft: {
+      fundId,
+      monthIndex: processedMonthIndex,
+      startingAum: 50000000,
+      marketBetaImpact: 1200000,
+      feeDrag: 150000,
+      taxPaid: 220000,
+      taxDragPct: 0.44,
+      pvpSlippagePaid: 80000,
+      liquidityPenaltyPct: 0.16,
+      classroomSellConcentrationPct: 58,
+      endingAum: 50750000,
+    },
+    leaderboardFunds: [
+      {
+        fundId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        studentDisplayName: 'Beta Fund',
+        currentAum: 51100000,
+        sharpeRatio: 1.08,
+      },
+      {
+        fundId,
+        studentDisplayName: 'Viewer Fund',
+        currentAum: 50750000,
+        sharpeRatio: 1.16,
+      },
+    ],
+  });
+
+  if (!snapshotResult.ok) {
+    return { status: 'failed', reason: snapshotResult.errors.map((error) => `${error.source}:${error.code}`).join(',') };
+  }
+
+  const envelopeResult = createStudentDashboardPostTurnQueryResultEnvelope({
+    descriptor: descriptorResult.value,
+    snapshot: snapshotResult.value,
+  });
+
+  if (!envelopeResult.ok) {
+    return { status: 'failed', reason: envelopeResult.errors.map((error) => error.code).join(',') };
+  }
+
+  return { status: 'ready', snapshot: envelopeResult.value.snapshot };
 }
 
 function StudentDashboardUnavailable() {

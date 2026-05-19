@@ -6,11 +6,11 @@ Use the existing `SupabaseRealtimePublicationDescriptor` as the input contract. 
 
 ## Application Flow
 
-A future month-processing completion handler should create the turn-completion event, derive the refresh signal, wrap it in the provider-neutral publication envelope, map it to the Supabase publication descriptor, and pass that descriptor to a server-only publisher. Subscription, refetch, and server-query descriptors remain separate contracts that clients and server query surfaces use after the broadcast is received.
+A future month-processing completion handler should create the turn-completion event, derive the refresh signal, wrap it in the provider-neutral publication envelope, map it to the Supabase publication descriptor, and pass that descriptor to the server-only publisher. The first publisher boundary is injected with a Supabase Realtime client shape so unit proof can cover channel and acknowledgement behavior without hosted provider credentials. Subscription, refetch, and server-query descriptors remain separate contracts that clients and server query surfaces use after the broadcast is received.
 
 ## Interface Contract
 
-The publisher should accept a typed descriptor and return a publication result containing the publication key, channel name, broadcast event name, and provider acknowledgement or provider error. It must not accept arbitrary gameplay payloads.
+The publisher accepts a typed descriptor and returns either a safe publication result containing the publication key, channel name, broadcast event name, and successful provider acknowledgement, or a safe failure envelope containing an allowlisted failure code and acknowledgement. It does not accept arbitrary gameplay payloads and does not return provider errors, provider clients, server query results, ledger drafts, fund processing keys, or aggregate financial totals.
 
 ## Data Model
 
@@ -28,4 +28,4 @@ Future implementation should log one publication attempt with publication key, c
 
 1. Implement Supabase publication immediately in the pure domain layer. Rejected because domain code must not depend on provider SDKs.
 2. Add a broad realtime platform scaffold. Rejected because the selected story needs a narrow server-only publication boundary, not a full app shell.
-3. Keep only descriptors for now. Accepted for this sprint because provider publication is blocked by missing runtime, auth, and validation boundaries.
+3. Keep only descriptors for now. Rejected for this sprint because a narrower injected publication boundary could be proven without hosted runtime credentials, subscription execution, or server-query execution.

@@ -166,15 +166,42 @@ Reselect a blocked high-risk story only when one of these is true:
 - A product, architecture, or validation contract changed since the blocker was
   recorded.
 
-## Future Validation Ladder
+## Autonomous Sprint Selection Guard
 
-No validation scripts exist yet. When implementation begins, the expected ladder
-is:
+Autonomous full-stack sprint rounds must choose from the Full-Stack MVP Sprint
+Sequence in `docs/stories/backlog.md`. Before implementation, record a sequence
+preflight that marks each sequence item as implemented, skipped, blocked, or the
+selected candidate with concrete evidence. For non-UI selections, also record
+which earlier or already-backed browser UI gaps were checked; if an unblocked UI
+over an existing safe server query/action boundary is missing, switch to that UI
+slice first.
+
+Stale progression notes in old prompts, sprint logs, or repository status prose
+must not override the current backlog, story evidence, and `docs/TEST_MATRIX.md`.
+
+## Dependency Audit Policy
+
+When a sprint installs or updates dependencies and the package manager reports
+audit findings, record the severity/count in story evidence or the final summary.
+Do not run forced audit fixes, dependency downgrades, or broad package upgrades
+without human approval, because those changes can alter product behavior outside
+the selected slice.
+
+## Validation Ladder
+
+The current quick validation commands are:
 
 ```text
 validate:quick
-  format, lint, typecheck, unit tests, architecture check
+  typecheck and unit tests
 
+smoke:routes
+  default App Router route smoke for /, /login, /dashboard, and /instructor/dashboard
+```
+
+Future checks should be introduced only when selected stories need them:
+
+```text
 test:integration
   backend, database, provider, or service checks as the stack requires
 

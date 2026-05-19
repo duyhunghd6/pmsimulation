@@ -1,0 +1,38 @@
+Autonomous implementation sprint — 2026-05-19
+
+Selected Full-Stack MVP Sprint Sequence item: 8
+Story/work item: US-089 Realtime refresh subscription UI — first browser-visible Supabase Realtime subscription/refetch status panel for student and instructor dashboards over the existing refresh-only descriptor/refetch contracts.
+Lane: normal story slice with browser UI plus safe client provider fallback; hosted Supabase/browser auth proof remains pending.
+Browser-visible UI: yes.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started, but local RLS execution is blocked solely because `AUTH_TENANCY_DATABASE_URL` is not configured; backlog directs agents not to select more parser-only/query-executor-only US-038 work.
+- Item 2: implemented — US-071 and US-072 evidence show the Next.js App Router shell, Supabase magic-link login/logout actions, and protected student/instructor route guards exist.
+- Item 3: implemented — TEST_MATRIX and backlog evidence show the current-turn student dashboard server composition executor exists through US-038 with bounded scoped row parsing and unit proof.
+- Item 4: implemented — US-073 renders protected current-turn student dashboard UI and US-088 renders protected post-turn attribution UI.
+- Item 5: implemented — US-074 adds the bounded student TARA order submission executor and US-085 renders the protected browser TARA order form over it.
+- Item 6: implemented — US-075 through US-086 add instructor pending-order, leaderboard, aggregate analytics, God Mode, class creation, and manual month-advance UI/server boundaries.
+- Item 7: implemented — US-087 adds the first bounded Inngest `/api/inngest` route and `app/month.advance.requested` function with worker-safe receipt proof; hosted worker execution, cron dispatch, durable processing, and provider-backed proof remain later gaps.
+- Item 8: selected candidate — US-037 added the first bounded server-only Supabase Realtime publication boundary, but browser subscription/refetch execution is still missing; the accepted subscription/refetch descriptors are available and a reachable UI can proceed with safe fallback when public Supabase browser environment values are not configured.
+- Item 9: skipped — E2E/platform/deployment/release proof depends on lower realtime/provider subscription/refetch proof and remains later in the sequence.
+- Selected: item 8, US-089 Realtime refresh subscription UI, because every earlier item is implemented or blocked only by the documented US-038 local database URL credential, and item 8 has an unimplemented browser-visible subscription/refetch slice over existing refresh-only contracts.
+
+Implementation:
+- Added `app/infrastructure/realtime/supabase-subscription.ts`, a parse-first browser-safe Supabase Realtime refresh payload boundary that validates unknown broadcasts against the authorized refetch plan scope before any UI refetch.
+- Added `app/infrastructure/realtime/supabase-subscription.test.ts`, covering accepted refresh-only payloads, malformed/cross-class/stale/wrong-idempotency rejections, and ignoring extra gameplay/provider fields.
+- Added `app/realtime-refresh-plan.ts`, a server helper that builds a realtime panel config from the accepted domain descriptor chain and parses browser-safe public Supabase environment values.
+- Added `app/realtime-refresh-panel.tsx`, a client panel that subscribes to the descriptor channel/event, displays connecting/subscribed/configuration/provider/rejected/refresh states, validates payloads, and calls `router.refresh()` only after accepted refresh-only broadcasts.
+- Wired the panel into protected student `/dashboard` and instructor `/instructor/dashboard` surfaces.
+
+Docs/evidence updated:
+- Added `docs/stories/US-089-realtime-refresh-subscription-ui.md`.
+- Updated README, AGENTS, CLAUDE, product runtime/user-surface docs, backlog, and TEST_MATRIX evidence for the first browser-visible realtime subscription/refetch status UI.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/realtime/supabase-subscription.test.ts` passed with 1 test file and 3 tests.
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed with 42 test files and 482 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/dashboard`, and `/instructor/dashboard`.
+
+Out of scope:
+- Hosted Supabase publication/subscription proof, provider-backed browser authentication, live server query execution after refetch, worker-to-realtime dispatch, processed live month execution, E2E proof, platform/deployment proof, and release proof were not attempted in this bounded UI slice.

@@ -5,15 +5,16 @@ ROUNDS="${1:-5}"
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${LOG_DIR:-${ROOT_DIR}/.claude/sprint-runs}"
+POSTFLIGHT_VALIDATE="${POSTFLIGHT_VALIDATE:-1}"
 
 if ! [[ "${ROUNDS}" =~ ^[0-9]+$ ]]; then
-  echo "Usage: $0 [rounds>=10]" >&2
+  echo "Usage: $0 [rounds>=5]" >&2
   exit 2
 fi
 
 if (( ROUNDS < 5 )); then
   echo "This runner is intended for at least 5 implementation rounds." >&2
-  echo "Usage: $0 [rounds>=10]" >&2
+  echo "Usage: $0 [rounds>=5]" >&2
   exit 2
 fi
 
@@ -61,24 +62,45 @@ Start by reading, in AGENTS.md order, the source-of-truth docs that are relevant
 - docs/TEST_MATRIX.md
 - docs/decisions/
 
-Select the next sprint from the Full-Stack MVP Sprint Sequence in docs/stories/backlog.md, not from the old pure-domain queue. Choose the earliest sequence item that is not already implemented and is not blocked by an unavailable external credential or hosted runtime. The old "smallest unblocked" rule must not keep selecting US-038 parser-only, descriptor-only, query-executor-only, action-executor-only, test-only, or docs-only work when the full-stack sequence has an available browser-visible UI slice.
+Select the next sprint from the Full-Stack MVP Sprint Sequence in docs/stories/backlog.md, not from the old pure-domain queue. Derive current progress from AGENTS.md, docs/stories/backlog.md, docs/TEST_MATRIX.md, and existing story evidence; do not rely on stale progression notes embedded in old logs or prompts. Choose the earliest sequence item that is not already implemented and is not blocked by an unavailable external credential or hosted runtime. The old "smallest unblocked" rule must not keep selecting US-038 parser-only, descriptor-only, query-executor-only, action-executor-only, test-only, or docs-only work when the full-stack sequence has an available browser-visible UI slice.
 
 US-038 local RLS execution is blocked when AUTH_TENANCY_DATABASE_URL is not configured. In that case, record that exact blocker once, do not select more US-038 parser-only/query-executor-only work unless a concrete security gap blocks browser exposure, and move to the next safe bounded full-stack slice.
 
 UI-FIRST OVERRIDE: if a server query/action boundary already exists for a student or instructor feature and its browser UI is still missing, select the UI before selecting another backend-only slice in the same or later sequence item. A UI sprint must modify an App Router page or component that a user can reach in the browser, wire it to the existing safe server boundary when available, and provide loading/empty/error/success states appropriate to that slice. Do not report "browser UI not attempted" as the main outcome when a missing UI is unblocked.
 
-Current progression note: the no-gameplay Next.js shell, Supabase auth route guard, student current-turn dashboard UI, instructor pending-order UI, instructor live leaderboard UI, instructor God Mode UI, instructor aggregate analytics UI, and bounded instructor class creation action already exist. Current autonomous rounds should normally advance to the browser class creation UI before adding another instructor-management server-only slice.
+Before implementation, write an auditable sequence preflight in the log using this exact shape:
+
+Sequence preflight:
+- Item 1: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 2: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 3: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 4: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 5: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 6: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 7: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 8: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Item 9: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+- Selected: item <N>, <story/work item>, because <why every earlier item is implemented or blocked>
+
+If the selected item is non-UI, also write this exact gate before implementing:
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: <list specific gaps checked, or "none found">
+- Decision: <proceed with non-UI | switch to UI>, because <specific reason>
+
+If that gate finds any unblocked missing UI over an existing safe server query/action boundary, switch to that browser-visible UI slice instead of continuing the non-UI slice.
 
 The approved full-stack sequence explicitly allows bounded Next.js App Router, Supabase Auth/PostgreSQL/RLS, Drizzle, Inngest, Tailwind/shadcn, charting, realtime, E2E, deployment, and release-proof work when selected by docs/stories/backlog.md. Keep each slice narrow, but do not treat auth, database, UI, worker, realtime, CI, or deployment as categorically forbidden.
 
 For this single round:
 1. State the selected Full-Stack MVP Sprint Sequence item, story/work item, lane, and whether the work is browser-visible UI or non-UI.
-2. Before implementing a non-UI slice, explicitly check whether an unblocked browser UI is missing for any earlier or already-backed feature. If yes, switch to that UI slice instead.
+2. Complete the sequence preflight, and complete the non-UI selection gate when applicable.
 3. Implement one bounded vertical slice from that sequence item, or document the exact credential/runtime/decision blocker and immediately select the next safe sequence item.
-4. For UI slices, modify reachable App Router UI and smoke the route with the dev server when practical; if browser/auth proof is blocked, still implement the reachable UI with safe fallback data and name the exact proof blocker.
+4. For UI slices, modify reachable App Router UI and run npm run smoke:routes when practical; if browser/auth proof is blocked, still implement the reachable UI with safe fallback data and name the exact proof blocker.
 5. Update relevant docs, story status/evidence, and docs/TEST_MATRIX.md when they change.
 6. Run available validation commands when they exist, especially npm run validate:quick after code changes.
-7. Stop after this one sprint and summarize what changed, validation run, and only the out-of-scope work that was not attempted for this selected slice.
+7. If npm install or dependency updates report audit findings, record the severity/count in the story evidence or final summary; do not run force fixes or dependency downgrades unless the human explicitly approves.
+8. Stop after this one sprint and summarize what changed, validation run, and only the out-of-scope work that was not attempted for this selected slice.
 
 Do not commit, push, or create a pull request.
 PROMPT
@@ -94,6 +116,21 @@ PROMPT
     "${CLAUDE_BIN}" --dangerously-skip-permissions ${CLAUDE_EXTRA_ARGS} -p "${prompt}" 2>&1 | tee "${log_file}"
   else
     "${CLAUDE_BIN}" --dangerously-skip-permissions -p "${prompt}" 2>&1 | tee "${log_file}"
+  fi
+
+  {
+    echo
+    echo "==> Harness postflight for sprint round ${round}"
+    echo "==> git status --short"
+    git status --short
+    echo
+    echo "==> git diff --stat"
+    git diff --stat
+  } 2>&1 | tee -a "${log_file}"
+
+  if [[ "${POSTFLIGHT_VALIDATE}" != "0" ]]; then
+    echo "==> npm run validate:quick postflight" | tee -a "${log_file}"
+    npm run validate:quick 2>&1 | tee -a "${log_file}"
   fi
 
   echo "==> Completed sprint round ${round} (${iteration}/${ROUNDS} this run)"

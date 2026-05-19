@@ -1,0 +1,22 @@
+Autonomous implementation sprint — 2026-05-19
+
+Selected Full-Stack MVP Sprint Sequence item: item 7, Inngest month-advance processing and Vercel cron/live trigger convergence.
+Story/work item: US-090 Vercel cron month-advance handoff.
+Lane: normal.
+Surface: non-UI.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started, and local RLS execution is blocked solely until AUTH_TENANCY_DATABASE_URL is configured; backlog says not to select more parser-only/query-executor-only US-038 work for that blocker.
+- Item 2: implemented — US-071/US-072 shell and Supabase auth route guard evidence is implemented in docs/TEST_MATRIX.md, and protected student/instructor routes exist.
+- Item 3: implemented — current-turn student dashboard server executor is implemented with unit evidence in docs/TEST_MATRIX.md and rendered by US-073.
+- Item 4: implemented — US-073 and US-088 render protected student current-turn and post-turn browser UI.
+- Item 5: implemented — US-074 and US-085 add the bounded student TARA submission executor and protected order form UI; live provider writes remain future proof only.
+- Item 6: implemented — US-075 through US-086 cover instructor pending-order, leaderboard, aggregate analytics, God Mode, class creation, and manual live month-advance UI/server boundaries.
+- Item 7: selected candidate — US-087 adds the Inngest provider route and live/manual handoff, but Vercel cron/auto scheduled trigger convergence remains unimplemented and can be added locally without hosted runtime credentials.
+- Item 8: implemented — US-037 and US-089 add the first bounded server-only Supabase Realtime publication boundary and browser-visible subscription/refetch status panel; hosted proof remains pending.
+- Item 9: blocked — release proof remains blocked by missing complete MVP path, hosted providers, CI/deployment, E2E/platform proof, and release evidence format.
+- Selected: item 7, US-090 Vercel cron month-advance handoff, because items 1 and 9 are blocked by external credentials/runtime/proof prerequisites, items 2-6 and 8 have bounded implementation evidence, and item 7 still has an unblocked non-UI scheduled-trigger convergence gap after US-087.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI (US-073) implemented; student post-turn attribution UI (US-088) implemented; student TARA order form UI (US-085) implemented; instructor class creation UI (US-084) implemented; instructor pending-order UI (US-076) implemented; instructor live leaderboard UI (US-078) implemented; instructor aggregate analytics UI (US-082) implemented; instructor God Mode UI (US-081) implemented; instructor manual live month-advance UI (US-086) implemented; realtime refresh status UI (US-089) implemented.
+- Decision: proceed with non-UI, because no earlier unblocked browser UI over an existing safe server boundary is missing, and the remaining item 7 gap is a scheduled cron-to-worker handoff boundary.

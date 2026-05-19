@@ -1,0 +1,155 @@
+Completed one bounded sprint for Full-Stack MVP Sequence item 8: `US-089 Realtime refresh subscription UI` as a browser-visible UI slice.
+
+Changed:
+- Added `app/realtime-refresh-panel.tsx` client component for Supabase Realtime subscription status, safe fallback, payload rejection, and `router.refresh()` after accepted refresh-only payloads.
+- Added `app/realtime-refresh-plan.ts` server config builder over the existing descriptor/refetch/query contract chain.
+- Added `app/infrastructure/realtime/supabase-subscription.ts` plus unit tests for parse-first refresh payload validation.
+- Wired the panel into:
+  - `app/(student)/dashboard/page.tsx`
+  - `app/(instructor)/instructor/dashboard/page.tsx`
+- Added story evidence in `docs/stories/US-089-realtime-refresh-subscription-ui.md`.
+- Updated README, AGENTS, CLAUDE, backlog, product docs, US-037 evidence, sprint log, and `docs/TEST_MATRIX.md`.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/realtime/supabase-subscription.test.ts` passed: 1 file, 3 tests.
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed: 42 files, 482 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/dashboard`, `/instructor/dashboard`.
+- `git diff --check` passed.
+- No dependency install/update was run, so no audit findings were introduced.
+
+Out of scope for this slice:
+- Hosted Supabase publication/subscription proof.
+- Provider-backed browser auth proof.
+- Live server query execution after realtime refetch.
+- Worker-to-realtime dispatch.
+- Processed live month execution.
+- E2E/platform/deployment/release proof.
+
+==> Harness postflight for sprint round 157
+==> git status --short
+ M .claude/sprint-runs/round-153-20260518-214415.log
+ M AGENTS.md
+ M CLAUDE.md
+ M README.md
+ M app/(instructor)/instructor/dashboard/page.tsx
+ M app/(student)/dashboard/page.tsx
+ M docs/HARNESS.md
+ M docs/TEST_MATRIX.md
+ M docs/product/data-model.md
+ M docs/product/roles-and-permissions.md
+ M docs/product/runtime-architecture.md
+ M docs/product/simulation-engine.md
+ M docs/product/user-surfaces.md
+ M docs/stories/US-037-supabase-realtime-client-publication/design.md
+ M docs/stories/US-037-supabase-realtime-client-publication/overview.md
+ M docs/stories/US-037-supabase-realtime-client-publication/validation.md
+ M docs/stories/backlog.md
+ M package-lock.json
+ M package.json
+ M scripts/README.md
+ M scripts/run-claude-sprints.sh
+?? .claude/sprint-runs/round-154-20260518-215648.log
+?? .claude/sprint-runs/round-155-20260518-220734.log
+?? .claude/sprint-runs/round-156-20260519-080454.log
+?? .claude/sprint-runs/round-157-20260519-081916.log
+?? .claude/sprint-runs/round-157-20260519-090000.log
+?? .claude/sprint-runs/round-158-20260519-091500.log
+?? app/api/
+?? app/infrastructure/inngest/
+?? app/infrastructure/realtime/
+?? app/realtime-refresh-panel.tsx
+?? app/realtime-refresh-plan.ts
+?? docs/stories/US-086-instructor-live-month-advance-control-ui.md
+?? docs/stories/US-087-inngest-month-advance-worker-handoff.md
+?? docs/stories/US-088-student-post-turn-attribution-ui.md
+?? docs/stories/US-089-realtime-refresh-subscription-ui.md
+?? scripts/smoke-routes.mjs
+
+==> git diff --stat
+ .claude/sprint-runs/round-153-20260518-214415.log  |   15 +
+ AGENTS.md                                          |   25 +-
+ CLAUDE.md                                          |    7 +-
+ README.md                                          |    2 +-
+ app/(instructor)/instructor/dashboard/page.tsx     |    5 +
+ app/(student)/dashboard/page.tsx                   |  163 +-
+ docs/HARNESS.md                                    |   35 +-
+ docs/TEST_MATRIX.md                                |   16 +-
+ docs/product/data-model.md                         |    9 +-
+ docs/product/roles-and-permissions.md              |    5 +-
+ docs/product/runtime-architecture.md               |   17 +-
+ docs/product/simulation-engine.md                  |   16 +-
+ docs/product/user-surfaces.md                      |   18 +-
+ .../design.md                                      |    6 +-
+ .../overview.md                                    |    8 +-
+ .../validation.md                                  |    9 +-
+ docs/stories/backlog.md                            |   14 +-
+ package-lock.json                                  | 2939 ++++++++++++++++++--
+ package.json                                       |    2 +
+ scripts/README.md                                  |   16 +-
+ scripts/run-claude-sprints.sh                      |   51 +-
+ 21 files changed, 3100 insertions(+), 278 deletions(-)
+==> npm run validate:quick postflight
+
+> apex-alpha-portfolio-simulator@0.1.0 validate:quick
+> npm run typecheck && npm run test:unit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 typecheck
+> tsc --noEmit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 test:unit
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90m/Users/steve/duyhunghd6/pmsimulation[39m
+
+ [32m✓[39m app/domain/scenario/macro-news.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/student/leaderboard-rank.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m app/domain/classes/live-leaderboard.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m app/domain/portfolio/pyramid.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/classes/god-mode-portfolio-visibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/rows.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/classes/month-advancement.test.ts [2m([22m[2m83 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m app/domain/student/dashboard-snapshot.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/domain/classes/dashboard-snapshot.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+ [32m✓[39m app/domain/tara/order.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/allocation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/classes/pending-order-visibility.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/student/attribution-report.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/tara/liquidity-penalty.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/driver-string-dashboard.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/tara/attribution.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/metrics/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-aggregate-analytics.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/tara/tax-drag.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/session.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-draft.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/catalog.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/returns.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-publication.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/tara/risk-register.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/classes/realtime-query-result.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/environment.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-macro-news-query.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/auth-flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-subscription.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m42 passed[39m[22m[90m (42)[39m
+[2m      Tests [22m [1m[32m482 passed[39m[22m[90m (482)[39m
+[2m   Start at [22m 08:37:40
+[2m   Duration [22m 900ms[2m (transform 1.93s, setup 0ms, import 3.06s, tests 328ms, environment 3ms)[22m
+

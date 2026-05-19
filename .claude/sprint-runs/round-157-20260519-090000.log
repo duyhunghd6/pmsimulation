@@ -1,0 +1,36 @@
+Autonomous implementation sprint — 2026-05-19
+
+Selected Full-Stack MVP Sprint Sequence item: 8
+Story/work item: US-037 Supabase Realtime client publication — first bounded server-only Supabase Realtime publication boundary over the existing refresh-only descriptor.
+Lane: high-risk story packet, narrowed to a bounded non-UI infrastructure slice with injected provider client and unit proof; no hosted provider credential or runtime execution.
+Browser-visible UI: non-UI.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started, but local RLS execution is blocked solely because `AUTH_TENANCY_DATABASE_URL` is not configured; backlog directs agents not to select more parser-only/query-executor-only US-038 work.
+- Item 2: implemented — US-071 and US-072 evidence show the Next.js App Router shell, Supabase magic-link login/logout actions, and protected student/instructor route guards exist.
+- Item 3: implemented — TEST_MATRIX and backlog evidence show the current-turn student dashboard server composition executor exists through US-038 with bounded scoped row parsing and unit proof.
+- Item 4: implemented — US-073 renders protected current-turn student dashboard UI and US-088 renders protected post-turn attribution UI.
+- Item 5: implemented — US-074 adds the bounded student TARA order submission executor and US-085 renders the protected browser TARA order form over it.
+- Item 6: implemented — US-075 through US-086 add instructor pending-order, leaderboard, aggregate analytics, God Mode, class creation, and manual month-advance UI/server boundaries.
+- Item 7: implemented — US-087 adds the first bounded Inngest `/api/inngest` route and `app/month.advance.requested` function with worker-safe receipt proof.
+- Item 8: selected candidate — backlog item 8 remains missing actual Supabase Realtime publication/subscription/refetch execution; existing descriptors are implemented and Supabase SDK is already present, so a bounded injected server-only publisher can proceed without hosted credentials.
+- Item 9: skipped — E2E/platform/deployment/release proof depends on lower realtime/provider slices and remains later in the sequence.
+- Selected: item 8, US-037 Supabase Realtime client publication, because every earlier item is implemented or blocked only by the documented US-038 local database URL credential, and item 8 has an unimplemented safe server-only publication boundary that does not require hosted runtime credentials in this slice.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI (US-073) implemented; student TARA order form UI (US-085) implemented; student post-turn attribution UI (US-088) implemented; instructor class creation UI (US-084) implemented; instructor pending-order UI (US-076) implemented; instructor live leaderboard UI (US-078) implemented; instructor God Mode UI (US-081) implemented; instructor class aggregate analytics UI (US-082) implemented; instructor live month-advance control UI (US-086) implemented.
+- Decision: proceed with non-UI, because no earlier unblocked browser UI over an existing safe server query/action boundary is missing and the next sequence gap is realtime provider publication.
+
+Implementation:
+- Added `app/infrastructure/realtime/supabase-publication.ts`, a bounded injected server-only Supabase Realtime publication boundary over `SupabaseRealtimePublicationDescriptor`.
+- Added `app/infrastructure/realtime/supabase-publication.test.ts`, covering descriptor-to-broadcast mapping, requested class channel publication, refresh-only result semantics, timeout/error acknowledgements, invalid acknowledgements, and thrown provider failures without leaking provider errors or secrets.
+
+Docs/evidence updated:
+- Updated US-037 story packet, product docs, backlog, test matrix, README, AGENTS, and CLAUDE status language to record the first bounded publisher boundary and preserve remaining hosted provider/subscription/refetch proof gaps.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/realtime/supabase-publication.test.ts` passed with 1 test file and 5 tests.
+- `npm run validate:quick` passed with 41 test files and 479 tests.
+
+Out of scope:
+- Hosted Supabase Realtime client construction, server-only publication credential/runtime configuration, browser subscription/refetch execution, server query execution after refetch, auth/RLS/provider integration proof, E2E proof, and platform/release proof were not attempted in this bounded non-UI slice.

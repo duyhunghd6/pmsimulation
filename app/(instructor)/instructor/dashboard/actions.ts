@@ -13,6 +13,10 @@ import {
   type InstructorClassCreationActionStore,
 } from '../../../infrastructure/auth-tenancy/instructor-class-creation-action';
 import { readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
+import {
+  executeLiveMonthAdvanceInngestHandoff,
+  sendMonthAdvanceRequestedEvent,
+} from '../../../infrastructure/inngest/month-advance';
 
 function classCreationStatusUrl(status: string, params: Record<string, string> = {}): string {
   const searchParams = new URLSearchParams({ classCreationStatus: status, ...params });
@@ -88,6 +92,20 @@ export async function advanceInstructorLiveMonth(formData: FormData): Promise<vo
 
   const command = createInstructorLiveMonthAdvanceServerActionCommandDescriptor(requestResult.value);
   const result = createInstructorLiveMonthAdvanceServerActionResultEnvelope(command);
+
+  let handoffResult: Awaited<ReturnType<typeof executeLiveMonthAdvanceInngestHandoff>>;
+  try {
+    handoffResult = await executeLiveMonthAdvanceInngestHandoff({
+      request: requestResult.value,
+      sender: { send: sendMonthAdvanceRequestedEvent },
+    });
+  } catch {
+    redirect(liveMonthAdvanceStatusUrl('failed', { reason: 'worker-dispatch-failed' }));
+  }
+
+  if (!handoffResult.ok) {
+    redirect(liveMonthAdvanceStatusUrl('failed', { reason: 'worker-handoff-validation-failed' }));
+  }
 
   redirect(
     liveMonthAdvanceStatusUrl('accepted', {

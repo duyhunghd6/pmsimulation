@@ -1,0 +1,15 @@
+Selected **Full-Stack MVP Sprint Sequence item 6**: instructor management manual month-advance UI/server boundary. Story: `US-086 Instructor Live Month-Advance Control UI`, lane `normal`, **browser-visible UI**.
+
+Implemented the bounded instructor live month-advance slice:
+- Added protected `/instructor/dashboard` Manual month advance UI over the existing safe control/result envelope at `app/(instructor)/instructor/dashboard/page.tsx:172`.
+- Wired the form to `advanceInstructorLiveMonth` at `app/(instructor)/instructor/dashboard/page.tsx:192`.
+- Added the bounded server action at `app/(instructor)/instructor/dashboard/actions.ts:63`.
+- Added pending/disabled submit button state at `app/(instructor)/instructor/dashboard/create-class-submit-button.tsx:15`.
+- Updated product/story evidence in `docs/product/user-surfaces.md`, `docs/stories/backlog.md`, `docs/TEST_MATRIX.md`, `README.md`, and created `docs/stories/US-086-instructor-live-month-advance-control-ui.md`.
+
+Validation:
+- `npm run validate:quick` passed: 39 test files, 468 tests.
+- `npm run build` passed.
+- Local dev-server smoke for `/instructor/dashboard` returned HTTP 200 on the existing repo dev server.
+
+Out of scope for this slice: worker enqueueing, ledger writes, realtime publication, processed month execution, live Supabase persistence, and provider-backed browser/E2E proof. No commit, push, or PR was created.

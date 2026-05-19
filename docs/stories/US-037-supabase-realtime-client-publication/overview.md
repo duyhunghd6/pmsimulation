@@ -2,7 +2,7 @@
 
 ## Current Behavior
 
-The repository has pure TypeScript descriptors for provider-neutral realtime publication, Supabase Realtime broadcast metadata, subscription metadata, authorized current-turn refetch plans, authorized current-turn query descriptors, and authorized current-turn query result envelopes. No Supabase SDK client, auth boundary, RLS proof, runtime configuration, server query execution, server action, worker, or platform publication code exists.
+The repository has pure TypeScript descriptors for provider-neutral realtime publication, Supabase Realtime broadcast metadata, subscription metadata, authorized current-turn refetch plans, authorized current-turn query descriptors, and authorized current-turn query result envelopes. It now also has a first bounded injected server-only Supabase Realtime publication boundary at `app/infrastructure/realtime/supabase-publication.ts` that maps the accepted descriptor to a typed broadcast message and returns safe publication result or failure envelopes. US-089 separately adds the first browser-visible subscription/refetch status UI with parse-first refresh-only payload validation. Hosted Supabase Realtime execution, provider-backed auth/RLS proof, server query execution after refetch, runtime configuration for publication credentials, and platform publication proof remain unwired.
 
 ## Target Behavior
 
@@ -27,8 +27,8 @@ After this story is implemented, a completed month-advance refresh signal can be
 - Do not add database migrations or RLS policies in this story unless a confirmed implementation plan includes their proof boundary.
 - Do not replace the provider-neutral descriptor contracts from US-028, US-031, US-035, US-036, US-040, or US-041.
 
-## Sprint Blocker
+## Implementation Evidence
 
-Implementation remains blocked in this sprint because US-040, US-041, and US-056 now define the future server-query handoff, result envelope, and validation-failure envelope, but the repository still has no Supabase client boundary, environment contract, auth/session model, RLS proof harness, executable server query boundary, or selected runtime surface for publishing. Scaffolding those pieces ad hoc would violate the harness rule against broad platform shells and would cross external-provider and authorization hard gates without a confirmed high-risk implementation plan.
+This sprint implemented the first bounded server-only publication boundary using an injected Supabase Realtime client shape instead of constructing hosted provider credentials. The publisher consumes only `SupabaseRealtimePublicationDescriptor`, sends a typed `month_advance_refresh_available` broadcast message to the descriptor channel, maps `ok`, `timed out`, `error`, invalid acknowledgements, and thrown provider failures into safe result/failure envelopes, and does not return gameplay payloads, query results, provider clients, provider errors, or provider secrets.
 
-This sprint reselected US-037 as the next existing realtime packet after confirming no smaller unblocked pure-domain or descriptor slice remains in E04. It stopped at refreshed blocker documentation; no provider SDK, runtime shell, auth/RLS, server query execution, UI refetch, worker, or platform code was introduced.
+Remaining US-037 work is still blocked until a selected slice adds hosted Supabase Realtime client construction, server-only publication credential/runtime configuration, class-participant authorization proof, live server query execution after refetch, and provider/integration/E2E/platform proof. Browser-visible subscription/refetch status UI is now tracked in US-089, but hosted provider proof remains pending.

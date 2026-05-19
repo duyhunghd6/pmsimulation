@@ -16,6 +16,8 @@ import {
   type InstructorGodModePortfolioVisibilityQueryRowReader,
 } from '../../../infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query';
 import { readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
+import { RealtimeRefreshPanel } from '../../../realtime-refresh-panel';
+import { createRealtimeRefreshPanelConfig } from '../../../realtime-refresh-plan';
 import type { AuthTenancySession } from '../../../infrastructure/auth-tenancy/session';
 
 import { advanceInstructorLiveMonth, createInstructorClass } from './actions';
@@ -101,6 +103,7 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
   const aggregateAnalytics = aggregateAnalyticsResult.value.snapshot;
   const godMode = godModeResult.value.snapshot;
   const liveMonthAdvanceControl = liveMonthAdvanceControlResult.value;
+  const realtimeRefreshConfig = createRealtimeRefreshPanelConfig({ classId, currentMonthIndex, totalMonths });
   const completionRate = snapshot.totalFundCount === 0 ? 0 : snapshot.pendingOrderCount / snapshot.totalFundCount;
   const missingOrderRate = aggregateAnalytics.fundCount === 0 ? 0 : aggregateAnalytics.missingOrderCount / aggregateAnalytics.fundCount;
 
@@ -131,6 +134,8 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
       </section>
 
       <section className="surface-grid">
+        <RealtimeRefreshPanel config={realtimeRefreshConfig} viewerRole="instructor" />
+
         <article className="terminal-panel wide">
           <div className="panel-heading">
             <span className="eyebrow">Class creation</span>
@@ -177,8 +182,8 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
             </strong>
           </div>
           <p>
-            Accept a live Fast-Forward Month receipt for this instructor-scoped manual class. This stops at the existing safe server-action
-            result envelope; worker enqueueing, ledger writes, realtime publication, and processed order execution remain unwired.
+            Accept a live Fast-Forward Month receipt for this instructor-scoped manual class and dispatch the bounded Inngest worker handoff.
+            Ledger writes, realtime publication, and processed order execution remain unwired.
           </p>
           <dl className="metric-grid compact">
             <MetricTile label="Trigger mode" value={liveMonthAdvanceControl.triggerMode} />
@@ -424,13 +429,14 @@ function LiveMonthAdvanceNotice({ notice }: Readonly<{ notice: LiveMonthAdvanceN
     return (
       <p className="route-banner">
         Live month advance accepted from M{notice.currentMonth} to M{notice.nextMonth}. Receipt key {notice.advancementKey} is safe for
-        instructor browser delivery and excludes worker jobs, realtime payloads, ledger drafts, and processed month results.
+        instructor browser delivery after the bounded Inngest handoff and excludes worker jobs, realtime payloads, ledger drafts, and
+        processed month results.
       </p>
     );
   }
 
   if (notice.status === 'validation-error') {
-    return <p className="route-banner danger">Live month advance rejected before worker enqueueing: {notice.errors}.</p>;
+    return <p className="route-banner danger">Live month advance rejected before bounded worker handoff: {notice.errors}.</p>;
   }
 
   if (notice.status === 'not-authorized') {
@@ -438,7 +444,7 @@ function LiveMonthAdvanceNotice({ notice }: Readonly<{ notice: LiveMonthAdvanceN
   }
 
   if (notice.status === 'failed') {
-    return <p className="route-banner danger">Live month advance stopped at the bounded server action: {notice.reason}.</p>;
+    return <p className="route-banner danger">Live month advance stopped before accepted worker handoff: {notice.reason}.</p>;
   }
 
   return <p className="route-banner">No live month-advance receipt yet. Accept the control to prove the browser-visible state.</p>;

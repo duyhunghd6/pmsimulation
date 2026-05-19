@@ -27,7 +27,7 @@ payload.
 
 ## Claude Sprint Runner
 
-`scripts/run-claude-sprints.sh` runs Claude Code for at least 10 bounded implementation rounds. Each round passes an AGENTS.md-first prompt, asks Claude to choose the next smallest unblocked sprint from the harness, and tells it to stop after one bounded slice.
+`scripts/run-claude-sprints.sh` runs Claude Code for at least 5 bounded implementation rounds. Each round passes an AGENTS.md-first prompt, requires an auditable Full-Stack MVP Sprint Sequence preflight from `docs/stories/backlog.md`, applies the UI-first override before non-UI work, and tells Claude to stop after one bounded slice.
 
 ```bash
 ./scripts/run-claude-sprints.sh
@@ -39,8 +39,20 @@ Optional environment variables:
 - `CLAUDE_BIN` — Claude Code executable name or path. Defaults to `claude`.
 - `CLAUDE_EXTRA_ARGS` — additional Claude Code flags, such as a permission mode.
 - `LOG_DIR` — output directory for per-round logs. Defaults to `.claude/sprint-runs`.
+- `POSTFLIGHT_VALIDATE` — set to `0` to skip the runner-level `npm run validate:quick` postflight. Defaults to `1`.
 
-The runner passes `--dangerously-skip-permissions` to Claude Code for unattended sprint execution. It does not set model, base URL, auth token, commit, push, or create PRs.
+The runner appends `git status --short`, `git diff --stat`, and runner-level validation output to each round log. It passes `--dangerously-skip-permissions` to Claude Code for unattended sprint execution. It does not set model, base URL, auth token, commit, push, or create PRs.
+
+## Route Smoke
+
+`npm run smoke:routes` checks the default App Router surfaces (`/`, `/login`, `/dashboard`, and `/instructor/dashboard`). It reuses an existing server at `SMOKE_BASE_URL` or starts `npm run dev` when none is reachable.
+
+Optional environment variables:
+
+- `SMOKE_BASE_URL` — base URL to smoke. Defaults to `http://127.0.0.1:3000`.
+- `SMOKE_ROUTES` — comma-separated routes. Defaults to `/,/login,/dashboard,/instructor/dashboard`.
+- `SMOKE_STARTUP_TIMEOUT_MS` — dev-server startup wait. Defaults to `30000`.
+- `SMOKE_REQUEST_TIMEOUT_MS` — per-route fetch timeout. Defaults to `10000`.
 
 ## Future Command Contract
 

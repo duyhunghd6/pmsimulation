@@ -2,13 +2,13 @@
 
 ## Proof Strategy
 
-This story cannot be implemented until provider and authorization boundaries exist. When unblocked, proof must show that Supabase publication uses the accepted descriptor contract, sends only refresh metadata, and does not weaken class-participant authorization, current-turn refetch rules, or the US-040/US-041 server-query handoff and result envelope.
+The first bounded publisher slice is implemented with an injected provider client and unit proof. Remaining provider and authorization proof must show that hosted Supabase publication uses the accepted descriptor contract, sends only refresh metadata, and does not weaken class-participant authorization, current-turn refetch rules, or the US-040/US-041 server-query handoff and result envelope.
 
 ## Test Plan
 
 | Layer | Cases |
 | --- | --- |
-| Unit | Publisher input/result mapping preserves descriptor channel, event, delivery semantics, idempotency key, and refresh-only payload fields without executing US-040 server queries or carrying US-041 result envelopes. |
+| Unit | Publisher input/result mapping preserves descriptor channel, event, delivery semantics, idempotency key, and refresh-only payload fields without executing US-040 server queries or carrying US-041 result envelopes; provider acknowledgement failures return safe envelopes without provider errors or secrets. |
 | Integration | Supabase broadcast uses the expected class channel and event; rejected or unauthorized publication paths are handled without leaking provider credentials or query results. |
 | E2E | Connected class participant receives refresh trigger and refetches authorized current-turn surface only after server authorization exists. |
 | Platform | Runtime environment keeps Supabase service credentials server-only and available only to the publication surface. |
@@ -25,10 +25,11 @@ This story cannot be implemented until provider and authorization boundaries exi
 ## Commands
 
 ```text
+npm run test:unit -- app/infrastructure/realtime/supabase-publication.test.ts
 npm run validate:quick
-TBD: provider/integration validation command after Supabase boundary exists
+TBD: provider/integration validation command after hosted Supabase publication exists
 ```
 
 ## Acceptance Evidence
 
-Blocked in this sprint. US-040, US-041, and US-056 now supply the server-query handoff descriptor, result envelope, and validation-failure envelope, but no provider code, auth/RLS proof, server query execution, or provider validation command exists yet. This sprint refreshed the blocker evidence after confirming no smaller unblocked E04 pure-domain or descriptor slice remains, intentionally did not add provider, auth, RLS, server query, UI, worker, or platform code, and `npm run validate:quick` passed with 24 test files and 244 tests.
+This sprint added `app/infrastructure/realtime/supabase-publication.ts` and `app/infrastructure/realtime/supabase-publication.test.ts` as the first bounded injected server-only Supabase Realtime publication boundary. `npm run test:unit -- app/infrastructure/realtime/supabase-publication.test.ts` passed with 1 test file and 5 tests, proving descriptor-to-broadcast mapping, requested channel use, refresh-only payload/result semantics, timeout/error acknowledgement mapping, invalid acknowledgement handling, and thrown provider failure handling without leaking provider errors or secrets. `npm run validate:quick` passed with 41 test files and 479 tests. US-089 now covers the first browser-visible subscription/refetch status UI and parse-first payload validation. Hosted Supabase publication/subscription proof, server query execution after refetch, auth/RLS/provider integration proof, E2E, and platform proof remain pending.

@@ -1,0 +1,19 @@
+Selected Full-Stack MVP Sprint Sequence item 7: Inngest month-advance processing and cron/live trigger convergence. Story: US-087. Lane: normal. Slice type: non-UI.
+
+Implemented:
+- Added `inngest` dependency.
+- Added the bounded Inngest month-advance worker handoff at `app/infrastructure/inngest/month-advance.ts:14`, including:
+  - `app/month.advance.requested` event mapping.
+  - Injectable handoff sender at `app/infrastructure/inngest/month-advance.ts:62`.
+  - Registered Inngest function at `app/infrastructure/inngest/month-advance.ts:107`.
+- Added the App Router Inngest provider route at `app/api/inngest/route.ts:5`.
+- Added unit proof for live/manual and auto/scheduled convergence plus malformed-event rejection at `app/infrastructure/inngest/month-advance.test.ts:50` and `app/infrastructure/inngest/month-advance.test.ts:148`.
+- Added story/docs/matrix evidence in `docs/stories/US-087-inngest-month-advance-worker-handoff.md:1`.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts` passed: 1 file, 6 tests.
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed: 40 files, 474 tests.
+- `npm run build` passed and listed `/api/inngest` as a dynamic route.
+
+Out of scope for this slice: hosted Inngest execution, Vercel cron class discovery, live server-action provider dispatch, durable database processing, ledger writes, realtime publication, and provider-backed proof. `npm install inngest` reported 3 moderate audit findings; I did not run a forced audit fix.

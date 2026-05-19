@@ -1,0 +1,21 @@
+Autonomous implementation sprint — 2026-05-19
+Selected Full-Stack MVP Sprint Sequence item: item 7, Inngest month-advance processing and Vercel cron/live trigger convergence with idempotent class-month processing.
+Story/work item: US-091 Inngest class-month processing executor.
+Lane: normal.
+Browser-visible UI or non-UI: non-UI.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor slices exist, but local RLS execution remains skipped because AUTH_TENANCY_DATABASE_URL is not configured; per backlog guard, do not select more US-038 parser-only/query-executor-only work.
+- Item 2: implemented — US-071 and US-072 are implemented with Next.js App Router shell, Supabase magic-link login/logout, and student/instructor route guards; TEST_MATRIX marks both implemented.
+- Item 3: implemented — current-turn student dashboard server composition exists through injected scoped parsers/executors; TEST_MATRIX E00/US-038 evidence lists the composed current-turn dashboard executor and guarded parser proof.
+- Item 4: implemented — US-073 renders protected current-turn student dashboard UI and US-088 renders protected post-turn attribution UI; backlog and TEST_MATRIX mark both implemented.
+- Item 5: implemented — US-074 adds the bounded student TARA submission executor and US-085 renders the protected browser order form; live Supabase writes/provider proof remain out of scope.
+- Item 6: implemented — US-075 through US-086 cover instructor pending-order, leaderboard, aggregate analytics, God Mode, class creation, and manual month-advance UI/server boundaries; backlog and TEST_MATRIX mark the bounded slices implemented.
+- Item 7: selected candidate — US-087 and US-090 implement Inngest handoff plus cron/live convergence, but actual injected class-month processing/ledger-write execution remains missing and is not blocked by hosted Inngest, Vercel, or Supabase credentials when kept behind injected boundaries.
+- Item 8: implemented — US-037 adds the bounded server-only Supabase Realtime publisher and US-089 adds the browser subscription/refetch panel; hosted provider proof remains pending.
+- Item 9: blocked — US-039 release validation/deployment proof remains blocked until app runtime/provider/CI/E2E/platform evidence exists.
+- Selected: item 7, US-091 Inngest class-month processing executor, because items 1 is blocked solely by missing AUTH_TENANCY_DATABASE_URL, items 2-6 have bounded implemented slices, and item 7 still has an unblocked non-UI gap before later hosted proof.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI over the safe current-turn executor (US-073) exists; student TARA order form UI over the bounded submission executor (US-085) exists; student post-turn attribution UI over the safe post-turn envelope (US-088) exists; instructor class creation UI over the bounded executor (US-084) exists; instructor pending-order, leaderboard, aggregate analytics, God Mode, and manual month-advance UIs over bounded server boundaries (US-076, US-078, US-082, US-081, US-086) exist; realtime subscription/refetch status UI over existing descriptors (US-089) exists.
+- Decision: proceed with non-UI, because no earlier unblocked browser UI over an existing safe server query/action boundary is missing, and item 7 still lacks an injected worker class-month processing/ledger-write executor.
