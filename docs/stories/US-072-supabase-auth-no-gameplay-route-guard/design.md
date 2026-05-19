@@ -7,7 +7,8 @@ The slice reuses the existing auth-tenancy session parser. A protected route is 
 ## Application Flow
 
 - `/login` parses only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` before enabling sign-in.
-- The login server action uses the Supabase server client to call `signInWithOtp` for an email magic link.
+- The login server action uses the Supabase server client to call `signInWithOtp` for an email magic link with an explicit `/auth/callback` redirect URL.
+- `/auth/callback` exchanges the Supabase auth code into SSR cookies, parses the trusted `app_role` claim, and redirects students to `/dashboard` or instructors to `/instructor/dashboard`.
 - The logout server action calls Supabase `signOut` and redirects to `/login`.
 - Student and instructor route-group layouts read the current Supabase user, parse the trusted role claim, and classify the route access decision before rendering placeholder shell content.
 - Missing public Supabase configuration renders a safe blocked-state panel so local builds can pass without a hosted auth provider.
@@ -17,6 +18,7 @@ The slice reuses the existing auth-tenancy session parser. A protected route is 
 Routes:
 
 - `/login` remains public and renders either a magic-link form or a no-provider-config blocker.
+- `/auth/callback` remains public, handles Supabase auth callback success/error states, and does not render gameplay payloads.
 - `/dashboard` requires a student session with `app_role=student`.
 - `/instructor/dashboard` requires an instructor session with `app_role=instructor`.
 
