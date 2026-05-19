@@ -67,6 +67,25 @@ describe('US-038 Supabase auth-tenancy SQL contract', () => {
     expect(migration).toContain('grant execute on function public.student_leaderboard_funds(uuid) to authenticated');
   });
 
+  it('defines a student join-code enrollment RPC contract', () => {
+    const joinFunction = migration.match(/create or replace function public\.join_class_by_code[\s\S]*?\$\$;/)?.[0] ?? '';
+
+    expect(joinFunction).toContain("public.current_app_role() <> 'student'");
+    expect(joinFunction).toContain('target_student_join_code text');
+    expect(joinFunction).toContain('insert into public.class_enrollments');
+    expect(joinFunction).toContain('insert into public.funds');
+    expect(joinFunction).toContain('on conflict (class_id, student_id) do nothing');
+    expect(joinFunction).toContain('insert into public.asset_holdings');
+    expect(joinFunction).toContain("('Base', 40.0000, 0.4000, 0.0500)");
+    expect(joinFunction).toContain("('Core', 40.0000, 0.4000, 0.0000)");
+    expect(joinFunction).toContain("('Apex', 20.0000, 0.2000, 0.0000)");
+    expect(joinFunction).toContain('on conflict (fund_id, tier) do nothing');
+    expect(joinFunction).toContain('student_join_code text');
+    expect(joinFunction).not.toContain('public.tara_orders');
+    expect(joinFunction).not.toContain('target_weights_json');
+    expect(migration).toContain('grant execute on function public.join_class_by_code(text, uuid) to authenticated');
+  });
+
   it('provides deterministic fixture actors, classes, scenario rows, and exact holdings', () => {
     expect(fixtures.match(/'student'/g)).toHaveLength(3);
     expect(fixtures.match(/'instructor'/g)).toHaveLength(2);

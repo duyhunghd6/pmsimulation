@@ -1,0 +1,15 @@
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor work is started and AUTH_TENANCY_DATABASE_URL is missing in this environment, so local RLS execution remains blocked by that exact server-only PostgreSQL URL.
+- Item 2: implemented — US-071 and US-072 provide the no-gameplay App Router shell, Supabase magic-link login/logout, and protected student/instructor route guards.
+- Item 3: implemented — US-097 wires a Supabase-backed current-turn student dashboard row reader behind the safe executor when the App Router Supabase server client is available.
+- Item 4: implemented — US-073 and US-088 render the protected current-turn student dashboard and post-turn attribution UI.
+- Item 5: implemented — US-074, US-085, and US-098 provide the bounded TARA order submission executor, protected order form UI, and Supabase-backed pending-order writer.
+- Item 6: selected candidate — instructor class creation/list, pending-order, live leaderboard, aggregate analytics, God Mode UI, and manual month-advance UI exist, but God Mode still uses bounded rows only and lacks the Supabase-backed safe row reader called out as a remaining provider-read gap.
+- Item 7: skipped — Inngest handoff, cron handoff, injected class-month processing executor, and Supabase processing store exist, with later hosted/runtime gaps remaining; item 6 has an earlier unimplemented safe provider-read slice.
+- Item 8: skipped — realtime publication/subscription/refetch UI slices exist, with hosted provider proof remaining; item 6 has an earlier unimplemented safe provider-read slice.
+- Item 9: skipped — local release/CI/smoke proof exists, with hosted proof/E2E/deployment remaining; item 6 has an earlier unimplemented safe provider-read slice.
+- Selected: item 6, instructor God Mode Supabase row reader, because every earlier item is implemented or blocked and this fills the remaining safe provider-backed instructor dashboard read gap without requiring hosted credentials.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI, student post-turn attribution UI, student TARA order form UI, instructor class creation/list UI, pending-order UI, live leaderboard UI, aggregate analytics UI, God Mode UI, and manual month-advance UI are already present per backlog/test matrix evidence.
+- Decision: proceed with non-UI, because the missing item-6 slice is the Supabase-backed God Mode reader behind an already reachable protected instructor dashboard UI, not a missing browser UI.

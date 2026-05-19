@@ -7,7 +7,9 @@ import {
   createAutoMonthAdvanceScheduledTriggerValidationFailureEnvelope,
 } from '../../../domain/classes/month-advancement';
 import {
+  createMonthAdvanceAutoClassDiscoveryReaderFromEnvironment,
   executeAutoMonthAdvanceInngestHandoff,
+  executeMonthAdvanceAutoClassDiscoveryHandoff,
   sendMonthAdvanceRequestedEvent,
 } from '../../../infrastructure/inngest/month-advance';
 
@@ -22,6 +24,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       { status: authorization.status },
     );
+  }
+
+  if (!hasExplicitClassAdvanceParams(request)) {
+    return executeDiscoveredAutoMonthAdvanceHandoff();
   }
 
   const input = {
@@ -88,6 +94,52 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 502 },
     );
   }
+}
+
+async function executeDiscoveredAutoMonthAdvanceHandoff(): Promise<NextResponse> {
+  const reader = createMonthAdvanceAutoClassDiscoveryReaderFromEnvironment(process.env);
+
+  if (!reader.ok) {
+    return NextResponse.json(
+      {
+        status: 'auto_month_advance_discovery_runtime_not_configured',
+        code: reader.code,
+        deliverySemantics: 'scheduled_trigger_safe_runtime_configuration_error',
+      },
+      { status: 503 },
+    );
+  }
+
+  const result = await executeMonthAdvanceAutoClassDiscoveryHandoff({
+    reader: reader.reader,
+    sender: { send: sendMonthAdvanceRequestedEvent },
+  });
+
+  if (!result.ok) {
+    return NextResponse.json(
+      {
+        status: 'auto_month_advance_discovery_failed',
+        failure: result.failure,
+      },
+      { status: 502 },
+    );
+  }
+
+  return NextResponse.json(
+    {
+      status: 'accepted_auto_month_advance_discovery',
+      result: result.value,
+    },
+    { status: 202 },
+  );
+}
+
+function hasExplicitClassAdvanceParams(request: NextRequest): boolean {
+  return (
+    request.nextUrl.searchParams.has('classId') ||
+    request.nextUrl.searchParams.has('currentMonthIndex') ||
+    request.nextUrl.searchParams.has('totalMonths')
+  );
 }
 
 function authorizeCronRequest(headers: Headers, cronSecret: string | undefined):

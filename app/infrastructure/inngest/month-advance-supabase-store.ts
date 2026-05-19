@@ -133,6 +133,8 @@ async function writeClassMonthProcessingResult(
   client: SupabaseMonthAdvanceProcessingClient,
   record: ClassMonthAdvanceProcessingRecord,
 ): Promise<MonthAdvanceClassMonthProcessingPersistenceReceipt> {
+  const pendingOrdersByFund = await readPendingOrdersByProcessedFund(client, record);
+
   if (record.ledgerDrafts.length > 0) {
     await mutateRows(
       client
@@ -163,6 +165,12 @@ async function writeClassMonthProcessingResult(
       client.from('funds').update({ current_aum: draft.endingAum }).match({ class_id: record.classId, id: draft.fundId }),
       'funds',
     );
+
+    const pendingOrder = pendingOrdersByFund.get(draft.fundId);
+    if (pendingOrder) {
+      await writeAssetHoldingTargetWeights(client, record.classId, draft.fundId, pendingOrder.targetWeights);
+    }
+
     await mutateRows(
       client
         .from('tara_orders')
@@ -187,6 +195,59 @@ async function writeClassMonthProcessingResult(
     processedMonthIndex: record.processedMonthIndex,
     advancedToMonthIndex: record.advancedToMonthIndex,
   };
+}
+
+async function readPendingOrdersByProcessedFund(
+  client: SupabaseMonthAdvanceProcessingClient,
+  record: ClassMonthAdvanceProcessingRecord,
+): Promise<Map<string, PendingOrderRow>> {
+  if (record.ledgerDrafts.length === 0) {
+    return new Map();
+  }
+
+  const processedFundIds = new Set(record.ledgerDrafts.map((draft) => draft.fundId));
+  const rows = await selectRows(client, 'tara_orders', 'id,class_id,fund_id,month_index,target_weights_json,status', {
+    class_id: record.classId,
+    month_index: record.processedMonthIndex,
+    status: 'pending',
+  });
+  const pendingOrdersByFund = new Map<string, PendingOrderRow>();
+
+  for (const row of rows) {
+    const order = parsePendingOrderRow(row);
+    if (order.classId !== record.classId || order.monthIndex !== record.processedMonthIndex) {
+      throw new Error('Supabase month advance processing row rejected: tara_orders');
+    }
+
+    if (!processedFundIds.has(order.fundId)) {
+      continue;
+    }
+
+    if (pendingOrdersByFund.has(order.fundId)) {
+      throw new Error('Supabase month advance processing row rejected: tara_orders');
+    }
+
+    pendingOrdersByFund.set(order.fundId, order);
+  }
+
+  return pendingOrdersByFund;
+}
+
+async function writeAssetHoldingTargetWeights(
+  client: SupabaseMonthAdvanceProcessingClient,
+  classId: string,
+  fundId: string,
+  targetWeights: Record<AssetTier, number>,
+): Promise<void> {
+  for (const tier of assetTiers) {
+    await mutateRows(
+      client
+        .from('asset_holdings')
+        .update({ allocation_weight_pct: targetWeights[tier] })
+        .match({ class_id: classId, fund_id: fundId, tier }),
+      'asset_holdings',
+    );
+  }
 }
 
 async function selectRows(

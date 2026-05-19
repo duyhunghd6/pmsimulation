@@ -3,11 +3,15 @@ import { describe, expect, it } from 'vitest';
 import {
   createMonthAdvanceInngestEvent,
   createMonthAdvanceWorkerJobResultFromInngestEventData,
+  createSupabaseMonthAdvanceAutoClassDiscoveryReader,
   executeAutoMonthAdvanceInngestHandoff,
   executeLiveMonthAdvanceInngestHandoff,
+  executeMonthAdvanceAutoClassDiscoveryHandoff,
   executeMonthAdvanceClassMonthProcessingFromInngestEventData,
   executeMonthAdvanceInngestHandoff,
+  executeMonthAdvanceRuntimeWorkerFromInngestEventData,
   MONTH_ADVANCE_REQUESTED_EVENT,
+  parseMonthAdvanceWorkerRuntimeEnvironment,
   type MonthAdvanceInngestEvent,
 } from './month-advance';
 
@@ -250,6 +254,193 @@ describe('executeAutoMonthAdvanceInngestHandoff', () => {
   });
 });
 
+describe('executeMonthAdvanceAutoClassDiscoveryHandoff', () => {
+  it('discovers auto classes and dispatches only ready month advances through the shared worker path', async () => {
+    const sentEvents: MonthAdvanceInngestEvent[] = [];
+    const result = await executeMonthAdvanceAutoClassDiscoveryHandoff({
+      reader: {
+        async readAutoClassRows() {
+          return [
+            {
+              classId: 'class-ready-001',
+              triggerMode: 'auto',
+              currentMonthIndex: 3,
+              totalMonths: 12,
+            },
+            {
+              classId: 'class-complete-001',
+              triggerMode: 'auto',
+              currentMonthIndex: 11,
+              totalMonths: 12,
+            },
+          ];
+        },
+      },
+      sender: {
+        async send(event) {
+          sentEvents.push(event);
+        },
+      },
+    });
+
+    expect(sentEvents).toEqual([
+      createMonthAdvanceInngestEvent({
+        classId: 'class-ready-001',
+        triggerMode: 'auto',
+        triggerSource: 'auto',
+        currentMonthIndex: 3,
+        nextMonthIndex: 4,
+        totalMonths: 12,
+        idempotencyKey: 'class:class-ready-001:advance:3->4',
+        processingPath: 'shared_month_advance',
+      }),
+    ]);
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        resultStatus: 'accepted_auto_month_advance_discovery',
+        discoveryBoundary: 'auto_month_advance_discovery_boundary',
+        discoveredClassCount: 2,
+        acceptedClassCount: 1,
+        workerHandoffs: [
+          expect.objectContaining({
+            envelopeType: 'month_advance_worker_job_result',
+            resultStatus: 'accepted_month_advance_worker_job',
+            deliverySemantics: 'worker_safe_month_advance_job_receipt',
+            receipt: expect.objectContaining({
+              classId: 'class-ready-001',
+              triggerMode: 'auto',
+              triggerSource: 'auto',
+              currentMonthIndex: 3,
+              nextMonthIndex: 4,
+              queueDiscipline: 'class_month_idempotent',
+            }),
+          }),
+        ],
+        deliverySemantics: 'scheduled_trigger_safe_auto_month_advance_receipt',
+      },
+    });
+
+    expect(JSON.stringify(result)).not.toContain('databaseRows');
+    expect(JSON.stringify(result)).not.toContain('providerClient');
+  });
+
+  it('sanitizes discovery provider and dispatch failures', async () => {
+    const readFailure = await executeMonthAdvanceAutoClassDiscoveryHandoff({
+      reader: {
+        async readAutoClassRows() {
+          throw new Error('provider failure with service-role-secret');
+        },
+      },
+      sender: {
+        async send() {
+          throw new Error('not reached');
+        },
+      },
+    });
+
+    const sendFailure = await executeMonthAdvanceAutoClassDiscoveryHandoff({
+      reader: {
+        async readAutoClassRows() {
+          return [
+            {
+              classId: 'class-ready-001',
+              triggerMode: 'auto',
+              currentMonthIndex: 3,
+              totalMonths: 12,
+            },
+          ];
+        },
+      },
+      sender: {
+        async send() {
+          throw new Error('provider failure with service-role-secret');
+        },
+      },
+    });
+
+    expect(readFailure).toEqual({
+      ok: false,
+      failure: {
+        resultStatus: 'auto_month_advance_discovery_failed',
+        discoveryBoundary: 'auto_month_advance_discovery_boundary',
+        failureCode: 'provider_error',
+        deliverySemantics: 'scheduled_trigger_safe_provider_failure',
+      },
+    });
+    expect(sendFailure).toEqual(readFailure);
+    expect(JSON.stringify(readFailure)).not.toContain('service-role-secret');
+    expect(JSON.stringify(sendFailure)).not.toContain('provider failure');
+  });
+});
+
+describe('createSupabaseMonthAdvanceAutoClassDiscoveryReader', () => {
+  it('reads and parses Supabase auto class rows through a narrow client shape', async () => {
+    const calls: unknown[] = [];
+    const reader = createSupabaseMonthAdvanceAutoClassDiscoveryReader({
+      from(table: string) {
+        calls.push({ table });
+        return {
+          select(columns: string) {
+            calls.push({ columns });
+            return {
+              async eq(column: string, value: unknown) {
+                calls.push({ column, value });
+                return {
+                  data: [
+                    {
+                      id: ' class-ready-001 ',
+                      trigger_mode: 'auto',
+                      current_month_index: 3,
+                      total_months: 12,
+                    },
+                  ],
+                  error: null,
+                };
+              },
+            };
+          },
+        };
+      },
+    });
+
+    await expect(reader.readAutoClassRows()).resolves.toEqual([
+      {
+        classId: 'class-ready-001',
+        triggerMode: 'auto',
+        currentMonthIndex: 3,
+        totalMonths: 12,
+      },
+    ]);
+    expect(calls).toEqual([
+      { table: 'classes' },
+      { columns: 'id, trigger_mode, current_month_index, total_months' },
+      { column: 'trigger_mode', value: 'auto' },
+    ]);
+  });
+
+  it('rejects malformed Supabase discovery rows without returning row contents', async () => {
+    const reader = createSupabaseMonthAdvanceAutoClassDiscoveryReader({
+      from() {
+        return {
+          select() {
+            return {
+              async eq() {
+                return {
+                  data: [{ id: 'class-ready-001', trigger_mode: 'manual', current_month_index: 3, total_months: 12 }],
+                  error: null,
+                };
+              },
+            };
+          },
+        };
+      },
+    });
+
+    await expect(reader.readAutoClassRows()).rejects.toThrow('Supabase auto month advance discovery row rejected.');
+  });
+});
+
 describe('executeMonthAdvanceClassMonthProcessingFromInngestEventData', () => {
   it('processes injected class fund inputs, persists ledger drafts, and publishes a refresh signal without returning drafts', async () => {
     const persistedRecords: unknown[] = [];
@@ -463,5 +654,166 @@ describe('createMonthAdvanceWorkerJobResultFromInngestEventData', () => {
         ]),
       }),
     });
+  });
+});
+
+describe('parseMonthAdvanceWorkerRuntimeEnvironment', () => {
+  it('accepts only the server-side Supabase worker runtime values', () => {
+    expect(
+      parseMonthAdvanceWorkerRuntimeEnvironment({
+        NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321',
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: 'public-anon-key',
+        SUPABASE_SERVICE_ROLE_KEY: 'service-role-secret',
+      }),
+    ).toEqual({
+      ok: true,
+      env: {
+        supabaseUrl: 'http://127.0.0.1:54321',
+        supabaseServiceRoleKey: 'service-role-secret',
+      },
+    });
+  });
+
+  it('rejects missing or malformed runtime values without returning secrets', () => {
+    expect(parseMonthAdvanceWorkerRuntimeEnvironment(null)).toEqual({ ok: false, code: 'environment_not_object' });
+    expect(parseMonthAdvanceWorkerRuntimeEnvironment({})).toEqual({ ok: false, code: 'missing_supabase_url' });
+    expect(
+      parseMonthAdvanceWorkerRuntimeEnvironment({
+        NEXT_PUBLIC_SUPABASE_URL: 'https://not-supabase.example.test',
+        SUPABASE_SERVICE_ROLE_KEY: 'service-role-secret',
+      }),
+    ).toEqual({ ok: false, code: 'invalid_supabase_url' });
+    expect(
+      parseMonthAdvanceWorkerRuntimeEnvironment({
+        NEXT_PUBLIC_SUPABASE_URL: 'https://project-ref.supabase.co',
+      }),
+    ).toEqual({ ok: false, code: 'missing_supabase_service_role_key' });
+    expect(
+      parseMonthAdvanceWorkerRuntimeEnvironment({
+        NEXT_PUBLIC_SUPABASE_URL: 'https://project-ref.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: ' service-role-secret ',
+      }),
+    ).toEqual({ ok: false, code: 'invalid_supabase_service_role_key' });
+  });
+});
+
+describe('executeMonthAdvanceRuntimeWorkerFromInngestEventData', () => {
+  it('runs the existing worker receipt, Supabase store, and realtime boundaries when runtime values are present', async () => {
+    const persistedRecords: unknown[] = [];
+    const sentRealtimeMessages: unknown[] = [];
+    const result = await executeMonthAdvanceRuntimeWorkerFromInngestEventData({
+      data: createMonthAdvanceInngestEvent(defaultProcessingRequest).data,
+      environment: {
+        NEXT_PUBLIC_SUPABASE_URL: 'https://project-ref.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'service-role-secret',
+      },
+      createBoundaries(environment) {
+        expect(environment).toEqual({
+          NEXT_PUBLIC_SUPABASE_URL: 'https://project-ref.supabase.co',
+          SUPABASE_SERVICE_ROLE_KEY: 'service-role-secret',
+        });
+        return {
+          ok: true,
+          boundaries: {
+            reader: {
+              async readFundInputs(request) {
+                expect(request).toEqual(defaultProcessingRequest);
+                return [defaultFundInput];
+              },
+            },
+            writer: {
+              async writeClassMonthProcessingResult(record) {
+                persistedRecords.push(record);
+                return {
+                  receiptType: 'class_month_processing_persistence_receipt',
+                  classMonthWriteKey: `${record.idempotencyKey}:runtime-class-month-write`,
+                  ledgerWriteCount: record.ledgerDrafts.length,
+                  processedMonthIndex: record.processedMonthIndex,
+                  advancedToMonthIndex: record.advancedToMonthIndex,
+                };
+              },
+            },
+            realtimeClient: createRealtimeClient(sentRealtimeMessages),
+          },
+        };
+      },
+    });
+
+    expect(persistedRecords).toHaveLength(1);
+    expect(sentRealtimeMessages).toHaveLength(1);
+    expect(result).toEqual({
+      status: 'completed_month_advance_worker_job',
+      result: expect.objectContaining({
+        envelopeType: 'month_advance_worker_job_result',
+        deliverySemantics: 'worker_safe_month_advance_job_receipt',
+      }),
+      processing: expect.objectContaining({
+        resultStatus: 'completed_class_month_processing',
+        persistence: expect.objectContaining({
+          classMonthWriteKey: 'class:class-001:advance:3->4:runtime-class-month-write',
+        }),
+      }),
+    });
+
+    if (result.status === 'completed_month_advance_worker_job') {
+      expect('fundInputs' in result.result).toBe(false);
+      expect('ledgerDrafts' in result.result).toBe(false);
+      expect('providerClient' in result.processing).toBe(false);
+      expect('providerSecret' in result.processing).toBe(false);
+    }
+  });
+
+  it('returns a safe runtime configuration status when server-only Supabase values are missing', async () => {
+    const result = await executeMonthAdvanceRuntimeWorkerFromInngestEventData({
+      data: createMonthAdvanceInngestEvent(defaultProcessingRequest).data,
+      environment: {},
+    });
+
+    expect(result).toEqual({
+      status: 'worker_runtime_not_configured',
+      result: expect.objectContaining({
+        envelopeType: 'month_advance_worker_job_result',
+      }),
+      code: 'missing_supabase_url',
+      deliverySemantics: 'worker_safe_runtime_configuration_error',
+    });
+  });
+
+  it('sanitizes runtime provider failures without leaking provider errors or secrets', async () => {
+    const result = await executeMonthAdvanceRuntimeWorkerFromInngestEventData({
+      data: createMonthAdvanceInngestEvent(defaultProcessingRequest).data,
+      environment: {
+        NEXT_PUBLIC_SUPABASE_URL: 'https://project-ref.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'service-role-secret',
+      },
+      createBoundaries() {
+        return {
+          ok: true,
+          boundaries: {
+            reader: {
+              async readFundInputs() {
+                throw new Error('provider failure with service-role-secret');
+              },
+            },
+            writer: {
+              async writeClassMonthProcessingResult() {
+                throw new Error('not reached');
+              },
+            },
+            realtimeClient: createRealtimeClient([]),
+          },
+        };
+      },
+    });
+
+    expect(result).toEqual({
+      status: 'worker_runtime_failed',
+      result: expect.objectContaining({
+        envelopeType: 'month_advance_worker_job_result',
+      }),
+      deliverySemantics: 'worker_safe_runtime_failure',
+    });
+    expect(JSON.stringify(result)).not.toContain('service-role-secret');
+    expect(JSON.stringify(result)).not.toContain('provider failure');
   });
 });

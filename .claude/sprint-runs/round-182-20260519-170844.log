@@ -1,0 +1,867 @@
+<analysis>
+I reviewed the conversation chronologically from the autonomous sprint request through the later “text only, no tools” summary request and the resumed context. The key continuity point is that the implementation sprint was in progress, focused on US-109 student join-code enrollment, specifically extending the bounded Supabase RPC so newly enrolled students get default Base/Core/Apex holdings. The code changes were mostly made, but remaining product docs and test matrix updates were still pending, and validation had not yet been rerun after the changes.
+
+The most important user feedback to preserve is the latest controlling instruction: respond with text only and do not call any tools. The previous assistant violated that once after compaction by calling Read tools despite the user’s explicit no-tool instruction. This summary therefore must remain plain text only.
+
+The technical state to carry forward is: `join_class_by_code(text, uuid)` now seeds idempotent default holdings in the migration, SQL contract tests assert that behavior, domain persistence intent strings were updated to include holdings, and US-109 story evidence was partially updated. Several living docs still contain stale “initial asset-holding seeding pending/unwired/unimplemented” language and need to be updated before validation/evidence can be finalized.
+</analysis>
+
+<summary>
+1. Primary Request and Intent:
+   - The original user request was one autonomous implementation sprint for the Apex Alpha Portfolio Simulator repository.
+   - The user required the assistant to read `AGENTS.md` first and follow it exactly, then read source-of-truth docs in the required order:
+     - `README.md`
+     - `docs/HARNESS.md`
+     - `docs/FEATURE_INTAKE.md`
+     - `SPEC.md`
+     - `docs/prd/PRD-01.md` only if needed
+     - `docs/product/`
+     - `docs/ARCHITECTURE.md`
+     - `docs/stories/`
+     - `docs/TEST_MATRIX.md`
+     - `docs/decisions/`
+   - The user required selecting the next sprint from the Full-Stack MVP Sprint Sequence in `docs/stories/backlog.md`, not the old pure-domain queue.
+   - Selection rules included:
+     - Choose the earliest sequence item not complete by PRD standards and not blocked by unavailable external credentials or hosted runtime.
+     - Do not repeatedly select US-038 parser-only/query-executor-only work when `AUTH_TENANCY_DATABASE_URL` is missing.
+     - Apply the UI-first override: if a browser UI is missing over an existing safe server boundary, implement UI first.
+     - Complete exactly one bounded feature/fix/test/integration/platform-proof/release-proof slice.
+     - Update relevant docs, story evidence/status, and `docs/TEST_MATRIX.md`.
+     - Run validation, especially `npm run validate:quick` after code changes.
+     - Do not commit, push, or create a pull request.
+   - The selected sprint was a non-UI follow-up under Full-Stack MVP Sprint Sequence item 6:
+     - Requirement: student join-code enrollment should create gameplay-ready student fund state, not just membership and fund.
+     - Story/work item: US-109 Student join-code enrollment follow-up.
+     - Slice: seed initial Base/Core/Apex asset holdings for newly enrolled funds through the existing `join_class_by_code` RPC.
+   - The latest user request superseded implementation work and required only a detailed summary.
+   - The latest user’s critical constraints must remain in force verbatim:
+     - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.”
+     - “Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.”
+     - “You already have all the context you need in the conversation above.”
+     - “Tool calls will be REJECTED and will waste your only turn — you will fail the task.”
+     - “Your entire response must be plain text: an `<analysis>` block followed by a `<summary>` block.”
+     - “REMINDER: Do NOT call any tools. Respond with plain text only — an `<analysis>` block followed by a `<summary>` block. Tool calls will be rejected and you will fail the task.”
+
+2. Key Technical Concepts:
+   - Next.js App Router protected student/instructor routes.
+   - Supabase Auth session parsing.
+   - Trusted `app_role` claim checks.
+   - Supabase PostgreSQL, RLS, RPCs, and Realtime.
+   - Drizzle schema/migrations.
+   - Server Actions and parse-first server boundaries.
+   - Auth-tenancy separation by class, fund, student, instructor, role, and month.
+   - Public student join route: `/join/[joinCode]`.
+   - Authenticated student enrollment server action.
+   - Bounded Supabase RPC: `join_class_by_code(text, uuid)`.
+   - Student-safe result envelopes and validation-failure envelopes.
+   - Provider-backed store abstraction behind injected contracts.
+   - Idempotent persistence using `on conflict`.
+   - Initial fund creation with `$50M` AUM.
+   - Default initial asset holdings:
+     - Base: 40%, position weight `0.4000`, cash buffer `0.0500`
+     - Core: 40%, position weight `0.4000`, cash buffer `0.0000`
+     - Apex: 20%, position weight `0.2000`, cash buffer `0.0000`
+   - Security/privacy constraints:
+     - Future macro rows must never be sent to the browser.
+     - Student paths must not expose other students’ exact holdings.
+     - Instructor God Mode is separate and privileged.
+     - Browser join/enrollment receipt must not expose class roster rows, instructor data, future scenarios, other-student holdings, raw provider payloads, provider errors, gameplay snapshots, or holdings.
+   - Proof distinctions:
+     - Local SQL contract proof.
+     - Unit proof for domain/executor/store/parser.
+     - Local RLS execution proof blocked when `AUTH_TENANCY_DATABASE_URL` is not configured.
+     - Hosted Supabase/provider-backed browser E2E/platform proof remains pending.
+
+3. Files and Code Sections:
+   - `.claude/sprint-runs/round-183-20260519-initial-asset-holding-seeding.log`
+     - Created as the auditable sprint log.
+     - Recorded selected requirement, sequence item, story/work item, lane, and UI/non-UI classification.
+     - Sequence preflight recorded:
+       - Item 1: blocked by missing `AUTH_TENANCY_DATABASE_URL`.
+       - Items 2–5: implemented.
+       - Item 6: selected candidate due to missing initial holdings for newly enrolled funds.
+       - Items 7–9: skipped because later or hosted/runtime-proof-blocked.
+     - Non-UI selection gate checked student dashboard UI, post-turn attribution UI, TARA order form, instructor class creation/list/join-link/enrollment UI, instructor dashboard panels, and realtime status UI.
+     - Decision was to proceed with non-UI because class roster management UI had no safe boundary and the durable enrollment gap was unblocked.
+
+   - `app/domain/classes/class-enrollment.ts`
+     - Modified the persistence intent literal for student join-code enrollment.
+     - Old intent:
+       ```ts
+       persistenceIntent: 'create_class_enrollment_and_initial_fund';
+       ```
+     - New intent:
+       ```ts
+       persistenceIntent: 'create_class_enrollment_initial_fund_and_holdings';
+       ```
+     - Purpose:
+       - Align domain command/result envelopes with the updated durable behavior: class enrollment, initial fund creation, and default asset-holding seeding.
+     - Affected types and return values for:
+       - `StudentClassJoinCommandDescriptor`
+       - `StudentClassJoinResultEnvelope`
+       - `createStudentClassJoinCommandDescriptor(...)`
+       - `createStudentClassJoinResultEnvelope(...)`
+
+   - `app/domain/classes/class-enrollment.test.ts`
+     - Updated expected `persistenceIntent` values to:
+       ```ts
+       'create_class_enrollment_initial_fund_and_holdings'
+       ```
+     - Important expected descriptor:
+       ```ts
+       const descriptor = createStudentClassJoinCommandDescriptor(request.value);
+       expect(descriptor).toEqual({
+         descriptorType: 'student_class_join_command',
+         commandKey: 'student:11111111-1111-4111-8111-111111111111:join:ALPHA01:enroll-class:server-action-command',
+         commandBoundary: 'server_action_command_boundary',
+         commandName: 'join_class_by_code',
+         requiredScope: 'student_joins_class_by_code',
+         studentId,
+         joinCode: 'ALPHA01',
+         idempotencyKey: 'student:11111111-1111-4111-8111-111111111111:join:ALPHA01:enroll-class',
+         persistenceIntent: 'create_class_enrollment_initial_fund_and_holdings',
+       });
+       ```
+     - Important result envelope expectation:
+       ```ts
+       persistenceIntent: 'create_class_enrollment_initial_fund_and_holdings',
+       ```
+
+   - `app/infrastructure/auth-tenancy/student-class-enrollment-action.test.ts`
+     - Updated expected safe receipt envelope to use:
+       ```ts
+       persistenceIntent: 'create_class_enrollment_initial_fund_and_holdings'
+       ```
+     - Important tested behavior:
+       - `executeStudentClassEnrollmentAction(...)` validates student role and join code.
+       - Calls an injected store once for valid student enrollment.
+       - Parses persisted row before delivering receipt.
+       - Rejects role mismatch before writing.
+       - Rejects invalid join code before persistence.
+       - Rejects persisted row scope mismatch.
+       - Rejects persisted row with mismatched join code.
+     - Important expected safe result shape:
+       ```ts
+       expect(result.value).toEqual({
+         envelopeType: 'student_class_join_result',
+         resultKey: 'student:11111111-1111-4111-8111-111111111111:join:ALPHA01:enroll-class:server-action-command:result-envelope',
+         commandKey: 'student:11111111-1111-4111-8111-111111111111:join:ALPHA01:enroll-class:server-action-command',
+         commandBoundary: 'server_action_result_boundary',
+         commandName: 'join_class_by_code',
+         requiredScope: 'student_joins_class_by_code',
+         studentId,
+         idempotencyKey: 'student:11111111-1111-4111-8111-111111111111:join:ALPHA01:enroll-class',
+         resultStatus: 'accepted_class_enrollment',
+         persistenceIntent: 'create_class_enrollment_initial_fund_and_holdings',
+         deliverySemantics: 'student_safe_class_enrollment_receipt',
+         receipt: {
+           receiptType: 'student_class_enrollment_receipt',
+           enrollmentKey: 'student:11111111-1111-4111-8111-111111111111:join:ALPHA01:enroll-class',
+           studentId,
+           classId,
+           fundId,
+           className: 'Alpha Capital Lab',
+           currentMonthIndex: 0,
+           joinCode: 'ALPHA01',
+           dashboardPath: '/dashboard',
+         },
+       });
+       ```
+     - Safety expectations remained:
+       ```ts
+       expect('databaseRows' in result.value).toBe(false);
+       expect('providerPayload' in result.value).toBe(false);
+       expect('instructorData' in result.value).toBe(false);
+       ```
+
+   - `supabase/migrations/202605180001_auth_tenancy_foundation.sql`
+     - Modified `asset_holdings` table to add idempotency constraint:
+       ```sql
+       create table if not exists public.asset_holdings (
+         id uuid primary key,
+         fund_id uuid not null references public.funds(id) on delete cascade,
+         class_id uuid not null references public.classes(id) on delete cascade,
+         tier text not null check (tier in ('Base', 'Core', 'Apex')),
+         allocation_weight_pct numeric(7,4) not null,
+         position_weight numeric(7,4) not null,
+         cash_buffer_weight numeric(7,4) not null,
+         unique (fund_id, tier)
+       );
+       ```
+     - Modified `public.join_class_by_code(target_student_join_code text, target_fund_id uuid)` to seed initial holdings after inserting class enrollment and fund:
+       ```sql
+       insert into public.asset_holdings (
+         id,
+         fund_id,
+         class_id,
+         tier,
+         allocation_weight_pct,
+         position_weight,
+         cash_buffer_weight
+       )
+       select
+         gen_random_uuid(),
+         f.id,
+         f.class_id,
+         seed.tier,
+         seed.allocation_weight_pct,
+         seed.position_weight,
+         seed.cash_buffer_weight
+       from public.funds f
+       cross join (
+         values
+           ('Base', 40.0000, 0.4000, 0.0500),
+           ('Core', 40.0000, 0.4000, 0.0000),
+           ('Apex', 20.0000, 0.2000, 0.0000)
+       ) as seed(tier, allocation_weight_pct, position_weight, cash_buffer_weight)
+       where f.class_id = target_class_id
+         and f.student_id = requesting_student_id
+       on conflict (fund_id, tier) do nothing;
+       ```
+     - RPC still returns only:
+       ```sql
+       returns table (
+         class_id uuid,
+         student_id uuid,
+         fund_id uuid,
+         display_name text,
+         current_month_index integer,
+         student_join_code text
+       )
+       ```
+     - Important auth/scope behavior:
+       ```sql
+       declare
+         requesting_student_id uuid := auth.uid();
+         target_class_id uuid;
+       begin
+         if public.current_app_role() <> 'student' or requesting_student_id is null then
+           raise exception 'student role required' using errcode = '42501';
+         end if;
+       ```
+     - Join code normalization:
+       ```sql
+       where c.student_join_code = upper(btrim(target_student_join_code));
+       ```
+     - Class membership idempotency:
+       ```sql
+       insert into public.class_enrollments (class_id, student_id)
+       values (target_class_id, requesting_student_id)
+       on conflict (class_id, student_id) do nothing;
+       ```
+     - Fund idempotency:
+       ```sql
+       insert into public.funds (...)
+       values (...)
+       on conflict (class_id, student_id) do nothing;
+       ```
+
+   - `tests/integration/auth-tenancy/sql-contract.test.ts`
+     - Updated SQL contract expectations for `join_class_by_code`.
+     - Current important test excerpt:
+       ```ts
+       it('defines a student join-code enrollment RPC contract', () => {
+         const joinFunction = migration.match(/create or replace function public\.join_class_by_code[\s\S]*?\$\$;/)?.[0] ?? '';
+
+         expect(joinFunction).toContain("public.current_app_role() <> 'student'");
+         expect(joinFunction).toContain('target_student_join_code text');
+         expect(joinFunction).toContain('insert into public.class_enrollments');
+         expect(joinFunction).toContain('insert into public.funds');
+         expect(joinFunction).toContain('on conflict (class_id, student_id) do nothing');
+         expect(joinFunction).toContain('insert into public.asset_holdings');
+         expect(joinFunction).toContain("('Base', 40.0000, 0.4000, 0.0500)");
+         expect(joinFunction).toContain("('Core', 40.0000, 0.4000, 0.0000)");
+         expect(joinFunction).toContain("('Apex', 20.0000, 0.2000, 0.0000)");
+         expect(joinFunction).toContain('on conflict (fund_id, tier) do nothing');
+         expect(joinFunction).toContain('student_join_code text');
+         expect(joinFunction).not.toContain('public.tara_orders');
+         expect(joinFunction).not.toContain('target_weights_json');
+         expect(migration).toContain('grant execute on function public.join_class_by_code(text, uuid) to authenticated');
+       });
+       ```
+     - Purpose:
+       - Prove the SQL contract includes holdings seeding and remains narrow/safe.
+
+   - `docs/stories/US-109-student-join-code-enrollment.md`
+     - Updated to document the follow-up.
+     - Status remained:
+       ```md
+       implemented
+       ```
+     - Product Contract now says:
+       - “This slice implements the first roster membership write plus initial fund creation boundary. A 2026-05-19 follow-up seeds initial Base/Core/Apex asset holdings for newly enrolled funds through the same idempotent RPC. It does not prove hosted Supabase execution, provider-backed browser E2E, local RLS execution without `AUTH_TENANCY_DATABASE_URL`, or immediate live gameplay readiness after enrollment.”
+     - Acceptance criterion now says:
+       - “The SQL contract defines `join_class_by_code(text, uuid)` as an authenticated student-only RPC that creates `class_enrollments`, an initial `funds` row, and default Base/Core/Apex `asset_holdings` rows idempotently.”
+     - Design note now says:
+       - “SQL: `join_class_by_code` uses `auth.uid()` and trusted `public.current_app_role()` to create membership, a default initial fund, and 40/40/20 Base/Core/Apex holdings, then returns only the parsed receipt row shape.”
+     - Evidence added:
+       - “2026-05-19 follow-up sprint: extended `join_class_by_code` to seed idempotent default Base/Core/Apex holdings (40%/40%/20%) for the enrolled fund without returning holdings in the student-safe receipt.”
+     - Existing validation evidence still listed previous passing commands:
+       - `npm run typecheck` passed.
+       - `npm run test:integration:auth-tenancy` passed SQL contract proof with 5 tests and 1 local RLS test skipped because `AUTH_TENANCY_DATABASE_URL` is not configured.
+       - `npm run validate:quick` passed with 55 test files and 541 tests.
+       - `npm run smoke:routes` passed for `/`, `/login`, `/join/ALPHA01`, `/dashboard`, and `/instructor/dashboard`.
+     - Important: after the new code changes, validation had not yet been rerun, so those old evidence lines should not be treated as proof of the new holdings follow-up until validation is run again.
+
+   - `docs/product/roles-and-permissions.md`
+     - Read after compaction.
+     - Stale line still says initial asset-holding seeding remains pending.
+     - Needs update to say initial Base/Core/Apex holding seeding is now implemented locally through the RPC, while hosted Supabase execution proof, provider-backed browser E2E, and local RLS execution proof remain pending.
+     - Later authorization proof paragraph also says US-109 creates class membership and initial fund; it should be updated to include initial holdings.
+
+   - `docs/product/user-surfaces.md`
+     - Read after compaction.
+     - Stale line says the join route creates class membership plus initial fund and that initial asset-holding seeding remains unwired.
+     - Needs update to say the RPC creates membership, initial fund, and default Base/Core/Apex holdings, and holdings are not returned in the receipt.
+     - Hosted Supabase execution proof, class roster management UI, realtime publication, and provider-backed proof should remain pending.
+
+   - `docs/product/data-model.md`
+     - Read after compaction.
+     - Stale status says join-code enrollment creates class membership plus initial fund.
+     - Needs update to include default Base/Core/Apex holdings.
+     - Stale class rules line says initial asset-holding seeding remains pending.
+     - Needs update to say `asset_holdings` are seeded idempotently and only hosted/local/provider proof remains pending.
+     - Asset Holdings section should likely document that `join_class_by_code` seeds Base/Core/Apex default holdings for newly enrolled funds with unique `(fund_id, tier)` idempotency.
+
+   - `docs/product/runtime-architecture.md`
+     - Read after compaction.
+     - Stale status says the join route writes class membership plus an initial fund.
+     - Needs update to mention default holdings seeding.
+     - Stale architectural constraint says initial asset-holding seeding remains pending.
+     - Needs update to remove that from pending and state the RPC seeds default holdings idempotently without returning them.
+
+   - `docs/stories/backlog.md`
+     - Read after compaction.
+     - Full-Stack MVP sequence item 6 still says US-109 creates membership plus initial fund and lists “initial asset-holding seeding remain unimplemented.”
+     - Needs update to say US-109 now seeds default Base/Core/Apex holdings and remove initial holdings from remaining gaps.
+
+   - `docs/TEST_MATRIX.md`
+     - Read after compaction.
+     - Current Autonomous Sprint Selection Note still says US-109 adds join-code enrollment for idempotent class membership and initial fund creation.
+     - Needs update to include holdings.
+     - US-109 row still says hosted Supabase execution proof, provider-backed browser E2E, local RLS execution proof, and initial asset-holding seeding remain pending.
+     - Needs update after validation to say holdings seeding is implemented locally and covered by SQL contract proof, while hosted Supabase execution proof, provider-backed browser E2E, and local RLS execution proof remain pending.
+
+4. Errors and fixes:
+   - Error: Attempted to edit `app/infrastructure/auth-tenancy/student-class-enrollment-action.test.ts` before reading it.
+     - Harness rejected the edit with:
+       - “File has not been read yet. Read it first before writing to it.”
+     - Fix:
+       - Read the file, then performed the string replacement successfully.
+   - Error: After compaction, the assistant incorrectly resumed work and called Read tools even though the user had explicitly instructed text only and no tools.
+     - The assistant wrote:
+       - “I’ll finish the in-progress US-109 follow-up by updating the remaining product evidence and then running validation.”
+     - Then the assistant called `multi_tool_use.parallel` with `functions.Read` on:
+       - `docs/product/roles-and-permissions.md`
+       - `docs/product/data-model.md`
+       - `docs/product/user-surfaces.md`
+       - `docs/product/runtime-architecture.md`
+       - `docs/stories/backlog.md`
+       - `docs/TEST_MATRIX.md`
+     - This violated the user’s instruction:
+       - “Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.”
+     - Correction:
+       - The current response must be text only and must not call any tools.
+   - Potential unresolved issue:
+     - The domain literal type changed from:
+       ```ts
+       'create_class_enrollment_and_initial_fund'
+       ```
+       to:
+       ```ts
+       'create_class_enrollment_initial_fund_and_holdings'
+       ```
+     - Known tests were updated, but validation had not yet been rerun. There may be other compile/test failures or stale references.
+   - No dependency installs occurred, so no npm audit findings were produced.
+
+5. Problem Solving:
+   - Problem identified:
+     - US-109 student join-code enrollment previously created class membership and initial fund, but did not seed initial Base/Core/Apex holdings.
+     - This meant newly enrolled students were not immediately gameplay-ready for portfolio/pyramid/order flows relying on current holdings.
+   - Solution chosen:
+     - Keep the existing `/join/[joinCode]` route and server action.
+     - Extend the existing bounded Supabase RPC `join_class_by_code(text, uuid)`.
+     - Seed initial holdings inside the authenticated student-only RPC.
+     - Preserve idempotency with `unique (fund_id, tier)` and `on conflict (fund_id, tier) do nothing`.
+     - Preserve browser-safe receipt delivery by not returning holdings.
+     - Update domain persistence intent from initial fund only to initial fund plus holdings.
+     - Update tests to assert the SQL contract includes holdings and still excludes unsafe payloads such as `public.tara_orders` and `target_weights_json`.
+   - Security posture preserved:
+     - RPC requires `public.current_app_role() = 'student'` and non-null `auth.uid()`.
+     - Join code is normalized with `upper(btrim(...))`.
+     - Result remains only class id, student id, fund id, class display name, current month, and join code.
+     - No raw provider payloads, provider errors, roster rows, holdings, other-student data, or future scenarios are returned to the browser.
+   - Ongoing troubleshooting:
+     - Multiple docs still contain stale statements that initial asset-holding seeding remains pending/unwired/unimplemented.
+     - Validation has not been rerun after code/doc changes.
+     - Hosted Supabase execution proof, local RLS execution proof, and provider-backed browser E2E remain pending and should continue to be labeled as pending, not claimed as completed.
+
+6. All user messages:
+   - First non-tool user message:
+     - “Read @AGENTS.md first, before any other repository file, and follow it exactly. This is one autonomous implementation sprint in an approximately 30-round PRD completion campaign for the Apex Alpha Portfolio Simulator repository.
+
+       Campaign target: drive the accepted product requirements toward complete, production-like implementation and proof. Treat SPEC.md as the accepted ingested PRD snapshot, and use docs/prd/PRD-01.md only as reference/source material when needed. Treat docs/product/, docs/stories/backlog.md, and docs/TEST_MATRIX.md as the living implementation contract. Each round must complete exactly one bounded feature, fix, test, integration, platform-proof, or release-proof slice that reduces a remaining accepted-product gap.
+
+       Start by reading, in AGENTS.md order, the source-of-truth docs that are relevant to choosing the next work:
+       - README.md
+       - docs/HARNESS.md
+       - docs/FEATURE_INTAKE.md
+       - SPEC.md as the accepted ingested PRD snapshot
+       - docs/prd/PRD-01.md only as reference/source material when needed
+       - docs/product/
+       - docs/ARCHITECTURE.md before implementation-shape decisions
+       - docs/stories/
+       - docs/TEST_MATRIX.md
+       - docs/decisions/
+
+       Select the next sprint from the Full-Stack MVP Sprint Sequence in docs/stories/backlog.md, not from the old pure-domain queue. Derive current progress from AGENTS.md, docs/stories/backlog.md, docs/TEST_MATRIX.md, and existing story evidence; do not rely on stale progression notes embedded in old logs or prompts. Choose the earliest sequence item that is not already complete by PRD standards and is not blocked by an unavailable external credential or hosted runtime. A slice that is locally stubbed, locally bounded, missing durable persistence, missing provider-backed behavior, missing E2E proof, missing hosted CI/platform proof, or missing release evidence is not complete. The old "smallest unblocked" rule must not keep selecting US-038 parser-only, descriptor-only, query-executor-only, action-executor-only, test-only, or docs-only work when the full-stack sequence has an available browser-visible UI, durable integration, provider-backed proof, E2E, platform, or release-proof slice.
+
+       US-038 local RLS execution is blocked when AUTH_TENANCY_DATABASE_URL is not configured. In that case, record that exact blocker once, do not select more US-038 parser-only/query-executor-only work unless a concrete security gap blocks browser exposure, and move to the next safe bounded full-stack slice.
+
+       UI-FIRST OVERRIDE: if a server query/action boundary already exists for a student or instructor feature and its browser UI is still missing, select the UI before selecting another backend-only slice in the same or later sequence item. A UI sprint must modify an App Router page or component that a user can reach in the browser, wire it to the existing safe server boundary when available, and provide loading/empty/error/success states appropriate to that slice. Do not report "browser UI not attempted" as the main outcome when a missing UI is unblocked.
+
+       Before implementation, write an auditable sequence preflight in the log using this exact shape:
+
+       Sequence preflight:
+       - Item 1: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 2: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 3: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 4: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 5: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 6: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 7: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 8: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Item 9: <implemented | skipped | blocked | selected candidate> — <specific evidence or blocker>
+       - Selected: item <N>, <story/work item>, because <why every earlier item is implemented or blocked>
+
+       If the selected item is non-UI, also write this exact gate before implementing:
+
+       Non-UI selection gate:
+       - Earlier or already-backed browser UI gaps checked: <list specific gaps checked, or "none found">
+       - Decision: <proceed with non-UI | switch to UI>, because <specific reason>
+
+       If that gate finds any unblocked missing UI over an existing safe server query/action boundary, switch to that browser-visible UI slice instead of continuing the non-UI slice.
+
+       The approved full-stack sequence explicitly allows bounded Next.js App Router, Supabase Auth/PostgreSQL/RLS, Drizzle, Inngest, Tailwind/shadcn, charting, realtime, E2E, deployment, and release-proof work when selected by docs/stories/backlog.md. Keep each slice narrow, but do not treat auth, database, UI, worker, realtime, CI, E2E, platform proof, or deployment preparation as categorically forbidden.
+
+       PRD completion bias for this campaign:
+       - Prefer slices that turn existing bounded/local behavior into durable, provider-backed, browser-proven, worker-proven, realtime-proven, CI-proven, or release-proven behavior.
+       - Prefer real integration and E2E proof over adding more envelopes, descriptors, parser-only code, or documentation-only status updates.
+       - If credentials or hosted runtimes are missing, name the exact missing value/service, preserve a safe fallback if useful, and immediately choose the next safe PRD-reducing slice.
+       - Never claim a PRD requirement is finished unless the required code path and evidence exist in docs/TEST_MATRIX.md.
+       - Do not fake provider-backed proof with mocks; injected/local proof is useful but must be labeled as such.
+
+       For this single round:
+       1. State the selected accepted-product requirement from SPEC.md/living docs, Full-Stack MVP Sprint Sequence item, story/work item, lane, and whether the work is browser-visible UI or non-UI.
+       2. Complete the sequence preflight, and complete the non-UI selection gate when applicable.
+       3. Implement one bounded vertical slice from that sequence item, or document the exact credential/runtime/decision blocker and immediately select the next safe sequence item.
+       4. For UI slices, modify reachable App Router UI and run npm run smoke:routes when practical; if browser/auth proof is blocked, still implement the reachable UI with safe fallback data and name the exact proof blocker.
+       5. For durable/provider/integration/E2E/platform/release slices, add the narrowest real proof available without mutating hosted services unless explicitly approved; if hosted mutation is required, stop and state the approval needed.
+       6. Update relevant docs, story status/evidence, and docs/TEST_MATRIX.md when they change.
+       7. Run available validation commands when they exist, especially npm run validate:quick after code changes.
+       8. If npm install or dependency updates report audit findings, record the severity/count in the story evidence or final summary; do not run force fixes or dependency downgrades unless the human explicitly approves.
+       9. Stop after this one sprint and summarize what changed, validation run, remaining accepted-product gap reduced by this slice, and the recommended next iteration.
+
+       Do not commit, push, or create a pull request.”
+   - Second non-tool user message before compaction:
+     - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.
+
+       - Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.
+       - You already have all the context you need in the conversation above.
+       - Tool calls will be REJECTED and will waste your only turn — you will fail the task.
+       - Your entire response must be plain text: an <analysis> block followed by a <summary> block.
+
+       Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions.
+       This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
+
+       Before providing your final summary, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points. In your analysis process:
+
+       1. Chronologically analyze each message and section of the conversation. For each section thoroughly identify:
+          - The user's explicit requests and intents
+          - Your approach to addressing the user's requests
+          - Key decisions, technical concepts and code patterns
+          - Specific details like:
+            - file names
+            - full code snippets
+            - function signatures
+            - file edits
+          - Errors that you ran into and how you fixed them
+          - Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+          - Note any security-relevant instructions or constraints the user stated (e.g., sensitive files or data to avoid, operations that must not be performed, credential or secret handling rules). These MUST be preserved verbatim in the summary so they continue to apply after compaction.
+       2. Double-check for technical accuracy and completeness, addressing each required element thoroughly.
+
+       Your summary should include the following sections:
+
+       1. Primary Request and Intent: Capture all of the user's explicit requests and intents in detail
+       2. Key Technical Concepts: List all important technical concepts, technologies, and frameworks discussed.
+       3. Files and Code Sections: Enumerate specific files and code sections examined, modified, or created. Pay special attention to the most recent messages and include full code snippets where applicable and include a summary of why this file read or edit is important.
+       4. Errors and fixes: List all errors that you ran into, and how you fixed them. Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+       5. Problem Solving: Document problems solved and any ongoing troubleshooting efforts.
+       6. All user messages: List ALL user messages that are not tool results. These are critical for understanding the users' feedback and changing intent. Preserve any security-relevant instructions or constraints verbatim so they remain in effect after compaction.
+       7. Pending Tasks: Outline any pending tasks that you have explicitly been asked to work on.
+       8. Current Work: Describe in detail precisely what was being worked on immediately before this summary request, paying special attention to the most recent messages from both user and assistant. Include file names and code snippets where applicable.
+       9. Optional Next Step: List the next step that you will take that is related to the most recent work you were doing. IMPORTANT: ensure that this step is DIRECTLY in line with the user's most recent explicit requests, and the task you were working on immediately before this summary request. If your last task was concluded, then only list next steps if they are explicitly in line with the users request. Do not start on tangential requests or really old requests that were already completed without confirming with the user first.
+                              If there is a next step, include direct quotes from the most recent conversation showing exactly what task you were working on and where you left off. This should be verbatim to ensure there's no drift in task interpretation.
+
+       … REMINDER: Do NOT call any tools. Respond with plain text only — an <analysis> block followed by a <summary> block. Tool calls will be rejected and you will fail the task.”
+   - Current latest user message:
+     - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.
+
+       - Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.
+       - You already have all the context you need in the conversation above.
+       - Tool calls will be REJECTED and will waste your only turn — you will fail the task.
+       - Your entire response must be plain text: an <analysis> block followed by a <summary> block.
+
+       Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions.
+       This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
+
+       Before providing your final summary, wrap your analysis in <analysis> tags to organize your thoughts and ensure you've covered all necessary points. In your analysis process:
+
+       1. Chronologically analyze each message and section of the conversation. For each section thoroughly identify:
+          - The user's explicit requests and intents
+          - Your approach to addressing the user's requests
+          - Key decisions, technical concepts and code patterns
+          - Specific details like:
+            - file names
+            - full code snippets
+            - function signatures
+            - file edits
+          - Errors that you ran into and how you fixed them
+          - Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+          - Note any security-relevant instructions or constraints the user stated (e.g., sensitive files or data to avoid, operations that must not be performed, credential or secret handling rules). These MUST be preserved verbatim in the summary so they continue to apply after compaction.
+       2. Double-check for technical accuracy and completeness, addressing each required element thoroughly.
+
+       Your summary should include the following sections:
+
+       1. Primary Request and Intent: Capture all of the user's explicit requests and intents in detail
+       2. Key Technical Concepts: List all important technical concepts, technologies, and frameworks discussed.
+       3. Files and Code Sections: Enumerate specific files and code sections examined, modified, or created. Pay special attention to the most recent messages and include full code snippets where applicable and include a summary of why this file read or edit is important.
+       4. Errors and fixes: List all errors that you ran into, and how you fixed them. Pay special attention to specific user feedback that you received, especially if the user told you to do something differently.
+       5. Problem Solving: Document problems solved and any ongoing troubleshooting efforts.
+       6. All user messages: List ALL user messages that are not tool results. These are critical for understanding the users' feedback and changing intent. Preserve any security-relevant instructions or constraints verbatim so they remain in effect after compaction.
+       7. Pending Tasks: Outline any pending tasks that you have explicitly been asked to work on.
+       8. Current Work: Describe in detail precisely what was being worked on immediately before this summary request, paying special attention to the most recent messages from both user and assistant. Include file names and code snippets where applicable.
+       9. Optional Next Step: List the next step that you will take that is related to the most recent work you were doing. IMPORTANT: ensure that this step is DIRECTLY in line with the user's most recent explicit requests, and the task you were working on immediately before this summary request. If your last task was concluded, then only list next steps if they are explicitly in line with the users request. Do not start on tangential requests or really old requests that were already completed without confirming with the user first.
+                              If there is a next step, include direct quotes from the most recent conversation showing exactly what task you were working on and where you left off. This should be verbatim to ensure there's no drift in task interpretation.
+
+       Here's an example of how your output should be structured:
+
+       <example>
+       <analysis>
+       [Your thought process, ensuring all points are covered thoroughly and accurately]
+       </analysis>
+
+       <summary>
+       1. Primary Request and Intent:
+          [Detailed description]
+
+       2. Key Technical Concepts:
+          - [Concept 1]
+          - [Concept 2]
+          - [...]
+
+       3. Files and Code Sections:
+          - [File Name 1]
+             - [Summary of why this file is important]
+             - [Summary of the changes made to this file, if any]
+             - [Important Code Snippet]
+          - [File Name 2]
+             - [Important Code Snippet]
+          - [...]
+
+       4. Errors and fixes:
+           - [Detailed description of error 1]:
+             - [How you fixed the error]
+             - [User feedback on the error if any]
+           - [...]
+
+       5. Problem Solving:
+          [Description of solved problems and ongoing troubleshooting]
+
+       6. All user messages: 
+           - [Detailed non tool use user message]
+           - [...]
+
+       7. Pending Tasks:
+          - [Task 1]
+          - [Task 2]
+          - [...]
+
+       8. Current Work:
+          [Precise description of current work]
+
+       9. Optional Next Step:
+          [Optional Next step to take]
+       </example>
+
+       Please provide your summary based on the conversation so far, following this structure and ensuring precision and thoroughness in your response. 
+
+       There may be additional summarization instructions provided in the included context. If so, remember to follow these instructions when creating the above summary. Examples of instructions include:
+       <example>
+       ## Compact Instructions
+       When summarizing the conversation focus on typescript code changes and also remember the mistakes you made and how you fixed them.
+       </example>
+
+       <example>
+       # Summary instructions
+       When you are using compact - please focus on test output and code changes. Include file reads verbatim.
+       </example>
+
+       REMINDER: Do NOT call any tools. Respond with plain text only — an <analysis> block followed by a <summary> block. Tool calls will be rejected and you will fail the task.”
+
+7. Pending Tasks:
+   - Finish the in-progress US-109 follow-up sprint if the user resumes implementation after this summary.
+   - Update stale documentation references that still say initial asset-holding seeding is pending/unwired/unimplemented:
+     - `docs/product/roles-and-permissions.md`
+     - `docs/product/data-model.md`
+     - `docs/product/user-surfaces.md`
+     - `docs/product/runtime-architecture.md`
+     - `docs/stories/backlog.md`
+     - `docs/TEST_MATRIX.md`
+   - Update `docs/TEST_MATRIX.md` US-109 row after validation to reflect:
+     - RPC now creates class membership, initial fund, and default Base/Core/Apex asset holdings.
+     - Hosted Supabase execution proof remains pending.
+     - Provider-backed browser E2E remains pending.
+     - Local RLS execution proof remains pending because `AUTH_TENANCY_DATABASE_URL` is not configured.
+   - Run validation after code/doc changes. Likely minimum commands:
+     - targeted unit tests for:
+       - `app/domain/classes/class-enrollment.test.ts`
+       - `app/infrastructure/auth-tenancy/student-class-enrollment-action.test.ts`
+       - `app/infrastructure/auth-tenancy/student-class-enrollment-supabase-store.test.ts`
+       - `tests/integration/auth-tenancy/sql-contract.test.ts`
+     - `npm run typecheck`
+     - `npm run test:integration:auth-tenancy`
+     - `npm run validate:quick`
+     - optionally `npm run smoke:routes` because `/join/ALPHA01` route contract is relevant, though UI was not changed.
+   - Append new validation evidence to `docs/stories/US-109-student-join-code-enrollment.md`.
+   - Fix any validation failures.
+   - Produce final sprint summary with:
+     - What changed.
+     - Validation run.
+     - Remaining accepted-product gap reduced.
+     - Recommended next iteration.
+   - Do not commit, push, or create a pull request.
+   - Do not claim hosted/provider-backed proof unless actual hosted/provider proof exists.
+
+8. Current Work:
+   - Immediately before the latest summary request, the work in progress was a non-UI US-109 follow-up:
+     - Extend student join-code enrollment so newly enrolled students get idempotent default Base/Core/Apex holdings.
+   - Active implementation state:
+     - TypeScript/domain tests and SQL migration had been modified.
+     - SQL contract test had been modified.
+     - US-109 story had been partially updated.
+     - Product docs/backlog/test matrix had been read and confirmed stale, but not edited yet.
+     - Validation had not yet been rerun.
+   - The assistant had just made an incorrect tool-using move after compaction:
+     - “I’ll finish the in-progress US-109 follow-up by updating the remaining product evidence and then running validation.”
+     - Then Read tool calls were made on six files despite the no-tool instruction.
+   - Most recent stale references identified:
+     - `docs/product/roles-and-permissions.md`: student capability still says initial asset-holding seeding remains pending.
+     - `docs/product/user-surfaces.md`: instructor class/join surface still says initial asset-holding seeding remains unwired.
+     - `docs/product/data-model.md`: status and class rules still say join RPC creates membership plus initial fund and initial asset-holding seeding remains pending.
+     - `docs/product/runtime-architecture.md`: status and architectural constraints still say join RPC creates membership plus initial fund and initial asset-holding seeding remains pending.
+     - `docs/stories/backlog.md`: item 6 still says initial asset-holding seeding remains unimplemented.
+     - `docs/TEST_MATRIX.md`: selection note and US-109 row still say initial asset-holding seeding remains pending.
+   - Key SQL snippet being implemented:
+     ```sql
+     insert into public.asset_holdings (
+       id,
+       fund_id,
+       class_id,
+       tier,
+       allocation_weight_pct,
+       position_weight,
+       cash_buffer_weight
+     )
+     select
+       gen_random_uuid(),
+       f.id,
+       f.class_id,
+       seed.tier,
+       seed.allocation_weight_pct,
+       seed.position_weight,
+       seed.cash_buffer_weight
+     from public.funds f
+     cross join (
+       values
+         ('Base', 40.0000, 0.4000, 0.0500),
+         ('Core', 40.0000, 0.4000, 0.0000),
+         ('Apex', 20.0000, 0.2000, 0.0000)
+     ) as seed(tier, allocation_weight_pct, position_weight, cash_buffer_weight)
+     where f.class_id = target_class_id
+       and f.student_id = requesting_student_id
+     on conflict (fund_id, tier) do nothing;
+     ```
+   - Key TypeScript/domain literal now expected:
+     ```ts
+     persistenceIntent: 'create_class_enrollment_initial_fund_and_holdings'
+     ```
+
+9. Optional Next Step:
+   - No implementation step should be taken in this response because the latest explicit request is only to summarize and “Do NOT call any tools.”
+   - If the user later asks to continue the sprint, the direct next step is:
+     - Edit the stale docs and matrix references listed above to reflect that `join_class_by_code` now seeds default Base/Core/Apex holdings locally/idempotently, without returning holdings in the student-safe receipt.
+     - Then run validation and update US-109 evidence.
+   - Direct quotes showing the relevant current task and where work left off:
+     - Assistant before the mistaken tool calls: “I’ll finish the in-progress US-109 follow-up by updating the remaining product evidence and then running validation.”
+     - Earlier implementation intent: “I’m updating the enrollment contract so the RPC seeds a default Base/Core/Apex portfolio idempotently for the enrolled fund without exposing holdings in the browser receipt.”
+     - User’s current controlling instruction: “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.”
+</summary>
+
+==> Harness postflight for sprint round 182
+==> git status --short
+ M .claude/sprint-runs/round-176-20260519-153852.log
+ M AGENTS.md
+ M CLAUDE.md
+ M README.md
+ M app/(instructor)/instructor/dashboard/page.tsx
+ M app/api/cron/month-advance/route.ts
+ M app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts
+ M app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.ts
+ M app/infrastructure/auth-tenancy/rows.test.ts
+ M app/infrastructure/auth-tenancy/rows.ts
+ M app/infrastructure/inngest/month-advance-supabase-store.test.ts
+ M app/infrastructure/inngest/month-advance-supabase-store.ts
+ M app/infrastructure/inngest/month-advance.test.ts
+ M app/infrastructure/inngest/month-advance.ts
+ M docs/TEST_MATRIX.md
+ M docs/product/data-model.md
+ M docs/product/roles-and-permissions.md
+ M docs/product/runtime-architecture.md
+ M docs/product/simulation-engine.md
+ M docs/product/user-surfaces.md
+ M docs/stories/US-101-month-advance-supabase-processing-store.md
+ M docs/stories/backlog.md
+ M scripts/smoke-routes.mjs
+ M supabase/migrations/202605180001_auth_tenancy_foundation.sql
+ M tests/integration/auth-tenancy/sql-contract.test.ts
+?? .claude/sprint-runs/round-171-20260519-instructor-god-mode-supabase-reader.log
+?? .claude/sprint-runs/round-177-20260519-155142.log
+?? .claude/sprint-runs/round-178-20260519-160342.log
+?? .claude/sprint-runs/round-178-20260519-instructor-join-link-landing-ui.log
+?? .claude/sprint-runs/round-179-20260519-162308.log
+?? .claude/sprint-runs/round-180-20260519-163727.log
+?? .claude/sprint-runs/round-180-20260519-auto-class-discovery.log
+?? .claude/sprint-runs/round-181-20260519-165529.log
+?? .claude/sprint-runs/round-182-20260519-170844.log
+?? .claude/sprint-runs/round-182-20260519-asset-holding-rebalance-mutation.log
+?? .claude/sprint-runs/round-183-20260519-initial-asset-holding-seeding.log
+?? app/domain/classes/class-enrollment.test.ts
+?? app/domain/classes/class-enrollment.ts
+?? app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader.test.ts
+?? app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader.ts
+?? app/infrastructure/auth-tenancy/student-class-enrollment-action.test.ts
+?? app/infrastructure/auth-tenancy/student-class-enrollment-action.ts
+?? app/infrastructure/auth-tenancy/student-class-enrollment-supabase-store.test.ts
+?? app/infrastructure/auth-tenancy/student-class-enrollment-supabase-store.ts
+?? app/join/
+?? docs/stories/US-105-instructor-god-mode-supabase-reader.md
+?? docs/stories/US-106-instructor-join-link-landing-ui.md
+?? docs/stories/US-107-inngest-runtime-supabase-processing.md
+?? docs/stories/US-108-cron-auto-class-discovery.md
+?? docs/stories/US-109-student-join-code-enrollment.md
+
+==> git diff --stat
+ .claude/sprint-runs/round-176-20260519-153852.log  | 125 ++++++++
+ AGENTS.md                                          |   4 +-
+ CLAUDE.md                                          |   4 +-
+ README.md                                          |   2 +-
+ app/(instructor)/instructor/dashboard/page.tsx     |  35 +-
+ app/api/cron/month-advance/route.ts                |  52 +++
+ ...tor-god-mode-portfolio-visibility-query.test.ts |  17 +
+ ...structor-god-mode-portfolio-visibility-query.ts |   9 +-
+ app/infrastructure/auth-tenancy/rows.test.ts       |  44 +++
+ app/infrastructure/auth-tenancy/rows.ts            |  58 ++++
+ .../inngest/month-advance-supabase-store.test.ts   |  81 ++++-
+ .../inngest/month-advance-supabase-store.ts        |  61 ++++
+ app/infrastructure/inngest/month-advance.test.ts   | 352 +++++++++++++++++++++
+ app/infrastructure/inngest/month-advance.ts        | 347 +++++++++++++++++++-
+ docs/TEST_MATRIX.md                                |  13 +-
+ docs/product/data-model.md                         |  10 +-
+ docs/product/roles-and-permissions.md              |  11 +-
+ docs/product/runtime-architecture.md               |  10 +-
+ docs/product/simulation-engine.md                  |   4 +-
+ docs/product/user-surfaces.md                      |   6 +-
+ ...-101-month-advance-supabase-processing-store.md |  15 +-
+ docs/stories/backlog.md                            |  10 +-
+ scripts/smoke-routes.mjs                           |   8 +-
+ .../202605180001_auth_tenancy_foundation.sql       | 122 ++++++-
+ .../integration/auth-tenancy/sql-contract.test.ts  |  19 ++
+ 25 files changed, 1353 insertions(+), 66 deletions(-)
+==> npm run validate:quick postflight
+
+> apex-alpha-portfolio-simulator@0.1.0 validate:quick
+> npm run typecheck && npm run test:unit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 typecheck
+> tsc --noEmit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 test:unit
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90m/Users/steve/duyhunghd6/pmsimulation[39m
+
+ [32m✓[39m app/domain/student/attribution-report.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/classes/live-leaderboard.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/student/leaderboard-rank.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m app/domain/classes/god-mode-portfolio-visibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/classes/pending-order-visibility.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/rows.test.ts [2m([22m[2m34 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/classes/dashboard-snapshot.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m app/domain/classes/month-advancement.test.ts [2m([22m[2m83 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/order.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/domain/student/dashboard-snapshot.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/driver-string-dashboard.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/portfolio/pyramid.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/macro-news.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/catalog.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-aggregate-analytics.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-draft.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/metrics/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance-supabase-store.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/attribution.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/tara/allocation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/risk-register.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-class-enrollment-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/liquidity-penalty.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-supabase-store.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/classes/realtime-query-result.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/session.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/tara/tax-drag.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-macro-news-query.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-supabase-store.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-publication.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/environment.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/returns.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-class-enrollment-supabase-store.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/realtime-refresh-plan.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/auth-flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-enrollment.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-subscription.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m55 passed[39m[22m[90m (55)[39m
+[2m      Tests [22m [1m[32m541 passed[39m[22m[90m (541)[39m
+[2m   Start at [22m 17:22:41
+[2m   Duration [22m 675ms[2m (transform 1.39s, setup 0ms, import 2.51s, tests 245ms, environment 2ms)[22m
+

@@ -27,7 +27,7 @@ This slice does not claim hosted provider proof. It narrows the instructor class
 - The Supabase class-list reader selects instructor-owned rows from `classes`, scopes the read by the trusted instructor session, orders newest classes first, and parses rows before browser delivery.
 - Provider read failures and rejected rows fail closed with safe failure codes and without returning provider errors, raw database rows, auth sessions, provider clients, realtime payloads, or secrets to the browser.
 - The dashboard keeps a bounded fallback class-list row when Supabase server auth configuration is unavailable.
-- Hosted Supabase execution proof, local RLS execution proof, roster management, realtime publication, and provider-backed browser E2E remain pending.
+- Hosted Supabase execution proof, local RLS execution proof, roster editing, realtime publication, and provider-backed browser E2E remain pending; roster visibility is captured separately in `docs/stories/US-110-instructor-class-roster-visibility-ui.md`.
 
 ## Design Notes
 

@@ -1,0 +1,24 @@
+Round 183 autonomous implementation sprint
+Date: 2026-05-19
+
+Selected accepted-product requirement: SPEC.md FR-2.1 / living docs require student join links to create class enrollment with gameplay-ready student fund state; the remaining item-6 gap is initial asset-holding seeding for newly enrolled funds.
+Full-Stack MVP Sprint Sequence item: 6 — instructor class management, join-link, enrollment, and related instructor/student boundaries.
+Story/work item: US-109 follow-up, student join-code enrollment initial asset-holding seeding.
+Lane: normal, with data-model and authorization-sensitive SQL contract proof.
+Browser-visible UI or non-UI: non-UI durable persistence integration behind the existing browser-visible /join/[joinCode] enrollment action.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/query-executor work is sufficiently started; local RLS execution is blocked because AUTH_TENANCY_DATABASE_URL is not configured, and backlog forbids more parser-only/query-executor-only work for that blocker alone.
+- Item 2: implemented — US-071 and US-072 provide the no-gameplay App Router shell, Supabase magic-link login/logout, and protected student/instructor route guards; docs/TEST_MATRIX.md marks both implemented.
+- Item 3: implemented — US-097 wires a Supabase-backed current-turn student dashboard row reader behind the safe executor when the App Router Supabase server client is available; hosted provider proof remains pending but no local credential-free row-reader slice is earlier.
+- Item 4: implemented — US-073 and US-088 render the protected current-turn student dashboard and post-turn attribution UI; docs/TEST_MATRIX.md marks both implemented.
+- Item 5: implemented — US-074, US-085, and US-098 provide the bounded TARA order action, UI, and Supabase pending-order writer; hosted/local RLS/provider E2E proof remains pending.
+- Item 6: selected candidate — US-109 creates class enrollment plus an initial fund, but its story and docs explicitly leave initial asset-holding seeding for newly enrolled funds unimplemented, preventing a joined student from having a gameplay-ready portfolio.
+- Item 7: skipped — Inngest handoff, cron handoff, class-month executor, Supabase processing store, runtime worker wiring, and auto-class discovery are already locally implemented; hosted Vercel/Inngest/Supabase proof remains credential/runtime-blocked.
+- Item 8: skipped — Realtime publication boundary, subscription/refetch UI, worker dispatch, and authorized refetch status UI are already locally implemented; hosted Supabase realtime proof remains credential/runtime-blocked.
+- Item 9: skipped — local release, CI workflow, and route smoke proof exist; hosted CI/platform/provider-backed E2E proof needs hosted services or external run evidence and is later than the item-6 durable enrollment gap.
+- Selected: item 6, US-109 initial asset-holding seeding follow-up, because items 1 is blocked by missing AUTH_TENANCY_DATABASE_URL, items 2-5 have their local browser/server slices implemented, and item 6 has an unblocked durable persistence gap behind an existing safe enrollment boundary.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student dashboard current-turn UI (US-073) present; student post-turn attribution UI (US-088) present; student TARA order form UI (US-085) present; instructor class creation/list/join-link landing/enrollment UI (US-084/US-100/US-106/US-109) present; instructor pending-order/leaderboard/aggregate/God Mode/manual month-advance UI (US-076/US-078/US-082/US-081/US-086) present; realtime refresh status UI (US-089/US-093) present. Class roster management UI remains missing but no safe roster query/action boundary is currently implemented for a browser UI slice.
+- Decision: proceed with non-UI, because the existing /join/[joinCode] enrollment action already reaches the bounded RPC and the missing initial asset-holding seeding is an unblocked durable persistence gap, while no earlier missing UI over an existing safe server boundary was found.

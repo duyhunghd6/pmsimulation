@@ -1,0 +1,619 @@
+<analysis>
+The conversation’s active state is a summary-only handoff after an autonomous implementation sprint was effectively completed but not fully finalized in the task tracker. The most recent controlling instruction before compaction was explicit: respond with text only, do not call any tools, and produce an `<analysis>` block followed by a `<summary>` block. Therefore no repository inspection, task update, or validation rerun should happen in this turn.
+
+The implementation work completed before the interruption was a bounded non-UI full-stack sprint slice for Full-Stack MVP Sprint Sequence item 7: wiring the Inngest month-advance worker runtime to the existing Supabase processing store and Supabase Realtime publisher when server-only runtime configuration is available. Code, tests, story evidence, product docs, backlog, and test matrix were updated, and validation passed. The remaining unfinalized bookkeeping was that task #3, “Update evidence and validate,” had not yet been marked completed even though the work and validation were done.
+</analysis>
+
+<summary>
+1. Primary Request and Intent
+
+- The user originally requested one autonomous implementation sprint in the Apex Alpha Portfolio Simulator repository.
+- The user explicitly required:
+  - “Read @AGENTS.md first, before any other repository file, and follow it exactly.”
+  - Treat `SPEC.md` as the accepted ingested PRD snapshot.
+  - Use `docs/prd/PRD-01.md` only as reference/source material when needed.
+  - Treat `docs/product/`, `docs/stories/backlog.md`, and `docs/TEST_MATRIX.md` as the living implementation contract.
+  - Select the next sprint from the Full-Stack MVP Sprint Sequence in `docs/stories/backlog.md`, not the old pure-domain queue.
+  - Pick the earliest sequence item not complete by PRD standards and not blocked by unavailable external credential or hosted runtime.
+  - If US-038 local RLS execution is blocked by missing `AUTH_TENANCY_DATABASE_URL`, record that blocker once and do not select more US-038 parser-only/query-executor-only work unless a concrete security gap blocks browser exposure.
+  - Apply the UI-first override: if a server query/action boundary exists and browser UI is missing, implement UI before backend-only work.
+  - Before implementation, write an auditable “Sequence preflight” with exactly nine item lines and selected item.
+  - If selected work is non-UI, write a “Non-UI selection gate” before implementation.
+  - Implement exactly one bounded vertical slice.
+  - Update relevant docs, story status/evidence, and `docs/TEST_MATRIX.md`.
+  - Run validation, especially `npm run validate:quick`; run `npm run smoke:routes` for UI when practical.
+  - Do not commit, push, or create a PR.
+
+- The selected bounded slice was Full-Stack MVP Sprint Sequence item 7:
+  - Inngest worker runtime Supabase processing wiring.
+  - The goal was to wire the existing `app/month.advance.requested` Inngest function to the existing Supabase processing store and Supabase Realtime publisher when server-only runtime values are configured.
+
+- The most recent pre-compaction user request superseded all implementation work and required a text-only detailed conversation summary:
+  - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.”
+  - “Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.”
+  - “You already have all the context you need in the conversation above.”
+  - “Tool calls will be REJECTED and will waste your only turn — you will fail the task.”
+  - “Your entire response must be plain text: an `<analysis>` block followed by a `<summary>` block.”
+  - “REMINDER: Do NOT call any tools. Respond with plain text only — an `<analysis>` block followed by a `<summary>` block. Tool calls will be rejected and you will fail the task.”
+
+2. Key Technical Concepts
+
+- Apex Alpha Portfolio Simulator:
+  - A web-based, desktop-first classroom financial training simulator.
+  - Students manage virtual funds inside instructor-controlled class simulations.
+  - Instructors create classes, generate join links, view dashboards, and advance simulation turns.
+
+- Full-stack MVP stack:
+  - Next.js App Router.
+  - Vercel hosting and cron.
+  - Supabase Auth/PostgreSQL/RLS/Realtime.
+  - Drizzle ORM.
+  - Inngest.
+  - Tailwind CSS/shadcn/ui.
+  - Apache ECharts/Tremor.
+
+- Security/auth/tenancy constraints:
+  - Supabase Auth JWT claims are the trusted session source.
+  - The trusted `app_role` claim separates student and instructor paths.
+  - Supabase RLS is the primary tenant enforcement layer for persisted gameplay records.
+  - Server boundaries must parse session claims, request inputs, and database rows before returning typed outcomes.
+  - Students must not receive future macro rows or other students’ exact holdings.
+  - Instructor God Mode is privileged and must remain separated from student query paths.
+  - Realtime payloads must be refresh-only and must not contain snapshots, database rows, ledger drafts, fund processing keys, aggregate financial totals, or gameplay payloads.
+
+- Month advancement:
+  - Manual/live instructor trigger and auto/cron trigger converge on shared idempotent processing.
+  - Inngest event name: `app/month.advance.requested`.
+  - Existing event data shape:
+    ```ts
+    export type MonthAdvanceInngestEventData = {
+      classId: string;
+      triggerMode: 'manual' | 'auto';
+      triggerSource: 'live' | 'auto';
+      currentMonthIndex: number;
+      nextMonthIndex: number;
+      totalMonths: number;
+      idempotencyKey: string;
+      processingPath: 'shared_month_advance';
+    };
+    ```
+  - Existing injected processing executor:
+    ```ts
+    executeMonthAdvanceClassMonthProcessingFromInngestEventData({
+      data,
+      reader,
+      writer,
+      realtimeClient,
+    })
+    ```
+
+- Supabase processing store:
+  - Reads class-scoped `funds`, `asset_holdings`, pending current-month `tara_orders`, and `tracked_metrics`.
+  - Writes `simulation_ledger`, updates `funds.current_aum`, processes pending orders, and advances `classes.current_month_index`.
+  - Asset-holding rebalance mutation remains unwired.
+
+- Worker runtime wiring:
+  - A non-persistent server-side Supabase client is created using `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+  - Missing/malformed runtime config returns safe status codes.
+  - Provider/runtime failures are sanitized and do not return provider errors or secrets.
+
+3. Files and Code Sections
+
+- `AGENTS.md`
+  - Read first per instruction.
+  - Important rules followed:
+    - Source-of-truth order.
+    - Use Full-Stack MVP Sprint Sequence.
+    - Do not reselect US-038 parser/query work if local RLS proof is blocked solely by missing `AUTH_TENANCY_DATABASE_URL`.
+    - Before non-UI work, verify no earlier or already-backed browser UI is missing.
+    - Done definition requires docs/test matrix validation and final response.
+    - Do not commit/push.
+
+- `docs/stories/backlog.md`
+  - Read and edited.
+  - Item 7 was selected because items 1–6 were implemented locally/bounded or blocked by missing provider/runtime proof.
+  - Added US-107 evidence:
+    - `docs/stories/US-107-inngest-runtime-supabase-processing.md` wires the Inngest worker function to the existing Supabase processing store and Supabase Realtime publisher when server-only worker runtime values are configured.
+  - Remaining gaps preserved:
+    - Hosted worker execution proof.
+    - Live RLS write proof.
+    - Durable auto-class discovery.
+    - Asset-holding rebalance mutation.
+    - Hosted realtime proof.
+    - Provider-backed proof.
+
+- `docs/TEST_MATRIX.md`
+  - Read and edited.
+  - Added row for US-107:
+    - Unit proof implemented.
+    - Integration/E2E/platform proof still planned.
+    - Evidence points to `docs/stories/US-107-inngest-runtime-supabase-processing.md`.
+    - Recorded focused unit test and typecheck results.
+  - Updated current sprint evidence and pending gaps.
+
+- `docs/product/simulation-engine.md`
+  - Edited to state that the Inngest worker function now wires the processing executor to the Supabase processing store and Supabase Realtime publisher when server-only runtime values are configured.
+  - Preserved pending hosted/runtime/provider proof gaps.
+
+- `docs/product/runtime-architecture.md`
+  - Edited status and architectural constraints.
+  - Added that the Inngest worker now wires valid `app/month.advance.requested` events to the Supabase processing store and Realtime publisher when configured.
+  - Added safe runtime-configuration/provider-failure behavior.
+
+- `docs/product/data-model.md`
+  - Edited Simulation Ledger rules.
+  - Added that valid runtime events can be wired to the Supabase processing store and Realtime publisher when `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.
+  - Preserved pending gaps for hosted proof, live RLS write proof, asset-holding rebalance mutation, provider payloads, and hosted realtime proof.
+
+- `docs/product/roles-and-permissions.md`
+  - Edited Authorization Proof Expectations.
+  - Added US-107 evidence:
+    - Inngest worker function wired to Supabase processing store and Supabase Realtime publisher when server-only runtime values are configured.
+    - Safe runtime-configuration/provider-failure statuses.
+    - Hosted worker execution proof and live RLS write proof remain pending.
+
+- `docs/stories/US-107-inngest-runtime-supabase-processing.md`
+  - Created new story file.
+  - Status: implemented locally with unit proof; hosted Inngest/Supabase execution proof pending.
+  - Sequence item: item 7.
+  - Lane: normal, non-UI infrastructure slice.
+  - Captured validation:
+    - `npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts` passed.
+    - `npm run typecheck` passed.
+  - Out of scope:
+    - Hosted Inngest execution proof.
+    - Hosted Supabase read/write and Realtime proof.
+    - Live RLS write proof.
+    - Durable auto-class discovery for cron.
+    - Asset-holding rebalance mutation.
+    - Provider-backed browser/E2E proof.
+
+- `app/infrastructure/inngest/month-advance.ts`
+  - Edited significantly.
+  - Previously, `monthAdvanceRequestedFunction` only parsed the worker job and returned an accepted/rejected worker-safe receipt.
+  - Added imports:
+    ```ts
+    import { createClient } from '@supabase/supabase-js';
+    import { Inngest } from 'inngest';
+    import { createSupabaseMonthAdvanceClassMonthProcessingStore } from './month-advance-supabase-store';
+    ```
+  - Added runtime environment parsing types:
+    - `MonthAdvanceWorkerRuntimeEnvironment`
+    - `MonthAdvanceWorkerRuntimeEnvironmentFailureCode`
+    - `MonthAdvanceWorkerRuntimeEnvironmentParseResult`
+    - `MonthAdvanceRuntimeWorkerBoundaries`
+    - `MonthAdvanceRuntimeWorkerBoundariesResult`
+  - Added runtime worker result type:
+    - `completed_month_advance_worker_job`
+    - `rejected_month_advance_worker_job`
+    - `worker_runtime_not_configured`
+    - `worker_runtime_failed`
+  - Added:
+    ```ts
+    parseMonthAdvanceWorkerRuntimeEnvironment(input: unknown)
+    ```
+    which validates:
+    - Input is an object.
+    - `NEXT_PUBLIC_SUPABASE_URL` exists and is either local Supabase `http://127.0.0.1...` or hosted `https://*.supabase.co`.
+    - `SUPABASE_SERVICE_ROLE_KEY` exists and is not whitespace-padded.
+  - Added:
+    ```ts
+    createMonthAdvanceRuntimeWorkerBoundariesFromEnvironment(environment: unknown)
+    ```
+    which:
+    - Parses runtime environment.
+    - Creates a non-persistent Supabase client.
+    - Creates the Supabase month-advance processing store.
+    - Reuses the client as the server-only realtime broadcast client.
+  - Added:
+    ```ts
+    executeMonthAdvanceRuntimeWorkerFromInngestEventData(...)
+    ```
+    which:
+    - Creates the worker-safe receipt from event data.
+    - Returns validation rejection if event data is invalid.
+    - Returns `worker_runtime_not_configured` for missing/malformed runtime config.
+    - Calls `executeMonthAdvanceClassMonthProcessingFromInngestEventData` when configured.
+    - Catches provider/runtime exceptions and returns `worker_runtime_failed` without leaking details.
+    - Returns completed worker job plus processing envelope on success.
+  - Replaced the Inngest function body with:
+    ```ts
+    async ({ event }) =>
+      executeMonthAdvanceRuntimeWorkerFromInngestEventData({
+        data: event.data,
+        environment: process.env,
+      })
+    ```
+
+- `app/infrastructure/inngest/month-advance.test.ts`
+  - Edited.
+  - Added imports:
+    ```ts
+    executeMonthAdvanceRuntimeWorkerFromInngestEventData,
+    parseMonthAdvanceWorkerRuntimeEnvironment,
+    ```
+  - Added parser tests:
+    - Accepts local/hosted Supabase runtime values.
+    - Ignores public anon key.
+    - Rejects non-object input.
+    - Rejects missing Supabase URL.
+    - Rejects non-Supabase URL.
+    - Rejects missing service-role key.
+    - Rejects whitespace-padded service-role key.
+  - Added runtime worker tests:
+    - Successfully wires injected reader/writer/realtime boundaries.
+    - Persists class-month processing result.
+    - Sends refresh-only realtime publication.
+    - Returns `worker_runtime_not_configured` for missing config.
+    - Returns sanitized `worker_runtime_failed` when provider boundary throws.
+    - Verifies result does not contain provider error text or `service-role-secret`.
+
+- `app/infrastructure/inngest/month-advance-supabase-store.ts`
+  - Read for context, not edited.
+  - Existing factory:
+    ```ts
+    createSupabaseMonthAdvanceClassMonthProcessingStore(client)
+    ```
+    returns reader and writer implementations.
+
+- `app/infrastructure/realtime/supabase-publication.ts`
+  - Read for realtime client shape, not edited.
+  - Key shape:
+    ```ts
+    export type SupabaseRealtimeClient = {
+      channel(channelName: string): SupabaseRealtimeChannel;
+    };
+    ```
+
+- `app/api/inngest/route.ts`
+  - Read for context, not edited.
+  - Serves `monthAdvanceRequestedFunction` through `inngest/next`.
+
+- `app/api/cron/month-advance/route.ts`
+  - Previously read.
+  - Existing limitation:
+    - Requires explicit `classId`, `currentMonthIndex`, and `totalMonths`.
+    - No durable auto-class discovery yet.
+
+4. Errors and Fixes
+
+- Edit error:
+  - Tried to replace a generic `});` in `app/infrastructure/inngest/month-advance.test.ts`.
+  - Edit failed because there were 32 matches and `replace_all` was false.
+  - Fix:
+    - Replaced a larger unique `describe('createMonthAdvanceWorkerJobResultFromInngestEventData', ...)` block and appended the new runtime tests after it.
+
+- Large diff output:
+  - `git diff` output was too large and persisted to a tool-result file.
+  - Preview showed `8 files changed, 344 insertions(+), 33 deletions(-)`.
+  - No code fix was needed.
+
+- No TypeScript or test failures occurred:
+  - Focused test passed.
+  - Typecheck passed.
+  - Full quick validation passed.
+
+5. Problem Solving
+
+- Sprint selection:
+  - Determined items 1–6 were implemented locally/bounded or blocked by missing external provider/runtime credentials.
+  - Determined item 7 had remaining unblocked non-UI work:
+    - Runtime Inngest worker wiring from event to Supabase processing store and realtime client.
+  - Applied UI-first override by checking:
+    - Student dashboard current-turn UI.
+    - Student TARA form.
+    - Student post-turn attribution panel.
+    - Instructor class creation/list/join links.
+    - Pending-order visibility.
+    - Live leaderboard.
+    - Aggregate analytics.
+    - God Mode.
+    - Manual month-advance control.
+    - Realtime status panel.
+  - No earlier unblocked UI over a safe server boundary was missing.
+
+- Required preflight was printed:
+  ```text
+  Sequence preflight:
+  - Item 1: blocked — US-038 local RLS execution is still blocked by missing `AUTH_TENANCY_DATABASE_URL`; parser/schema/RLS/query slices are already started, so no more parser-only work.
+  - Item 2: implemented — no-gameplay App Router shell and Supabase auth route guard are captured by US-071/US-072.
+  - Item 3: implemented — US-097 wires the current-turn student dashboard reader behind the safe executor with hosted proof pending.
+  - Item 4: implemented — US-073 and US-088 cover protected current-turn and post-turn student dashboard UI.
+  - Item 5: implemented — US-074/US-085/US-098 cover bounded student TARA action, UI, and Supabase writer with hosted proof pending.
+  - Item 6: implemented — US-075 through US-106 cover instructor server/UI/provider-reader and join-link landing slices, with roster/provider proof pending.
+  - Item 7: selected candidate — US-087/US-090/US-091/US-101 exist, but runtime Inngest worker wiring from event to Supabase store plus realtime client remains unimplemented.
+  - Item 8: skipped — realtime publication/subscription/refetch slices exist locally; hosted proof depends on runtime/provider wiring after item 7.
+  - Item 9: skipped — E2E/platform/release hosted proof remains later than item 7.
+  - Selected: item 7, Inngest worker runtime Supabase processing wiring, because every earlier item is implemented locally/bounded or blocked by missing external provider credentials, and the next unblocked gap is wiring existing processing/store/realtime boundaries into the worker function.
+  ```
+
+- Required non-UI selection gate was printed:
+  ```text
+  Non-UI selection gate:
+  - Earlier or already-backed browser UI gaps checked: student dashboard current-turn UI, student TARA form, student post-turn attribution panel, instructor class creation/list/join links, pending-order visibility, live leaderboard, aggregate analytics, God Mode, manual month-advance control, realtime status panel.
+  - Decision: proceed with non-UI, because no earlier unblocked UI over an existing safe boundary is missing; the selected item is the earliest non-UI worker-runtime gap in the full-stack sequence.
+  ```
+
+- Implemented solution:
+  - Converted Inngest worker function from receipt-only behavior to runtime processing behavior when configured.
+  - Preserved worker-safe receipt behavior.
+  - Added safe config failure semantics.
+  - Added sanitized provider failure semantics.
+  - Reused existing Supabase store and realtime publisher boundaries.
+
+- Validation performed:
+  - Focused unit test:
+    - `npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts`
+    - 1 test file passed.
+    - 16 tests passed.
+  - Typecheck:
+    - `npm run typecheck`
+    - Passed.
+  - Full quick validation:
+    - `npm run validate:quick`
+    - Typecheck passed.
+    - Unit tests passed:
+      - 52 test files passed.
+      - 526 tests passed.
+
+6. All User Messages
+
+- Original autonomous sprint request included:
+  - “Read @AGENTS.md first, before any other repository file, and follow it exactly.”
+  - “This is one autonomous implementation sprint in an approximately 30-round PRD completion campaign for the Apex Alpha Portfolio Simulator repository.”
+  - “Campaign target: drive the accepted product requirements toward complete, production-like implementation and proof.”
+  - “Treat SPEC.md as the accepted ingested PRD snapshot, and use docs/prd/PRD-01.md only as reference/source material when needed.”
+  - “Treat docs/product/, docs/stories/backlog.md, and docs/TEST_MATRIX.md as the living implementation contract.”
+  - “Select the next sprint from the Full-Stack MVP Sprint Sequence in docs/stories/backlog.md, not from the old pure-domain queue.”
+  - “Choose the earliest sequence item that is not already complete by PRD standards and is not blocked by an unavailable external credential or hosted runtime.”
+  - “US-038 local RLS execution is blocked when AUTH_TENANCY_DATABASE_URL is not configured. In that case, record that exact blocker once, do not select more US-038 parser-only/query-executor-only work unless a concrete security gap blocks browser exposure, and move to the next safe bounded full-stack slice.”
+  - “UI-FIRST OVERRIDE: if a server query/action boundary already exists for a student or instructor feature and its browser UI is still missing, select the UI before selecting another backend-only slice in the same or later sequence item.”
+  - “Never claim a PRD requirement is finished unless the required code path and evidence exist in docs/TEST_MATRIX.md.”
+  - “Do not fake provider-backed proof with mocks; injected/local proof is useful but must be labeled as such.”
+  - “Do not commit, push, or create a pull request.”
+
+- Continuation instruction after compaction:
+  - “Continue the conversation from where it left off without asking the user any further questions. Resume directly — do not acknowledge the summary, do not recap what was happening, do not preface with "I'll continue" or similar. Pick up the last task as if the break never happened.”
+
+- Most recent pre-compaction summary-only request:
+  - “CRITICAL: Respond with TEXT ONLY. Do NOT call any tools.”
+  - “Do NOT use Read, Bash, Grep, Glob, Edit, Write, or ANY other tool.”
+  - “You already have all the context you need in the conversation above.”
+  - “Tool calls will be REJECTED and will waste your only turn — you will fail the task.”
+  - “Your entire response must be plain text: an `<analysis>` block followed by a `<summary>` block.”
+  - Requested sections:
+    1. Primary Request and Intent
+    2. Key Technical Concepts
+    3. Files and Code Sections
+    4. Errors and fixes
+    5. Problem Solving
+    6. All user messages
+    7. Pending Tasks
+    8. Current Work
+    9. Optional Next Step
+  - “Preserve any security-relevant instructions or constraints verbatim so they remain in effect after compaction.”
+  - “REMINDER: Do NOT call any tools. Respond with plain text only — an `<analysis>` block followed by a `<summary>` block. Tool calls will be rejected and you will fail the task.”
+
+7. Pending Tasks
+
+- Task tracker state before the summary-only request:
+  - Task #1 “Select full-stack sprint slice” — completed.
+  - Task #2 “Implement selected bounded slice” — completed.
+  - Task #3 “Update evidence and validate” — in_progress.
+
+- In practice, task #3’s actual work was completed:
+  - Evidence docs were updated.
+  - Story file was created.
+  - Test matrix was updated.
+  - Focused test passed.
+  - Typecheck passed.
+  - `npm run validate:quick` passed.
+  - But the task tracker itself had not yet been updated to completed.
+
+- Remaining sprint finalization if tool use is allowed later:
+  - Mark task #3 completed.
+  - Provide final sprint summary with:
+    - Changed files.
+    - Validation status.
+    - Out-of-scope gaps.
+    - Suggested next iteration.
+
+- Remaining product gaps outside this sprint:
+  - Hosted Inngest/Supabase execution proof.
+  - Live RLS write proof.
+  - Durable auto-class discovery.
+  - Asset-holding rebalance mutation.
+  - Hosted realtime publication/subscription proof.
+  - Provider-backed browser/E2E proof.
+  - Hosted platform/release proof.
+
+8. Current Work
+
+- Immediately before the summary-only request:
+  - US-107 implementation was complete.
+  - Docs and test matrix had been updated.
+  - Validation had passed.
+  - The last progress statement was:
+    - “The evidence docs now include US-107 and mark runtime Supabase wiring as locally implemented while keeping hosted worker/RLS/realtime proofs pending.”
+
+- Last validation:
+  ```text
+  npm run validate:quick
+  ```
+  Result:
+  ```text
+  > npm run typecheck && npm run test:unit
+  > tsc --noEmit
+  > vitest run
+   RUN  v4.1.6 /Users/steve/duyhunghd6/pmsimulation
+   Test Files  52 passed (52)
+        Tests  526 passed (526)
+     Start at  16:18:13
+     Duration  734ms (transform 1.54s, setup 0ms, import 2.60s, tests 269ms, environment 2ms)
+  ```
+
+- Focused test previously run:
+  ```text
+  npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts
+  ```
+  Result:
+  ```text
+  Test Files  1 passed (1)
+  Tests  16 passed (16)
+  ```
+
+- Current code state:
+  - `monthAdvanceRequestedFunction` now calls:
+    ```ts
+    executeMonthAdvanceRuntimeWorkerFromInngestEventData({
+      data: event.data,
+      environment: process.env,
+    })
+    ```
+  - Runtime executor now:
+    - Parses event data into worker-safe receipt.
+    - Builds Supabase store/realtime boundaries from environment when configured.
+    - Calls `executeMonthAdvanceClassMonthProcessingFromInngestEventData`.
+    - Returns completed processing, safe runtime config failure, safe provider failure, or validation rejection.
+
+- Current docs state:
+  - US-107 story created.
+  - Backlog updated.
+  - Test matrix updated.
+  - Runtime architecture updated.
+  - Simulation engine updated.
+  - Data model updated.
+  - Roles and permissions updated.
+
+9. Optional Next Step
+
+- Do not take any tool action in the summary-only turn.
+- If the user later resumes implementation and allows tool use, the immediate next step is:
+  - Mark task #3 “Update evidence and validate” completed.
+  - Provide the final sprint summary.
+- Do not proceed to additional implementation such as durable auto-class discovery, hosted proof, or asset-holding rebalance mutation without a new explicit continuation request, because the selected sprint slice was already completed and the latest controlling request was only to summarize.
+</summary>
+
+==> Harness postflight for sprint round 178
+==> git status --short
+ M .claude/sprint-runs/round-176-20260519-153852.log
+ M AGENTS.md
+ M CLAUDE.md
+ M README.md
+ M app/(instructor)/instructor/dashboard/page.tsx
+ M app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts
+ M app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.ts
+ M app/infrastructure/inngest/month-advance.test.ts
+ M app/infrastructure/inngest/month-advance.ts
+ M docs/TEST_MATRIX.md
+ M docs/product/data-model.md
+ M docs/product/roles-and-permissions.md
+ M docs/product/runtime-architecture.md
+ M docs/product/simulation-engine.md
+ M docs/product/user-surfaces.md
+ M docs/stories/backlog.md
+ M scripts/smoke-routes.mjs
+?? .claude/sprint-runs/round-171-20260519-instructor-god-mode-supabase-reader.log
+?? .claude/sprint-runs/round-177-20260519-155142.log
+?? .claude/sprint-runs/round-178-20260519-160342.log
+?? .claude/sprint-runs/round-178-20260519-instructor-join-link-landing-ui.log
+?? app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader.test.ts
+?? app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader.ts
+?? app/join/
+?? docs/stories/US-105-instructor-god-mode-supabase-reader.md
+?? docs/stories/US-106-instructor-join-link-landing-ui.md
+?? docs/stories/US-107-inngest-runtime-supabase-processing.md
+
+==> git diff --stat
+ .claude/sprint-runs/round-176-20260519-153852.log  | 125 +++++++++++++++
+ AGENTS.md                                          |   4 +-
+ CLAUDE.md                                          |   4 +-
+ README.md                                          |   2 +-
+ app/(instructor)/instructor/dashboard/page.tsx     |  35 ++++-
+ ...tor-god-mode-portfolio-visibility-query.test.ts |  17 ++
+ ...structor-god-mode-portfolio-visibility-query.ts |   9 +-
+ app/infrastructure/inngest/month-advance.test.ts   | 163 ++++++++++++++++++++
+ app/infrastructure/inngest/month-advance.ts        | 171 +++++++++++++++++++--
+ docs/TEST_MATRIX.md                                |  11 +-
+ docs/product/data-model.md                         |   6 +-
+ docs/product/roles-and-permissions.md              |   6 +-
+ docs/product/runtime-architecture.md               |   8 +-
+ docs/product/simulation-engine.md                  |   2 +-
+ docs/product/user-surfaces.md                      |   6 +-
+ docs/stories/backlog.md                            |  10 +-
+ scripts/smoke-routes.mjs                           |   8 +-
+ 17 files changed, 536 insertions(+), 51 deletions(-)
+==> npm run validate:quick postflight
+
+> apex-alpha-portfolio-simulator@0.1.0 validate:quick
+> npm run typecheck && npm run test:unit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 typecheck
+> tsc --noEmit
+
+
+> apex-alpha-portfolio-simulator@0.1.0 test:unit
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90m/Users/steve/duyhunghd6/pmsimulation[39m
+
+ [32m✓[39m app/domain/classes/live-leaderboard.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32m✓[39m app/domain/student/attribution-report.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/student/leaderboard-rank.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m app/domain/classes/god-mode-portfolio-visibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m app/domain/classes/pending-order-visibility.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-publication.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/rows.test.ts [2m([22m[2m32 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m app/domain/classes/month-advancement.test.ts [2m([22m[2m83 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m app/domain/classes/dashboard-snapshot.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/catalog.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/domain/tara/order.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-draft.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/tara/liquidity-penalty.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/classes/class-aggregate-analytics.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-supabase-store.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/session.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-portfolio-pyramid-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/portfolio/pyramid.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/student/dashboard-snapshot.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-query.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/macro-news.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/inngest/month-advance-supabase-store.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/tara/tax-drag.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/scenario/driver-string-dashboard.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/metrics/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/domain/tara/risk-register.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-submission-action.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-macro-news-query.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-query.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-tara-order-entry-query.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-live-leaderboard-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m app/domain/tara/attribution.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m app/domain/tara/allocation.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-action.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-aggregate-analytics-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-dashboard-current-turn-supabase-reader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/catalog.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/student-driver-string-dashboard-query.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-creation-supabase-store.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/domain/classes/realtime-query-result.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/environment.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-class-list-supabase-reader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/instructor-pending-order-visibility-supabase-reader.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/realtime-refresh-plan.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/domain/asset-dna/returns.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/realtime/supabase-subscription.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m app/infrastructure/auth-tenancy/auth-flow.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m52 passed[39m[22m[90m (52)[39m
+[2m      Tests [22m [1m[32m526 passed[39m[22m[90m (526)[39m
+[2m   Start at [22m 16:23:07
+[2m   Duration [22m 775ms[2m (transform 1.56s, setup 0ms, import 2.59s, tests 328ms, environment 3ms)[22m
+

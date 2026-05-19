@@ -39,6 +39,7 @@ export type InstructorGodModePortfolioVisibilityQueryExecutionFailureCode =
   | 'fund_row_rejected'
   | 'holding_row_rejected'
   | 'order_row_rejected'
+  | 'row_reader_failed'
   | 'invalid_order_status'
   | 'unknown_order_fund'
   | 'duplicate_order_fund'
@@ -83,7 +84,13 @@ export async function executeInstructorGodModePortfolioVisibilityQuery(input: {
     return { ok: false, failure: { code: 'invalid_descriptor' } };
   }
 
-  const rows = await input.rowReader.readInstructorGodModePortfolioVisibilityRows({ session: input.session, scope });
+  let rows: InstructorGodModePortfolioVisibilityQueryRowSet;
+  try {
+    rows = await input.rowReader.readInstructorGodModePortfolioVisibilityRows({ session: input.session, scope });
+  } catch {
+    return { ok: false, failure: { code: 'row_reader_failed' } };
+  }
+
   const funds: {
     fundId: string;
     studentDisplayName: string;

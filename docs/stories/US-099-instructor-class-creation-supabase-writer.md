@@ -27,7 +27,7 @@ This slice does not claim hosted provider proof. It narrows the live instructor 
 - The Supabase migration exposes a bounded `create_instructor_class` RPC that requires `app_role=instructor`, uses `auth.uid()` as the instructor owner, inserts both `classes` and `class_administrators`, and returns the persisted class row shape expected by the existing parser.
 - Provider write failures fail closed through a generic store error without returning provider errors, provider clients, auth sessions, raw database rows, realtime payloads, or secrets to the browser.
 - The protected `/instructor/dashboard` class creation form uses the Supabase store when `createAuthTenancySupabaseServerClient()` succeeds and keeps the bounded local fallback when Supabase server auth configuration is unavailable.
-- Hosted Supabase execution proof, local RLS execution proof, roster management, realtime publication, and provider-backed browser E2E remain pending; server-refreshed class-list UI is captured separately in `docs/stories/US-100-instructor-class-list-refresh-ui.md`.
+- Hosted Supabase execution proof, local RLS execution proof, roster editing, realtime publication, and provider-backed browser E2E remain pending; server-refreshed class-list UI is captured separately in `docs/stories/US-100-instructor-class-list-refresh-ui.md`, and roster visibility is captured separately in `docs/stories/US-110-instructor-class-roster-visibility-ui.md`.
 
 ## Design Notes
 

@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/month-advance",
+      "schedule": "0 17 * * *"
+    }
+  ]
+}

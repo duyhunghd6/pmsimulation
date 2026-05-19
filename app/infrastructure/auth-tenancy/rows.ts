@@ -17,6 +17,22 @@ export type InstructorOwnedClassRow = {
 
 export type InstructorCreatedClassRow = InstructorOwnedClassRow;
 
+export type StudentClassEnrollmentRow = {
+  classId: string;
+  studentId: string;
+  fundId: string;
+  displayName: string;
+  currentMonthIndex: number;
+  studentJoinCode: string;
+};
+
+export type InstructorClassRosterRow = {
+  classId: string;
+  studentId: string;
+  fundId: string;
+  currentAum: number;
+};
+
 export type StudentFundStateRow = {
   fundId: string;
   classId: string;
@@ -411,6 +427,90 @@ export function parseInstructorCreatedClassRow(
       studentJoinCode: input.student_join_code,
     },
   };
+}
+
+export function parseStudentClassEnrollmentRow(
+  input: unknown,
+  boundary: { session: AuthTenancySession; joinCode: string },
+): AuthTenancyDatabaseRowParseResult<StudentClassEnrollmentRow> {
+  if (boundary.session.role !== 'student') {
+    return { ok: false, code: 'invalid_role' };
+  }
+  if (!isRecord(input)) {
+    return { ok: false, code: 'row_not_object' };
+  }
+
+  const classId = input.class_id;
+  const studentId = input.student_id;
+  const fundId = input.fund_id;
+  if (!isUuid(classId)) {
+    return { ok: false, code: 'invalid_class_id' };
+  }
+  if (!isUuid(studentId)) {
+    return { ok: false, code: 'invalid_student_id' };
+  }
+  if (!isUuid(fundId)) {
+    return { ok: false, code: 'invalid_fund_id' };
+  }
+  if (studentId !== boundary.session.subjectId) {
+    return { ok: false, code: 'scope_mismatch' };
+  }
+  if (typeof input.display_name !== 'string' || input.display_name.trim() === '') {
+    return { ok: false, code: 'invalid_display_name' };
+  }
+  if (typeof input.current_month_index !== 'number' || !Number.isInteger(input.current_month_index) || input.current_month_index < 0) {
+    return { ok: false, code: 'invalid_month_index' };
+  }
+  if (typeof input.student_join_code !== 'string' || input.student_join_code !== boundary.joinCode || !joinCodePattern.test(input.student_join_code)) {
+    return { ok: false, code: 'invalid_join_code' };
+  }
+
+  return {
+    ok: true,
+    row: {
+      classId,
+      studentId,
+      fundId,
+      displayName: input.display_name.trim(),
+      currentMonthIndex: input.current_month_index,
+      studentJoinCode: input.student_join_code,
+    },
+  };
+}
+
+export function parseInstructorClassRosterRow(
+  input: unknown,
+  boundary: { session: AuthTenancySession; scope: ParsedAuthTenancyScope },
+): AuthTenancyDatabaseRowParseResult<InstructorClassRosterRow> {
+  if (boundary.session.role !== 'instructor') {
+    return { ok: false, code: 'invalid_role' };
+  }
+  if (!isRecord(input)) {
+    return { ok: false, code: 'row_not_object' };
+  }
+
+  const fundId = input.id;
+  const classId = input.class_id;
+  const studentId = input.student_id;
+  if (!isUuid(fundId)) {
+    return { ok: false, code: 'invalid_id' };
+  }
+  if (!isUuid(classId)) {
+    return { ok: false, code: 'invalid_class_id' };
+  }
+  if (!isUuid(studentId)) {
+    return { ok: false, code: 'invalid_student_id' };
+  }
+  if (classId !== boundary.scope.classId) {
+    return { ok: false, code: 'scope_mismatch' };
+  }
+
+  const currentAum = parseDatabaseNumber(input.current_aum);
+  if (currentAum === undefined || currentAum < 0) {
+    return { ok: false, code: 'invalid_numeric_value' };
+  }
+
+  return { ok: true, row: { fundId, classId, studentId, currentAum } };
 }
 
 export function parseStudentFundStateRow(

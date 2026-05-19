@@ -205,6 +205,23 @@ describe('executeInstructorGodModePortfolioVisibilityQuery', () => {
     expect(readCount).toBe(0);
   });
 
+  it('fails closed when the row reader fails before result delivery', async () => {
+    await expect(
+      executeInstructorGodModePortfolioVisibilityQuery({
+        session: instructorSession,
+        scope,
+        rowReader: {
+          async readInstructorGodModePortfolioVisibilityRows() {
+            throw new Error('provider leaked detail');
+          },
+        },
+      }),
+    ).resolves.toEqual({
+      ok: false,
+      failure: { code: 'row_reader_failed' },
+    });
+  });
+
   it('rejects cross-class or malformed fund rows before result delivery', async () => {
     await expect(
       executeInstructorGodModePortfolioVisibilityQuery({

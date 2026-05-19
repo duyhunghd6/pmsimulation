@@ -1,0 +1,33 @@
+Round 180 — US-108 cron auto-class discovery
+
+Selected accepted-product requirement: SPEC.md FR-3.1 Auto Mode and FR-3.2 shared execution path; docs/product/simulation-engine.md Processing Requirements; docs/product/runtime-architecture.md Inngest/Vercel cron convergence.
+Full-Stack MVP Sprint Sequence item: 7 — Inngest month-advance processing and Vercel cron/live trigger convergence with idempotent class-month processing.
+Story/work item: US-108 Cron auto-class discovery.
+Lane: normal, non-UI infrastructure slice.
+Browser-visible UI: no.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started; local RLS execution remains blocked solely by missing AUTH_TENANCY_DATABASE_URL per docs/TEST_MATRIX.md.
+- Item 2: implemented — US-071 and US-072 provide the no-gameplay App Router shell, Supabase magic-link auth actions, and protected student/instructor route guards.
+- Item 3: implemented — US-097 wires the student current-turn dashboard to a Supabase-backed row reader when the App Router server client is available.
+- Item 4: implemented — US-073 and US-088 render protected student current-turn and post-turn dashboard UI surfaces.
+- Item 5: implemented — US-074, US-085, and US-098 provide the bounded TARA order server action, browser form, and Supabase-backed pending-order store.
+- Item 6: implemented — US-075 through US-106 cover instructor class creation/list/join-link, pending-order, leaderboard, aggregate analytics, God Mode, and manual month-advance UI/server/provider-reader slices; roster enrollment and hosted proof remain later gaps without an existing safe enrollment action boundary.
+- Item 7: selected candidate — US-087, US-090, US-091, US-101, and US-107 have handoff, processing executor, Supabase processing store, and runtime worker wiring, but durable auto-class discovery for cron remains unimplemented and is local-code/proof feasible without hosted mutation.
+- Item 8: skipped — realtime publication/subscription/refetch slices are locally implemented through US-093, while hosted Supabase publication/subscription proof is blocked by missing hosted runtime/credentials.
+- Item 9: skipped — local release/CI workflow/smoke proof exists through US-096, while provider-backed E2E, hosted CI run evidence, deployment, and hosted platform proof require external runtime decisions or credentials.
+- Selected: item 7, US-108 Cron auto-class discovery, because every earlier item is implemented or blocked by AUTH_TENANCY_DATABASE_URL/hosted provider proof, and durable auto-class discovery is the earliest safe unimplemented local item-7 gap.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard UI over US-097 exists; student TARA order form over US-098 exists; student post-turn attribution UI exists; instructor class creation/list/join-link UI over US-099/US-100 exists; instructor pending-order/leaderboard/aggregate/God Mode UI over US-102/US-103/US-104/US-105 exists; instructor manual month-advance UI over US-087 exists; realtime refresh status UI over US-089/US-093 exists; roster enrollment UI lacks an existing safe enrollment action boundary.
+- Decision: proceed with non-UI, because no unblocked missing browser UI over an existing safe server query/action boundary was found.
+
+Implementation:
+- Added a Supabase-backed auto-class discovery reader in app/infrastructure/inngest/month-advance.ts that parses class rows before converting ready rows through the existing auto month-advance request validator.
+- Added executeMonthAdvanceAutoClassDiscoveryHandoff to dispatch discovered ready auto classes through the existing Inngest auto handoff while returning scheduled-trigger-safe receipts and sanitized provider failures.
+- Wired app/api/cron/month-advance/route.ts to keep explicit class/month query params for targeted proof and use discovery when no explicit params are supplied.
+- Added docs/stories/US-108-cron-auto-class-discovery.md and updated product docs, backlog, and TEST_MATRIX evidence.
+
+Validation:
+- npm run test:unit -- app/infrastructure/inngest/month-advance.test.ts passed with 1 test file and 20 tests.
+- npm run validate:quick passed with 52 test files and 530 tests.

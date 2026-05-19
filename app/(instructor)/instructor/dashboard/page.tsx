@@ -17,6 +17,11 @@ import {
 } from '../../../infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-query';
 import { createSupabaseInstructorClassAggregateAnalyticsRowReader } from '../../../infrastructure/auth-tenancy/instructor-class-aggregate-analytics-supabase-reader';
 import { createSupabaseInstructorClassListReader, type InstructorClassListReadResult } from '../../../infrastructure/auth-tenancy/instructor-class-list-supabase-reader';
+import {
+  createSupabaseInstructorClassRosterReader,
+  type InstructorClassRosterReadResult,
+} from '../../../infrastructure/auth-tenancy/instructor-class-roster-supabase-reader';
+import { createSupabaseInstructorGodModePortfolioVisibilityRowReader } from '../../../infrastructure/auth-tenancy/instructor-god-mode-portfolio-visibility-supabase-reader';
 import { createSupabaseInstructorLiveLeaderboardRowReader } from '../../../infrastructure/auth-tenancy/instructor-live-leaderboard-supabase-reader';
 import { createSupabaseInstructorPendingOrderVisibilityRowReader } from '../../../infrastructure/auth-tenancy/instructor-pending-order-visibility-supabase-reader';
 import { createAuthTenancySupabaseServerClient, readAuthTenancyRouteSession } from '../../../infrastructure/auth-tenancy/supabase-server';
@@ -63,13 +68,15 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
   }
 
   const rowReader = createBoundedInstructorDashboardRowReader(routeSession.session);
-  const [pendingOrderRowReader, liveLeaderboardRowReader, aggregateAnalyticsRowReader] = await Promise.all([
+  const [pendingOrderRowReader, liveLeaderboardRowReader, aggregateAnalyticsRowReader, godModeRowReader] = await Promise.all([
     createPendingOrderVisibilityRowReader(rowReader),
     createLiveLeaderboardRowReader(rowReader),
     createAggregateAnalyticsRowReader(rowReader),
+    createGodModePortfolioVisibilityRowReader(rowReader),
   ]);
-  const [classListResult, pendingOrderResult, liveLeaderboardResult, aggregateAnalyticsResult, godModeResult] = await Promise.all([
+  const [classListResult, classRosterResult, pendingOrderResult, liveLeaderboardResult, aggregateAnalyticsResult, godModeResult] = await Promise.all([
     readInstructorClassList(routeSession.session),
+    readInstructorClassRoster(routeSession.session),
     executeInstructorPendingOrderVisibilityQuery({
       session: routeSession.session,
       scope: { classId, monthIndex: currentMonthIndex },
@@ -88,7 +95,7 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
     executeInstructorGodModePortfolioVisibilityQuery({
       session: routeSession.session,
       scope: { classId, monthIndex: currentMonthIndex },
-      rowReader,
+      rowReader: godModeRowReader,
     }),
   ]);
 
@@ -151,6 +158,7 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
           <MetricTile label="Pending orders" value={snapshot.pendingOrderCount.toString()} />
           <MetricTile label="Class AUM" value={formatCurrency(aggregateAnalytics.totalCurrentAum)} />
           <MetricTile label="Classes" value={classListResult.ok ? classListResult.classes.length.toString() : 'Unavailable'} />
+          <MetricTile label="Roster" value={classRosterResult.ok ? classRosterResult.roster.length.toString() : 'Unavailable'} />
           <MetricTile label="Ranked funds" value={leaderboard.rankedFundCount.toString()} />
           <MetricTile label="God Mode funds" value={godMode.fundCount.toString()} />
           <MetricTile
@@ -171,8 +179,8 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
           <p>
             Create an instructor-scoped class receipt through the bounded server action executor. The server action prefers a Supabase-backed
             class creation writer when the App Router Supabase client is available and still returns only the safe join-code receipt; the
-            server-rendered class list below refreshes on the next protected render while roster management, realtime publication, and
-            provider-backed browser proof remain unwired.
+            server-rendered class list and roster panels below refresh on the next protected render while roster edits, realtime publication,
+            and provider-backed browser proof remain unwired.
           </p>
           <form action={createInstructorClass} className="form-stack">
             <label htmlFor="className">Class name</label>
@@ -201,6 +209,8 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
         </article>
 
         <InstructorClassListPanel result={classListResult} />
+
+        <InstructorClassRosterPanel result={classRosterResult} />
 
         <article className="terminal-panel wide">
           <div className="panel-heading">
@@ -353,8 +363,9 @@ export default async function InstructorDashboardShellPage({ searchParams }: Ins
             </tbody>
           </table>
           <p className="route-banner">
-            This view renders exact Base/Core/Apex holdings only from the bounded instructor God Mode executor; live Supabase reads,
-            target weights, order details, month advancement, and browser E2E remain out of scope.
+            This view renders exact Base/Core/Apex holdings only through the bounded instructor God Mode executor, preferring Supabase-backed
+            parsed rows when the App Router server client is available; target weights, order details, provider payloads, month advancement,
+            and browser E2E remain out of scope.
           </p>
         </article>
       </section>
@@ -432,6 +443,7 @@ function InstructorClassListPanel({ result }: Readonly<{ result: InstructorClass
             <tr>
               <th>Class</th>
               <th>Join code</th>
+              <th>Student join link</th>
               <th>Trigger</th>
               <th>Current month</th>
               <th>Total months</th>
@@ -442,6 +454,9 @@ function InstructorClassListPanel({ result }: Readonly<{ result: InstructorClass
               <tr key={classRow.classId}>
                 <td>{classRow.displayName}</td>
                 <td>{classRow.studentJoinCode}</td>
+                <td>
+                  <a href={studentJoinPathFor(classRow.studentJoinCode)}>{studentJoinPathFor(classRow.studentJoinCode)}</a>
+                </td>
                 <td>{classRow.triggerMode}</td>
                 <td>M{classRow.currentMonthIndex + 1}</td>
                 <td>{classRow.totalMonths}</td>
@@ -451,8 +466,69 @@ function InstructorClassListPanel({ result }: Readonly<{ result: InstructorClass
         </table>
       )}
       <p className="route-banner">
-        Class ids, provider payloads, roster rows, order details, realtime payloads, and secrets stay outside the browser-visible receipt and
-        list copy.
+        Class ids, provider payloads, roster rows, order details, realtime payloads, and secrets stay outside the browser-visible receipt,
+        list copy, and join-link landing route.
+      </p>
+    </article>
+  );
+}
+
+function InstructorClassRosterPanel({ result }: Readonly<{ result: InstructorClassRosterReadResult }>) {
+  if (!result.ok) {
+    return (
+      <article className="terminal-panel wide">
+        <div className="panel-heading">
+          <span className="eyebrow">Class roster visibility</span>
+          <strong>Read stopped</strong>
+        </div>
+        <p>
+          The instructor roster read failed closed before browser delivery. No raw provider errors, database rows, auth sessions, provider
+          clients, order details, holdings, or target weights were rendered.
+        </p>
+        <p className="route-banner danger">
+          Failure code: {result.code}{result.rowFailureCode ? ` / ${result.rowFailureCode}` : ''}
+        </p>
+      </article>
+    );
+  }
+
+  return (
+    <article className="terminal-panel wide">
+      <div className="panel-heading">
+        <span className="eyebrow">Class roster visibility</span>
+        <strong>{result.roster.length === 0 ? 'No enrolled funds' : `${result.roster.length} enrolled fund${result.roster.length === 1 ? '' : 's'}`}</strong>
+      </div>
+      <p>
+        This server-rendered roster uses class-scoped Supabase fund rows when the App Router server client is available and falls back to
+        bounded local proof data otherwise. It renders only parsed enrollment context for the instructor-scoped class.
+      </p>
+      {result.roster.length === 0 ? (
+        <p className="route-banner">No enrolled student funds were returned for this instructor-scoped class.</p>
+      ) : (
+        <table className="terminal-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Fund</th>
+              <th>Current AUM</th>
+              <th>Roster state</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.roster.map((row) => (
+              <tr key={row.fundId}>
+                <td>{formatStudentLabel(row.studentId)}</td>
+                <td>{formatFundLabel(row.fundId)}</td>
+                <td>{formatCurrency(row.currentAum)}</td>
+                <td><span className="status">enrolled</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="route-banner">
+        Roster delivery excludes join-code secrets beyond the class list, raw provider payloads, order target weights, estimated tax drag,
+        exact holdings, future scenario rows, worker jobs, and realtime payloads.
       </p>
     </article>
   );
@@ -462,8 +538,9 @@ function ClassCreationNotice({ notice }: Readonly<{ notice: ClassCreationNoticeS
   if (notice.status === 'created') {
     return (
       <p className="route-banner">
-        Class creation accepted for join code {notice.joinCode} in {notice.triggerMode} mode. The receipt is safe for browser delivery
-        and excludes persisted class ids, raw database rows, auth sessions, and realtime payloads.
+        Class creation accepted for join code {notice.joinCode} in {notice.triggerMode} mode. Student join link:{' '}
+        <a href={studentJoinPathFor(notice.joinCode)}>{studentJoinPathFor(notice.joinCode)}</a>. The receipt is safe for browser delivery
+        and excludes persisted class ids, raw database rows, auth sessions, roster rows, and realtime payloads.
       </p>
     );
   }
@@ -600,6 +677,14 @@ function formatFundLabel(fundId: string) {
   return `Fund ${fundId.slice(0, 8)}`;
 }
 
+function formatStudentLabel(studentId: string) {
+  return `Student ${studentId.slice(0, 8)}`;
+}
+
+function studentJoinPathFor(joinCode: string) {
+  return `/join/${encodeURIComponent(joinCode)}`;
+}
+
 function formatCurrency(value: number) {
   return `$${(value / 1_000_000).toFixed(1)}M`;
 }
@@ -625,6 +710,13 @@ async function createAggregateAnalyticsRowReader(
   return supabase.ok ? createSupabaseInstructorClassAggregateAnalyticsRowReader(supabase.client) : fallback;
 }
 
+async function createGodModePortfolioVisibilityRowReader(
+  fallback: InstructorGodModePortfolioVisibilityQueryRowReader,
+): Promise<InstructorGodModePortfolioVisibilityQueryRowReader> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  return supabase.ok ? createSupabaseInstructorGodModePortfolioVisibilityRowReader(supabase.client) : fallback;
+}
+
 async function readInstructorClassList(session: AuthTenancySession): Promise<InstructorClassListReadResult> {
   const supabase = await createAuthTenancySupabaseServerClient();
   if (supabase.ok) {
@@ -642,6 +734,43 @@ async function readInstructorClassList(session: AuthTenancySession): Promise<Ins
         currentMonthIndex,
         totalMonths,
         studentJoinCode: 'ALPHA01',
+      },
+    ],
+  };
+}
+
+async function readInstructorClassRoster(session: AuthTenancySession): Promise<InstructorClassRosterReadResult> {
+  const supabase = await createAuthTenancySupabaseServerClient();
+  if (supabase.ok) {
+    return createSupabaseInstructorClassRosterReader(supabase.client).readInstructorClassRoster({ session, classId });
+  }
+
+  return {
+    ok: true,
+    roster: [
+      {
+        classId,
+        studentId: '22222222-2222-4222-8222-222222222222',
+        fundId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+        currentAum: 51000000,
+      },
+      {
+        classId,
+        studentId: '33333333-3333-4333-8333-333333333333',
+        fundId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+        currentAum: 54000000,
+      },
+      {
+        classId,
+        studentId: '44444444-4444-4444-8444-444444444444',
+        fundId: 'ffffffff-ffff-4fff-8fff-ffffffffffff',
+        currentAum: 54000000,
+      },
+      {
+        classId,
+        studentId: '55555555-5555-4555-8555-555555555555',
+        fundId: '11111111-1111-4111-8111-111111111111',
+        currentAum: 49500000,
       },
     ],
   };

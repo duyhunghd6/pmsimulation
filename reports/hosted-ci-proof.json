@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-19T11:00:26.468Z",
+  "status": "blocked",
+  "scope": "hosted-ci-read-only-proof",
+  "workflow": "local-release-validation.yml",
+  "workflowPath": "/Users/steve/duyhunghd6/pmsimulation/.github/workflows/local-release-validation.yml",
+  "nonGoals": [
+    "No workflow run is triggered.",
+    "No repository, deployment, or provider state is mutated.",
+    "No hosted provider credentials are required beyond read-only GitHub CLI access."
+  ],
+  "query": {
+    "command": "gh run list --workflow local-release-validation.yml --limit 10 --json databaseId,status,conclusion,headBranch,headSha,event,createdAt,updatedAt,url,displayTitle",
+    "status": "passed",
+    "exitCode": 0
+  },
+  "evidence": null,
+  "recentRuns": [
+    {
+      "databaseId": 26079704315,
+      "status": "completed",
+      "conclusion": "cancelled",
+      "event": "push",
+      "headBranch": "main",
+      "headSha": "b3a5507301f45274cae661eb1b602e4ffd4e9222",
+      "displayTitle": "feat(app): implement release validation, realtime updates, and CI",
+      "createdAt": "2026-05-19T06:11:21Z",
+      "updatedAt": "2026-05-19T06:31:40Z",
+      "url": "https://github.com/duyhunghd6/pmsimulation/actions/runs/26079704315"
+    }
+  ],
+  "blockers": [
+    "no_successful_hosted_ci_run_found"
+  ]
+}

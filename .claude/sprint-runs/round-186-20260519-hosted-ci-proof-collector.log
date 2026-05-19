@@ -1,0 +1,33 @@
+# Round 186 — Hosted CI proof collector
+
+Selected accepted-product requirement: SPEC.md Epic 3/4 validation and release proof for the complete MVP path, specifically hosted CI run evidence for the existing local release validation workflow.
+Full-Stack MVP Sprint Sequence item: 9.
+Story/work item: US-112 Hosted CI run proof collector.
+Lane: normal maintenance/release-proof slice (external-system read-only proof, weak proof gap, no hosted mutation).
+Browser-visible UI: non-UI.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started, and `docs/TEST_MATRIX.md` records local RLS execution skipped until `AUTH_TENANCY_DATABASE_URL` is configured; no more parser-only/query-executor-only work selected.
+- Item 2: implemented — US-071 and US-072 App Router shell, Supabase magic-link auth, and student/instructor route guards are implemented with local validation evidence.
+- Item 3: implemented — US-097 adds the Supabase-backed current-turn student dashboard row reader behind the safe executor; hosted Supabase proof remains external-runtime blocked.
+- Item 4: implemented — US-073 and US-088 render the protected student dashboard current-turn and post-turn attribution UI surfaces; provider-backed browser proof remains pending.
+- Item 5: implemented — US-074, US-085, and US-098 add bounded student TARA submission, protected browser form, and Supabase pending-order writer; hosted Supabase/E2E proof remains pending.
+- Item 6: implemented — US-075 through US-110 cover instructor class creation/list/join/enrollment/roster, pending-order, leaderboard, aggregate, God Mode, and manual month-advance UI/server boundaries; hosted provider proof remains pending.
+- Item 7: implemented — US-087, US-090, US-091, US-101, US-107, US-108, and US-111 cover Inngest handoff/processing, Supabase processing store/runtime wiring, auto-class discovery, and Vercel cron schedule config; hosted Vercel/Inngest/Supabase proof remains pending.
+- Item 8: blocked — local Realtime publication/subscription/refetch UI slices exist through US-037, US-089, US-092, and US-093, but hosted Supabase publication/subscription and live provider-backed refetch proof require a hosted Supabase runtime and credentials not present in this repo/session.
+- Item 9: selected candidate — US-094 through US-096 add local release proof, non-deploying CI workflow, and local route smoke; hosted CI run proof remains pending and can be reduced by a read-only evidence collector without mutating hosted services.
+- Selected: item 9, US-112 Hosted CI run proof collector, because every earlier item is implemented locally or blocked by unavailable hosted provider/runtime credentials, and hosted CI evidence can be collected read-only without deployment or provider mutation.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student current-turn dashboard, student TARA order form, student post-turn attribution panel, instructor class creation/list/join/enrollment/roster panels, pending-order visibility, live leaderboard, aggregate analytics, God Mode, manual month-advance control, and realtime refresh/refetch status panels are already backed by reachable App Router surfaces; provider-backed browser proof is blocked by missing hosted Supabase auth/session/project configuration rather than missing UI.
+- Decision: proceed with non-UI, because no unblocked browser UI over an existing safe server boundary is missing and the earliest safe remaining PRD-reducing work is release/platform proof collection.
+
+Implementation:
+- Added `scripts/hosted-ci-proof.mjs`, a read-only GitHub Actions run evidence collector.
+- Added `npm run proof:hosted-ci`.
+- Added `docs/stories/US-112-hosted-ci-run-proof-collector.md` and updated backlog, runtime architecture, and test matrix evidence.
+
+Validation:
+- `npm run proof:hosted-ci` completed and wrote `reports/hosted-ci-proof.json` with `status=blocked`; `gh run list` succeeded read-only but found no completed successful hosted run for `local-release-validation.yml`.
+- `npm run validate:quick` passed with 57 test files and 548 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/join/ALPHA01`, `/dashboard`, and `/instructor/dashboard`.

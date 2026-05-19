@@ -1,0 +1,36 @@
+Autonomous sprint round: asset-holding rebalance mutation
+Date: 2026-05-19
+
+Selected accepted-product requirement: SPEC.md FR-3.1/FR-3.2 dual-trigger month advancement must feed the same deterministic processing path, and post-processing persistence must apply TARA order effects to durable portfolio state for later dashboards.
+Full-Stack MVP Sprint Sequence item: 7, Inngest month-advance processing and Vercel cron/live trigger convergence with idempotent class-month processing.
+Story/work item: US-101/US-107 follow-up — add asset-holding rebalance mutation to the existing Supabase-backed month-advance processing store.
+Lane: normal with stronger validation, because this touches persistence behavior, existing worker processing, and proof expectations but stays inside the already bounded injected Supabase processing store and unit tests.
+Browser-visible UI: non-UI.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are started, and local RLS execution remains blocked solely by missing AUTH_TENANCY_DATABASE_URL per docs/stories/backlog.md and docs/TEST_MATRIX.md.
+- Item 2: implemented — US-071 and US-072 provide the current no-gameplay App Router shell, Supabase magic-link auth, and protected student/instructor route guards.
+- Item 3: implemented — US-097 adds the Supabase-backed current-turn student dashboard row reader behind the safe executor; hosted provider proof remains pending but is credential/runtime proof, not local implementation.
+- Item 4: implemented — US-073, US-085, US-088, US-089, and US-093 cover reachable protected student dashboard UI surfaces with safe fallback states.
+- Item 5: implemented — US-074, US-085, and US-098 provide the bounded student TARA order submission action, browser form, and Supabase-backed pending-order writer; processed order execution remains an item-7 gap.
+- Item 6: implemented — US-075 through US-086 plus US-099, US-100, US-102 through US-106, and US-109 cover instructor class, join-link/enrollment, pending-order, leaderboard, aggregate, God Mode, and manual month-advance UI/server boundaries; class roster management UI lacks a safe roster query boundary and initial asset-holding seeding is non-UI.
+- Item 7: selected candidate — US-087, US-090, US-091, US-101, US-107, and US-108 cover handoff, cron, processing executor, Supabase processing store, runtime wiring, and auto-class discovery, but docs/TEST_MATRIX.md still names asset-holding rebalance mutation as unimplemented and this can be reduced locally without hosted credentials.
+- Item 8: skipped — local realtime publication/subscription/refetch scaffolding exists, but hosted Supabase publication/subscription proof and live provider-backed refetch proof require provider runtime/credentials.
+- Item 9: skipped — local release and CI workflow proof exists, while hosted CI/platform/deployment/provider-backed E2E proof requires hosted services or external approval.
+- Selected: item 7, asset-holding rebalance mutation in the month-advance Supabase processing store, because every earlier item is implemented or blocked by missing AUTH_TENANCY_DATABASE_URL/provider-hosted proof, and this item still has a local, PRD-reducing persistence gap that is not externally blocked.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: student dashboard current-turn UI, student TARA order form UI, student post-turn attribution UI, instructor class creation/list/join-link UI, public join landing/enrollment UI, pending-order UI, live leaderboard UI, aggregate analytics UI, God Mode UI, manual month-advance UI, realtime status/refetch UI; class roster management UI is missing but no safe roster query boundary exists yet, and initial asset-holding seeding is non-UI.
+- Decision: proceed with non-UI, because no unblocked missing browser UI over an existing safe server query/action boundary was found, and the selected item-7 processing-store mutation directly reduces the processed order execution gap.
+
+Implementation:
+- Updated `app/infrastructure/inngest/month-advance-supabase-store.ts` so write-time Supabase persistence re-reads matching pending current-month TARA orders, parses them, applies Base/Core/Apex target weights to `asset_holdings`, and only then marks matching pending orders processed.
+- Kept the existing injected Supabase client shape and safe writer receipt; provider read/write failures still collapse to sanitized table-scoped errors, including `asset_holdings` write failures.
+- Updated `app/infrastructure/inngest/month-advance-supabase-store.test.ts` to assert per-tier holding updates and sanitized holding write failure behavior.
+- Updated `docs/stories/US-101-month-advance-supabase-processing-store.md`, `docs/product/simulation-engine.md`, `docs/product/runtime-architecture.md`, `docs/product/data-model.md`, `docs/product/roles-and-permissions.md`, `docs/stories/backlog.md`, and `docs/TEST_MATRIX.md` to reflect the local asset-holding rebalance persistence slice while keeping hosted worker/RLS/realtime/provider proof gaps explicit.
+
+Validation:
+- `npm run test:unit -- app/infrastructure/inngest/month-advance-supabase-store.test.ts` passed with 1 test file and 4 tests.
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed with 55 test files and 541 tests.
+- No dependency install or update was run, so no npm audit findings were reported.

@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 
 const baseUrl = new URL(process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:3000");
-const routes = (process.env.SMOKE_ROUTES ?? "/,/login,/dashboard,/instructor/dashboard")
+const routes = (process.env.SMOKE_ROUTES ?? "/,/login,/join/ALPHA01,/dashboard,/instructor/dashboard")
   .split(",")
   .map((route) => route.trim())
   .filter(Boolean);
@@ -19,6 +19,12 @@ const routeExpectations = new Map([
     "/login",
     {
       content: ["Sign in boundary", "browser-safe public environment values"],
+    },
+  ],
+  [
+    "/join/ALPHA01",
+    {
+      content: ["Student class join link", "Join class ALPHA01", "Continue to sign in"],
     },
   ],
   [

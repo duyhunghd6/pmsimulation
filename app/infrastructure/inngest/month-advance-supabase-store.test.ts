@@ -253,8 +253,27 @@ describe('createSupabaseMonthAdvanceClassMonthProcessingStore', () => {
     await expect(store.readFundInputs(processingRequest)).rejects.toThrow('Supabase month advance processing row rejected: asset_holdings');
   });
 
-  it('writes ledger drafts, fund AUMs, processed pending orders, and class month advancement', async () => {
-    const fixture = createSupabaseClientFixture({});
+  it('writes ledger drafts, fund AUMs, rebalanced holdings, processed pending orders, and class month advancement', async () => {
+    const fixture = createSupabaseClientFixture({
+      tara_orders: [
+        {
+          id: 'order-001',
+          class_id: 'class-001',
+          fund_id: 'fund-001',
+          month_index: 3,
+          target_weights_json: { Base: 30, Core: 50, Apex: 20 },
+          status: 'pending',
+        },
+        {
+          id: 'order-002',
+          class_id: 'class-001',
+          fund_id: 'fund-002',
+          month_index: 3,
+          target_weights_json: { Base: 20, Core: 55, Apex: 25 },
+          status: 'pending',
+        },
+      ],
+    });
     const store = createSupabaseMonthAdvanceClassMonthProcessingStore(fixture.client);
 
     await expect(store.writeClassMonthProcessingResult(processingRecord)).resolves.toEqual({
@@ -264,6 +283,13 @@ describe('createSupabaseMonthAdvanceClassMonthProcessingStore', () => {
       processedMonthIndex: 3,
       advancedToMonthIndex: 4,
     });
+    expect(fixture.selectCalls).toEqual([
+      {
+        table: 'tara_orders',
+        columns: 'id,class_id,fund_id,month_index,target_weights_json,status',
+        filters: { class_id: 'class-001', month_index: 3, status: 'pending' },
+      },
+    ]);
     expect(fixture.upsertCalls).toHaveLength(1);
     expect(fixture.upsertCalls[0]).toEqual({
       table: 'simulation_ledger',
@@ -293,11 +319,41 @@ describe('createSupabaseMonthAdvanceClassMonthProcessingStore', () => {
     expect(fixture.updateCalls).toEqual([
       { table: 'funds', row: { current_aum: 50_575_000 }, filters: { class_id: 'class-001', id: 'fund-001' } },
       {
+        table: 'asset_holdings',
+        row: { allocation_weight_pct: 30 },
+        filters: { class_id: 'class-001', fund_id: 'fund-001', tier: 'Base' },
+      },
+      {
+        table: 'asset_holdings',
+        row: { allocation_weight_pct: 50 },
+        filters: { class_id: 'class-001', fund_id: 'fund-001', tier: 'Core' },
+      },
+      {
+        table: 'asset_holdings',
+        row: { allocation_weight_pct: 20 },
+        filters: { class_id: 'class-001', fund_id: 'fund-001', tier: 'Apex' },
+      },
+      {
         table: 'tara_orders',
         row: { status: 'processed' },
         filters: { class_id: 'class-001', fund_id: 'fund-001', month_index: 3, status: 'pending' },
       },
       { table: 'funds', row: { current_aum: 40_600_000 }, filters: { class_id: 'class-001', id: 'fund-002' } },
+      {
+        table: 'asset_holdings',
+        row: { allocation_weight_pct: 20 },
+        filters: { class_id: 'class-001', fund_id: 'fund-002', tier: 'Base' },
+      },
+      {
+        table: 'asset_holdings',
+        row: { allocation_weight_pct: 55 },
+        filters: { class_id: 'class-001', fund_id: 'fund-002', tier: 'Core' },
+      },
+      {
+        table: 'asset_holdings',
+        row: { allocation_weight_pct: 25 },
+        filters: { class_id: 'class-001', fund_id: 'fund-002', tier: 'Apex' },
+      },
       {
         table: 'tara_orders',
         row: { status: 'processed' },
@@ -318,6 +374,27 @@ describe('createSupabaseMonthAdvanceClassMonthProcessingStore', () => {
 
     await expect(writeStore.writeClassMonthProcessingResult(processingRecord)).rejects.toThrow(
       'Supabase month advance processing write failed: simulation_ledger',
+    );
+
+    const holdingWriteFixture = createSupabaseClientFixture(
+      {
+        tara_orders: [
+          {
+            id: 'order-001',
+            class_id: 'class-001',
+            fund_id: 'fund-001',
+            month_index: 3,
+            target_weights_json: { Base: 30, Core: 50, Apex: 20 },
+            status: 'pending',
+          },
+        ],
+      },
+      'asset_holdings',
+    );
+    const holdingWriteStore = createSupabaseMonthAdvanceClassMonthProcessingStore(holdingWriteFixture.client);
+
+    await expect(holdingWriteStore.writeClassMonthProcessingResult(processingRecord)).rejects.toThrow(
+      'Supabase month advance processing write failed: asset_holdings',
     );
   });
 });

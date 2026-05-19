@@ -46,7 +46,7 @@ This story implements a non-UI scheduled-trigger convergence slice. It does not 
 | Unit | `app/infrastructure/inngest/month-advance.test.ts` covers auto scheduled-trigger convergence onto the shared worker event path. |
 | Integration | Planned; hosted/local Inngest execution and durable database class discovery remain pending. |
 | E2E | Planned; provider-backed cron-to-worker proof remains pending. |
-| Platform | Planned; Vercel cron invocation and hosted route proof remain pending. |
+| Platform | Local schedule configuration proof is captured by `docs/stories/US-111-vercel-cron-schedule-configuration.md`; Vercel cron invocation and hosted route proof remain pending. |
 | Release | `npm run validate:quick`, `npm run smoke:routes`, and `npm run build`. |
 
 ## Harness Delta

@@ -1,0 +1,16 @@
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor work is started, but local RLS execution remains skipped because AUTH_TENANCY_DATABASE_URL is not configured.
+- Item 2: implemented — US-071 and US-072 provide the App Router shell, Supabase magic-link login/logout, and trusted app_role route guards; no current shell/auth breakage found.
+- Item 3: implemented — US-097 wires the current-turn student dashboard to a Supabase-backed row reader when the App Router server client is available; hosted provider proof remains pending but requires runtime credentials.
+- Item 4: implemented — US-073 and US-088 render protected student current-turn and post-turn dashboard UI surfaces.
+- Item 5: implemented — US-074, US-085, and US-098 provide the bounded TARA order submission executor, browser form, and Supabase-backed pending-order store; hosted provider/E2E proof remains pending.
+- Item 6: selected candidate — instructor class management exists, but browser-visible student join-link delivery is still only a join code in the instructor class list and roster/enrollment remains unwired; the existing safe class-list boundary exposes parsed join codes without raw provider payloads.
+- Item 7: skipped — later sequence item not reached because item 6 has an unblocked browser-visible join-link UI gap.
+- Item 8: skipped — later sequence item not reached because item 6 has an unblocked browser-visible join-link UI gap.
+- Item 9: skipped — later sequence item not reached because item 6 has an unblocked browser-visible join-link UI gap.
+- Selected: item 6, US-106 instructor join-link landing UI, because items 1 is blocked by missing AUTH_TENANCY_DATABASE_URL, items 2-5 are implemented by local bounded proof, and item 6 still lacks a reachable browser join-link surface over the existing safe join-code/class-list boundary.
+
+Validation:
+- `npm run typecheck` passed.
+- `npm run validate:quick` passed with 52 test files and 521 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/join/ALPHA01`, `/dashboard`, and `/instructor/dashboard`.

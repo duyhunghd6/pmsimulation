@@ -1,0 +1,31 @@
+Selected accepted-product requirement: SPEC FR-3.1 Auto Mode / Hosting and Cron requires Vercel Cron to advance auto-mode classes at 0:00 AM UTC+7 through the shared month-advance path.
+Full-Stack MVP Sprint Sequence item: 7, Inngest month-advance processing and Vercel cron/live trigger convergence.
+Story/work item: US-111 Vercel cron schedule configuration proof.
+Lane: normal.
+Browser-visible UI: no, this is a non-UI platform-configuration proof slice.
+
+Sequence preflight:
+- Item 1: blocked — US-038 parser/schema/RLS/fixture/query-executor portions are sufficiently started, and local RLS execution is blocked only because AUTH_TENANCY_DATABASE_URL is not configured.
+- Item 2: implemented — US-071 and US-072 provide the App Router shell plus Supabase magic-link login/logout and student/instructor route guards; no broken shell/auth boundary found in backlog or test matrix.
+- Item 3: implemented — US-097 wires the current-turn student dashboard to a Supabase-backed row reader when the App Router Supabase server client is available; hosted provider proof remains pending but requires external runtime.
+- Item 4: implemented — US-073 and US-088 render protected current-turn and post-turn student dashboard UI surfaces; live provider-backed data remains pending but UI is not missing.
+- Item 5: implemented — US-074, US-085, and US-098 provide bounded student TARA order action, browser form, and Supabase-backed pending-order store; hosted execution/E2E remains pending.
+- Item 6: implemented — US-075 through US-110 cover instructor class creation/list/join/enrollment/roster, pending-order, leaderboard, aggregate, God Mode, and manual month-advance UI/server boundaries; hosted provider/browser proof and roster editing remain pending.
+- Item 7: selected candidate — US-087, US-090, US-091, US-101, US-107, and US-108 implement local worker/cron/processing/discovery paths, but no vercel.json exists to declare the Vercel Cron schedule for /api/cron/month-advance at midnight UTC+7.
+- Item 8: skipped — Supabase Realtime publication/subscription/refetch local boundaries exist via US-037, US-089, US-092, and US-093; hosted provider proof remains pending and requires external runtime.
+- Item 9: skipped — local release proof and CI workflow exist via US-094 through US-096; hosted CI/platform/provider-backed E2E proof remains pending and is later than the missing item-7 cron schedule declaration.
+- Selected: item 7, US-111 Vercel cron schedule configuration proof, because items 1 is blocked by missing AUTH_TENANCY_DATABASE_URL, items 2-6 have their local/UI/server boundaries implemented, and the item-7 route/handoff exists but lacks the unblocked deployment configuration that declares the accepted UTC+7 auto-mode cron trigger.
+
+Non-UI selection gate:
+- Earlier or already-backed browser UI gaps checked: protected student current-turn dashboard; protected student post-turn attribution; protected student TARA order form; protected instructor class creation/list/join-link; public join landing plus authenticated enrollment; protected instructor roster visibility; pending-order visibility; live leaderboard; aggregate analytics; God Mode; manual month-advance control; realtime refresh status panels.
+- Decision: proceed with non-UI, because those earlier browser-visible UI surfaces are present in the backlog/test matrix and the selected gap is the missing platform cron schedule declaration over the existing safe /api/cron/month-advance boundary.
+
+Implementation:
+- Added `vercel.json` with one cron job targeting `/api/cron/month-advance` on `0 17 * * *`.
+- Added `app/vercel-cron-config.test.ts` to prove the platform schedule and route shape.
+- Added `docs/stories/US-111-vercel-cron-schedule-configuration.md` and updated product/story/test-matrix evidence.
+
+Validation:
+- `npm run test:unit -- app/vercel-cron-config.test.ts` passed with 1 test file and 2 tests.
+- `npm run validate:quick` passed with 57 test files and 548 tests.
+- `npm run smoke:routes` passed for `/`, `/login`, `/join/ALPHA01`, `/dashboard`, and `/instructor/dashboard`.

@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import {
   parseInstructorClassAggregateFundRow,
   parseInstructorClassFundRow,
+  parseInstructorClassRosterRow,
   parseInstructorCreatedClassRow,
   parseInstructorGodModeHoldingRow,
   parseInstructorLiveLeaderboardFundRow,
   parseInstructorOwnedClassRow,
   parseInstructorPendingTaraOrderStatusRow,
+  parseStudentClassEnrollmentRow,
   parseStudentFundStateRow,
   parseStudentLeaderboardFundRow,
   parseStudentOwnHoldingRow,
@@ -124,6 +126,91 @@ describe('parseInstructorCreatedClassRow', () => {
       ok: false,
       code: 'invalid_total_months',
     });
+  });
+});
+
+describe('parseStudentClassEnrollmentRow', () => {
+  const row = {
+    class_id: classId,
+    student_id: studentSession.subjectId,
+    fund_id: fundId,
+    display_name: 'Alpha Capital Lab',
+    current_month_index: 0,
+    student_join_code: 'ALPHA01',
+  };
+
+  it('accepts a student enrollment receipt row after the join RPC', () => {
+    expect(parseStudentClassEnrollmentRow(row, { session: studentSession, joinCode: 'ALPHA01' })).toEqual({
+      ok: true,
+      row: {
+        classId,
+        studentId: studentSession.subjectId,
+        fundId,
+        displayName: 'Alpha Capital Lab',
+        currentMonthIndex: 0,
+        studentJoinCode: 'ALPHA01',
+      },
+    });
+  });
+
+  it('rejects wrong-role, wrong-student, malformed, or wrong-code enrollment rows', () => {
+    expect(parseStudentClassEnrollmentRow(row, { session: instructorSession, joinCode: 'ALPHA01' })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(
+      parseStudentClassEnrollmentRow({ ...row, student_id: otherStudentId }, { session: studentSession, joinCode: 'ALPHA01' }),
+    ).toEqual({ ok: false, code: 'scope_mismatch' });
+    expect(parseStudentClassEnrollmentRow({ ...row, fund_id: 'not-a-fund' }, { session: studentSession, joinCode: 'ALPHA01' })).toEqual({
+      ok: false,
+      code: 'invalid_fund_id',
+    });
+    expect(parseStudentClassEnrollmentRow({ ...row, student_join_code: 'BETA02' }, { session: studentSession, joinCode: 'ALPHA01' })).toEqual({
+      ok: false,
+      code: 'invalid_join_code',
+    });
+  });
+});
+
+describe('parseInstructorClassRosterRow', () => {
+  const row = {
+    id: fundId,
+    class_id: classId,
+    student_id: otherStudentId,
+    current_aum: '50000000.00',
+  };
+
+  it('accepts an instructor-scoped roster row after RLS', () => {
+    expect(parseInstructorClassRosterRow(row, { session: instructorSession, scope })).toEqual({
+      ok: true,
+      row: {
+        fundId,
+        classId,
+        studentId: otherStudentId,
+        currentAum: 50000000,
+      },
+    });
+  });
+
+  it('rejects wrong-role, cross-class, malformed, or negative roster rows before result delivery', () => {
+    expect(parseInstructorClassRosterRow(row, { session: studentSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_role',
+    });
+    expect(parseInstructorClassRosterRow({ ...row, class_id: otherClassId }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'scope_mismatch',
+    });
+    expect(parseInstructorClassRosterRow({ ...row, student_id: 'not-a-student-id' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_student_id',
+    });
+    expect(parseInstructorClassRosterRow({ ...row, current_aum: '-1.00' }, { session: instructorSession, scope })).toEqual({
+      ok: false,
+      code: 'invalid_numeric_value',
+    });
+    expect('holdings' in parseInstructorClassRosterRow(row, { session: instructorSession, scope })).toBe(false);
+    expect('targetWeights' in parseInstructorClassRosterRow(row, { session: instructorSession, scope })).toBe(false);
   });
 });
 

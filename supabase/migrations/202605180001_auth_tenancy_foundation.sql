@@ -58,7 +58,8 @@ create table if not exists public.asset_holdings (
   tier text not null check (tier in ('Base', 'Core', 'Apex')),
   allocation_weight_pct numeric(7,4) not null,
   position_weight numeric(7,4) not null,
-  cash_buffer_weight numeric(7,4) not null
+  cash_buffer_weight numeric(7,4) not null,
+  unique (fund_id, tier)
 );
 
 create table if not exists public.macro_narratives (
@@ -327,6 +328,124 @@ begin
 end;
 $$;
 
+create or replace function public.join_class_by_code(
+  target_student_join_code text,
+  target_fund_id uuid
+)
+returns table (
+  class_id uuid,
+  student_id uuid,
+  fund_id uuid,
+  display_name text,
+  current_month_index integer,
+  student_join_code text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  requesting_student_id uuid := auth.uid();
+  target_class_id uuid;
+begin
+  if public.current_app_role() <> 'student' or requesting_student_id is null then
+    raise exception 'student role required' using errcode = '42501';
+  end if;
+
+  select c.id
+  into target_class_id
+  from public.classes c
+  where c.student_join_code = upper(btrim(target_student_join_code));
+
+  if target_class_id is null then
+    raise exception 'class join code not found' using errcode = 'P0002';
+  end if;
+
+  insert into public.class_enrollments (class_id, student_id)
+  values (target_class_id, requesting_student_id)
+  on conflict (class_id, student_id) do nothing;
+
+  insert into public.funds (
+    id,
+    class_id,
+    student_id,
+    current_aum,
+    risk_appetite_level,
+    risk_profile_class,
+    investment_time_horizon,
+    expected_annual_return,
+    risk_budget,
+    liquidity_buffer,
+    roi,
+    alpha,
+    beta,
+    volatility,
+    sharpe_ratio,
+    treynor_ratio,
+    drawdown
+  ) values (
+    coalesce(target_fund_id, gen_random_uuid()),
+    target_class_id,
+    requesting_student_id,
+    50000000.00,
+    'moderate',
+    'balanced',
+    '12_months',
+    0.0800,
+    0.1000,
+    0.0500,
+    0.0000,
+    0.0000,
+    1.0000,
+    0.0000,
+    0.0000,
+    0.0000,
+    0.0000
+  )
+  on conflict (class_id, student_id) do nothing;
+
+  insert into public.asset_holdings (
+    id,
+    fund_id,
+    class_id,
+    tier,
+    allocation_weight_pct,
+    position_weight,
+    cash_buffer_weight
+  )
+  select
+    gen_random_uuid(),
+    f.id,
+    f.class_id,
+    seed.tier,
+    seed.allocation_weight_pct,
+    seed.position_weight,
+    seed.cash_buffer_weight
+  from public.funds f
+  cross join (
+    values
+      ('Base', 40.0000, 0.4000, 0.0500),
+      ('Core', 40.0000, 0.4000, 0.0000),
+      ('Apex', 20.0000, 0.2000, 0.0000)
+  ) as seed(tier, allocation_weight_pct, position_weight, cash_buffer_weight)
+  where f.class_id = target_class_id
+    and f.student_id = requesting_student_id
+  on conflict (fund_id, tier) do nothing;
+
+  return query
+    select
+      c.id,
+      requesting_student_id,
+      f.id,
+      c.display_name,
+      c.current_month_index,
+      c.student_join_code
+    from public.classes c
+    join public.funds f on f.class_id = c.id and f.student_id = requesting_student_id
+    where c.id = target_class_id;
+end;
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.classes enable row level security;
 alter table public.class_administrators enable row level security;
@@ -363,6 +482,7 @@ grant execute on function public.owns_fund(uuid) to authenticated;
 grant execute on function public.administers_fund(uuid) to authenticated;
 grant execute on function public.student_leaderboard_funds(uuid) to authenticated;
 grant execute on function public.create_instructor_class(uuid, text, text, integer, integer, text) to authenticated;
+grant execute on function public.join_class_by_code(text, uuid) to authenticated;
 
 create policy profiles_select_own_or_administered
 on public.profiles
